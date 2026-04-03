@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Card shape -->
+    <path
+        android:fillColor="#6c5ce7"
+        android:pathData="M30,35 L78,35 Q80,35 80,37 L80,71 Q80,73 78,73 L30,73 Q28,73 28,71 L28,37 Q28,35 30,35 Z" />
+    <!-- Card lines -->
+    <path
+        android:fillColor="#ffffff"
+        android:pathData="M35,45 L65,45 L65,48 L35,48 Z" />
+    <path
+        android:fillColor="#ffffff"
+        android:pathData="M35,52 L55,52 L55,55 L35,55 Z" />
+    <path
+        android:fillColor="#ffffff"
+        android:pathData="M35,59 L73,59 L73,62 L35,62 Z" />
+</vector>

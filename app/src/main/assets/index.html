@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Janus 卡片制作器</title>
+<script>
+// Inline JSZip v3.10.1 (minified core) — fallback if CDN fails
+// CDN loaded below, this is just a marker
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js" onerror="document.getElementById('cdnFallback').style.display='block'"></script>
+<div id="cdnFallback" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:#0a0a0f;color:#e8e8f0;z-index:9999;display:none;align-items:center;justify-content:center;flex-direction:column;padding:32px;text-align:center">
+  <p style="font-size:18px">⚠️ 需要网络连接加载 JSZip 库</p>
+  <p style="font-size:14px;color:#888;margin-top:8px">请连接网络后重启应用</p>
+</div>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0a0a0f;--surface:#13131a;--surface2:#1a1a24;--border:#2a2a3a;
+  --text:#e8e8f0;--text2:#8888a0;--accent:#6c5ce7;--accent2:#a29bfe;
+  --green:#00b894;--red:#e17055;--orange:#fdcb6e;--radius:12px;
+}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+a{color:var(--accent2);text-decoration:none}
+
+/* Layout */
+.app{display:grid;grid-template-columns:320px 1fr;height:100vh;overflow:hidden}
+.sidebar{background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden}
+.main{display:flex;flex-direction:column;overflow:hidden}
+
+/* Header */
+.header{padding:16px 20px;border-bottom:1px solid var(--border);flex-shrink:0}
+.header h1{font-size:18px;font-weight:700;display:flex;align-items:center;gap:8px}
+.header h1 span{font-size:22px}
+.header p{font-size:12px;color:var(--text2);margin-top:4px}
+
+/* Template list */
+.templates{flex:1;overflow-y:auto;padding:12px}
+.templates::-webkit-scrollbar{width:4px}
+.templates::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
+.tpl-card{padding:12px 14px;border-radius:var(--radius);cursor:pointer;border:1px solid transparent;margin-bottom:6px;transition:all .2s}
+.tpl-card:hover{background:var(--surface2);border-color:var(--border)}
+.tpl-card.active{background:var(--accent);border-color:var(--accent);color:#fff}
+.tpl-card.active .tpl-desc{color:rgba(255,255,255,.7)}
+.tpl-name{font-size:14px;font-weight:600}
+.tpl-desc{font-size:11px;color:var(--text2);margin-top:3px}
+
+/* Config panel */
+.config{border-top:1px solid var(--border);padding:14px;max-height:50vh;overflow-y:auto;flex-shrink:0}
+.config::-webkit-scrollbar{width:4px}
+.config::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
+.config h3{font-size:13px;font-weight:600;color:var(--text2);margin-bottom:10px;text-transform:uppercase;letter-spacing:.5px}
+.field{margin-bottom:10px}
+.field label{display:block;font-size:12px;color:var(--text2);margin-bottom:4px}
+.field input,.field select,.field textarea{width:100%;padding:7px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:13px;outline:none;transition:border-color .2s}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--accent)}
+.field input[type=color]{height:36px;padding:3px;cursor:pointer}
+.field input[type=range]{padding:0;background:transparent;border:none}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.field .hint{font-size:10px;color:var(--text2);margin-top:2px}
+
+/* Preview */
+.preview-area{flex:1;display:flex;align-items:center;justify-content:center;padding:32px;position:relative;overflow:hidden}
+.preview-container{position:relative}
+.preview-phone{width:240px;height:480px;border-radius:24px;overflow:hidden;position:relative;box-shadow:0 0 0 2px var(--border),0 20px 60px rgba(0,0,0,.5)}
+.preview-screen{width:100%;height:100%;position:relative;overflow:hidden}
+.preview-camera{position:absolute;left:0;top:0;width:74px;height:100%;background:rgba(255,255,255,.03);border-right:1px dashed rgba(255,255,255,.1);z-index:10;display:flex;align-items:flex-start;justify-content:center}
+.preview-camera::after{content:'📷';font-size:14px;margin-top:8px;opacity:.3}
+.preview-camera.hidden{display:none}
+.preview-content{position:absolute;top:0;left:0;width:100%;height:100%}
+
+/* Toolbar */
+.toolbar{padding:12px 20px;border-top:1px solid var(--border);display:flex;gap:8px;flex-shrink:0}
+.btn{padding:9px 18px;border-radius:8px;border:none;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:6px}
+.btn-primary{background:var(--accent);color:#fff}
+.btn-primary:hover{background:var(--accent2)}
+.btn-secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border)}
+.btn-secondary:hover{border-color:var(--accent)}
+.btn-export{background:var(--green);color:#fff;margin-left:auto}
+.btn-export:hover{opacity:.9}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+
+/* Code preview */
+.code-toggle{position:absolute;top:12px;right:12px;z-index:20}
+.code-panel{position:absolute;top:0;right:0;width:400px;height:100%;background:var(--surface);border-left:1px solid var(--border);overflow:auto;z-index:15;display:none}
+.code-panel.show{display:block}
+.code-panel pre{padding:16px;font-size:12px;line-height:1.5;white-space:pre-wrap;word-break:break-all;color:var(--accent2);font-family:'SF Mono',Monaco,monospace}
+
+/* Device selector */
+.device-bar{padding:8px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;flex-shrink:0}
+.device-bar label{font-size:12px;color:var(--text2)}
+.device-bar select{padding:4px 8px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:12px}
+
+/* Toast */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);padding:10px 24px;background:var(--green);color:#fff;border-radius:8px;font-size:13px;font-weight:600;opacity:0;transition:opacity .3s;z-index:999;pointer-events:none}
+.toast.show{opacity:1}
+
+/* Custom elements editor */
+.elements-list{margin-top:8px}
+.el-item{padding:8px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;margin-bottom:6px;cursor:pointer;display:flex;align-items:center;gap:8px;font-size:12px;transition:all .2s}
+.el-item:hover{border-color:var(--accent)}
+.el-item.active{border-color:var(--accent);background:rgba(108,92,231,.1)}
+.el-badge{padding:2px 6px;border-radius:4px;font-size:10px;font-weight:700;background:var(--accent);color:#fff}
+.el-actions{margin-left:auto;display:flex;gap:4px}
+.el-actions button{background:none;border:none;color:var(--text2);cursor:pointer;font-size:14px;padding:2px 4px}
+.el-actions button:hover{color:var(--red)}
+
+/* Responsive */
+@media(max-width:900px){
+  .app{grid-template-columns:1fr;grid-template-rows:auto 1fr auto}
+  .sidebar{max-height:35vh;border-right:none;border-bottom:1px solid var(--border)}
+  .code-panel{width:100%}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <div class="header">
+      <h1><span>🃏</span> Janus 卡片制作器</h1>
+      <p>为小米背屏制作 MAML 卡片模板</p>
+    </div>
+    <div class="templates" id="templateList"></div>
+    <div class="config" id="configPanel">
+      <h3>配置</h3>
+      <div id="configFields"></div>
+    </div>
+  </div>
+
+  <!-- Main -->
+  <div class="main">
+    <div class="device-bar">
+      <label>机型</label>
+      <select id="deviceSelect" onchange="updatePreview()">
+        <option value="p2">Mix Flip 2 (P2) 976×596</option>
+        <option value="q200">Mix Flip (Q200) 904×572</option>
+      </select>
+      <label style="margin-left:12px">
+        <input type="checkbox" id="showCamera" checked onchange="updatePreview()"> 显示摄像头遮挡
+      </label>
+    </div>
+    <div class="preview-area">
+      <div class="preview-container">
+        <div class="preview-phone" id="previewPhone">
+          <div class="preview-screen" id="previewScreen">
+            <div class="preview-camera" id="previewCamera"></div>
+            <div class="preview-content" id="previewContent"></div>
+          </div>
+        </div>
+      </div>
+      <div class="code-panel" id="codePanel">
+        <pre id="codeContent"></pre>
+      </div>
+    </div>
+    <div class="toolbar">
+      <button class="btn btn-secondary" onclick="toggleCode()">📄 查看 XML</button>
+      <button class="btn btn-secondary" onclick="addCustomElement()" id="addElBtn" style="display:none">➕ 添加元素</button>
+      <button class="btn btn-export" onclick="exportZip()">📦 导出 ZIP</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ─── MAML Templates ───────────────────────────────────────────────
+
+const TEMPLATES = [
+  {
+    id: 'clock',
+    name: '⏰ 时钟卡片',
+    desc: '显示当前时间和日期',
+    config: [
+      { key: 'cardName', label: '卡片名称', type: 'text', default: '时钟卡片' },
+      { key: 'bgColor', label: '背景颜色', type: 'color', default: '#000000' },
+      { key: 'timeColor', label: '时间颜色', type: 'color', default: '#ffffff' },
+      { key: 'dateColor', label: '日期颜色', type: 'color', default: '#888888' },
+      { key: 'timeSize', label: '时间字号', type: 'range', min: 24, max: 96, default: 64 },
+      { key: 'dateFormat', label: '日期格式', type: 'select', options: [
+        { v: 'yyyy/MM/dd EEEE', l: '2026/04/04 星期五' },
+        { v: 'MM-dd EEEE', l: '04-04 星期五' },
+        { v: 'MM/dd', l: '04/04' },
+      ], default: 'yyyy/MM/dd EEEE' },
+      { key: 'timeFormat', label: '时间格式', type: 'select', options: [
+        { v: 'HH:mm', l: '24小时制' },
+        { v: 'hh:mm', l: '12小时制' },
+      ], default: 'HH:mm' },
+    ],
+    gen: (c) => `<Widget screenWidth="480" frameRate="0" scaleByDensity="false" useVariableUpdater="DateTime.Minute" name="${esc(c.cardName)}">
+  <Rectangle w="#view_width" h="#view_height" fillColor="${c.bgColor}" />
+  <Text textExp="formatDate('${c.timeFormat}', #time_sys)" x="30" y="80" size="${c.timeSize}" color="${c.timeColor}" />
+  <Text textExp="formatDate('${c.dateFormat}', #time_sys)" x="30" y="${80 + c.timeSize * 0.9}" size="20" color="${c.dateColor}" />
+</Widget>`
+  },
+  {
+    id: 'quote',
+    name: '💬 名言卡片',
+    desc: '显示一段文字/名言',
+    config: [
+      { key: 'cardName', label: '卡片名称', type: 'text', default: '名言卡片' },
+      { key: 'bgColor', label: '背景颜色', type: 'color', default: '#1a1a2e' },
+      { key: 'text', label: '文字内容', type: 'textarea', default: 'Stay hungry.\nStay foolish.' },
+      { key: 'textColor', label: '文字颜色', type: 'color', default: '#ffffff' },
+      { key: 'textSize', label: '字号', type: 'range', min: 14, max: 64, default: 28 },
+      { key: 'author', label: '作者', type: 'text', default: '— Steve Jobs' },
+      { key: 'authorColor', label: '作者颜色', type: 'color', default: '#6c5ce7' },
+    ],
+    gen: (c) => `<Widget screenWidth="336" frameRate="0" scaleByDensity="false" name="${esc(c.cardName)}">
+  <Var name="scale" type="number" expression="(#view_width / 336)" />
+  <Var name="marginL" type="number" expression="(#view_width * 0.30)" />
+  <Var name="safeW" type="number" expression="(#view_width - #marginL - 20)" />
+  <Rectangle w="#view_width" h="#view_height" fillColor="${c.bgColor}" />
+  <Group x="#marginL" y="40" w="#safeW">
+    <Text text="${esc(c.text)}" size="${c.textSize}" color="${c.textColor}" w="#safeW" multiLine="true" />
+    <Text text="${esc(c.author)}" x="0" y="(#view_height - 80)" size="16" color="${c.authorColor}" />
+  </Group>
+</Widget>`
+  },
+  {
+    id: 'battery',
+    name: '🔋 电池卡片',
+    desc: '显示电池电量和状态',
+    config: [
+      { key: 'cardName', label: '卡片名称', type: 'text', default: '电池卡片' },
+      { key: 'bgColor', label: '背景颜色', type: 'color', default: '#0d1117' },
+      { key: 'barColor', label: '电量条颜色', type: 'color', default: '#00b894' },
+      { key: 'textColor', label: '文字颜色', type: 'color', default: '#ffffff' },
+    ],
+    gen: (c) => `<Widget screenWidth="480" frameRate="0" scaleByDensity="false" useVariableUpdater="Battery" name="${esc(c.cardName)}">
+  <Var name="marginL" type="number" expression="(#view_width * 0.30)" />
+  <Var name="safeW" type="number" expression="(#view_width - #marginL - 40)" />
+  <Var name="barW" type="number" expression="(#safeW * #battery_level / 100)" />
+  <Rectangle w="#view_width" h="#view_height" fillColor="${c.bgColor}" />
+  <Group x="#marginL" y="0">
+    <Text text="电量" x="0" y="50" size="18" color="${c.textColor}" alpha="0.6" />
+    <Text textExp="(#battery_level + '%')" x="0" y="80" size="56" color="${c.textColor}" />
+    <Rectangle x="0" y="160" w="#safeW" h="12" fillColor="#333333" cornerRadius="6" />
+    <Rectangle x="0" y="160" w="#barW" h="12" fillColor="${c.barColor}" cornerRadius="6" />
+    <Text textExp="ifelse((#battery_level }= 80), '电量充足', ifelse((#battery_level }= 20), '电量偏低', '电量极低'))"
+          x="0" y="200" size="16" color="${c.textColor}" alpha="0.5" />
+  </Group>
+</Widget>`
+  },
+  {
+    id: 'status',
+    name: '📊 状态卡片',
+    desc: '显示多个状态指标',
+    config: [
+      { key: 'cardName', label: '卡片名称', type: 'text', default: '状态卡片' },
+      { key: 'bgColor', label: '背景颜色', type: 'color', default: '#0f0f1a' },
+      { key: 'title', label: '标题', type: 'text', default: '系统状态' },
+      { key: 'item1', label: '项目1', type: 'text', default: 'WiFi: 已连接' },
+      { key: 'item2', label: '项目2', type: 'text', default: '蓝牙: 已开启' },
+      { key: 'item3', label: '项目3', type: 'text', default: 'GPS: 已关闭' },
+      { key: 'item4', label: '项目4', type: 'text', default: 'NFC: 已开启' },
+      { key: 'accentColor', label: '强调色', type: 'color', default: '#6c5ce7' },
+      { key: 'textColor', label: '文字颜色', type: 'color', default: '#e0e0e0' },
+    ],
+    gen: (c) => {
+      const items = [c.item1, c.item2, c.item3, c.item4].filter(Boolean);
+      return `<Widget screenWidth="336" frameRate="0" scaleByDensity="false" name="${esc(c.cardName)}">
+  <Var name="marginL" type="number" expression="(#view_width * 0.30)" />
+  <Var name="safeW" type="number" expression="(#view_width - #marginL - 30)" />
+  <Rectangle w="#view_width" h="#view_height" fillColor="${c.bgColor}" />
+  <Group x="#marginL" y="0">
+    <Rectangle x="0" y="40" w="4" h="24" fillColor="${c.accentColor}" cornerRadius="2" />
+    <Text text="${esc(c.title)}" x="14" y="42" size="22" color="${c.textColor}" />
+    ${items.map((t, i) => `<Text text="${esc(t)}" x="14" y="${90 + i * 40}" size="16" color="${c.textColor}" alpha="0.8" />`).join('\n    ')}
+  </Group>
+</Widget>`;
+    }
+  },
+  {
+    id: 'countdown',
+    name: '⏳ 倒计时卡片',
+    desc: '倒计时到指定日期',
+    config: [
+      { key: 'cardName', label: '卡片名称', type: 'text', default: '倒计时卡片' },
+      { key: 'bgColor', label: '背景颜色', type: 'color', default: '#1a0a2e' },
+      { key: 'eventName', label: '事件名称', type: 'text', default: '距离新年' },
+      { key: 'targetDate', label: '目标日期 (MMdd)', type: 'text', default: '0101' },
+      { key: 'accentColor', label: '强调色', type: 'color', default: '#a29bfe' },
+      { key: 'textColor', label: '文字颜色', type: 'color', default: '#ffffff' },
+    ],
+    gen: (c) => `<Widget screenWidth="336" frameRate="0" scaleByDensity="false" useVariableUpdater="DateTime.Day" name="${esc(c.cardName)}">
+  <Var name="marginL" type="number" expression="(#view_width * 0.30)" />
+  <Var name="safeW" type="number" expression="(#view_width - #marginL - 30)" />
+  <Var name="nowMonth" type="number" expression="#month" />
+  <Var name="nowDay" type="number" expression="#date" />
+  <Var name="nowCode" type="number" expression="(#nowMonth * 100 + #nowDay)" />
+  <Var name="target" type="number" expression="${c.targetDate}" />
+  <Var name="diff" type="number" expression="ifelse((#nowCode <= #target), (#target - #nowCode), (365 - #nowCode + #target))" />
+  <Rectangle w="#view_width" h="#view_height" fillColor="${c.bgColor}" />
+  <Group x="#marginL" y="0">
+    <Text text="${esc(c.eventName)}" x="0" y="50" size="18" color="${c.textColor}" alpha="0.6" />
+    <Text textExp="#diff" x="0" y="80" size="72" color="${c.accentColor}" />
+    <Text text="天" x="0" y="160" size="20" color="${c.textColor}" alpha="0.5" />
+  </Group>
+</Widget>`
+  },
+  {
+    id: 'music',
+    name: '🎵 音乐信息卡片',
+    desc: '显示歌曲名和歌手（需配合音乐源）',
+    config: [
+      { key: 'cardName', label: '卡片名称', type: 'text', default: '音乐卡片' },
+      { key: 'bgColor', label: '背景颜色', type: 'color', default: '#0a0a0a' },
+      { key: 'titleColor', label: '歌名颜色', type: 'color', default: '#ffffff' },
+      { key: 'artistColor', label: '歌手颜色', type: 'color', default: '#888888' },
+      { key: 'accentColor', label: '强调色', type: 'color', default: '#1db954' },
+    ],
+    gen: (c) => `<Widget screenWidth="336" frameRate="0" scaleByDensity="false" name="${esc(c.cardName)}">
+  <Var name="marginL" type="number" expression="(#view_width * 0.30)" />
+  <Var name="safeW" type="number" expression="(#view_width - #marginL - 30)" />
+  <Rectangle w="#view_width" h="#view_height" fillColor="${c.bgColor}" />
+  <Group x="#marginL" y="0">
+    <Rectangle x="0" y="40" w="48" h="48" fillColor="${c.accentColor}" cornerRadius="12" />
+    <Text text="♪" x="14" y="52" size="28" color="#ffffff" />
+    <Text text="正在播放" x="60" y="48" size="12" color="${c.accentColor}" />
+    <Text text="歌曲名称" x="0" y="120" size="24" color="${c.titleColor}" />
+    <Text text="歌手名称" x="0" y="152" size="16" color="${c.artistColor}" />
+    <Rectangle x="0" y="200" w="#safeW" h="3" fillColor="#333333" cornerRadius="1.5" />
+    <Rectangle x="0" y="200" w="(#safeW * 0.4)" h="3" fillColor="${c.accentColor}" cornerRadius="1.5" />
+  </Group>
+</Widget>`
+  },
+  {
+    id: 'gradient',
+    name: '🌈 渐变文字卡片',
+    desc: '渐变背景 + 居中文字',
+    config: [
+      { key: 'cardName', label: '卡片名称', type: 'text', default: '渐变卡片' },
+      { key: 'bgColor1', label: '渐变色1', type: 'color', default: '#667eea' },
+      { key: 'bgColor2', label: '渐变色2', type: 'color', default: '#764ba2' },
+      { key: 'text', label: '文字', type: 'textarea', default: 'Hello\nWorld' },
+      { key: 'textColor', label: '文字颜色', type: 'color', default: '#ffffff' },
+      { key: 'textSize', label: '字号', type: 'range', min: 16, max: 72, default: 36 },
+    ],
+    gen: (c) => `<Widget screenWidth="336" frameRate="0" scaleByDensity="false" name="${esc(c.cardName)}">
+  <Var name="marginL" type="number" expression="(#view_width * 0.30)" />
+  <Var name="safeW" type="number" expression="(#view_width - #marginL - 30)" />
+  <Rectangle w="#view_width" h="#view_height" fillColor="${c.bgColor1}" />
+  <Rectangle x="(#view_width * 0.5)" w="(#view_width * 0.5)" h="#view_height" fillColor="${c.bgColor2}" alpha="0.7" />
+  <Group x="#marginL" y="0" w="#safeW" h="#view_height">
+    <Text text="${esc(c.text)}" x="0" y="(#view_height * 0.3)" size="${c.textSize}" color="${c.textColor}" w="#safeW" multiLine="true" textAlign="center" />
+  </Group>
+</Widget>`
+  },
+  {
+    id: 'custom',
+    name: '🛠️ 自定义',
+    desc: '从零开始，手动添加元素',
+    config: [
+      { key: 'cardName', label: '卡片名称', type: 'text', default: '自定义卡片' },
+      { key: 'bgColor', label: '背景颜色', type: 'color', default: '#000000' },
+    ],
+    gen: null, // handled separately
+    elements: []
+  },
+];
+
+// ─── State ─────────────────────────────────────────────────────────
+
+let currentTpl = null;
+let configValues = {};
+let customElements = [];
+let selectedElIdx = -1;
+
+// ─── Init ──────────────────────────────────────────────────────────
+
+function init() {
+  renderTemplateList();
+  selectTemplate(TEMPLATES[0]);
+}
+
+function renderTemplateList() {
+  const el = document.getElementById('templateList');
+  el.innerHTML = TEMPLATES.map(t =>
+    `<div class="tpl-card${currentTpl?.id === t.id ? ' active' : ''}" onclick="selectTemplate(TEMPLATES.find(x=>x.id==='${t.id}'))">
+      <div class="tpl-name">${t.name}</div>
+      <div class="tpl-desc">${t.desc}</div>
+    </div>`
+  ).join('');
+}
+
+function selectTemplate(tpl) {
+  currentTpl = tpl;
+  configValues = {};
+  tpl.config.forEach(c => configValues[c.key] = c.default);
+  customElements = tpl.id === 'custom' ? [
+    { type: 'text', text: 'Hello Card', x: 30, y: 60, size: 28, color: '#ffffff' }
+  ] : [];
+  selectedElIdx = -1;
+  renderTemplateList();
+  renderConfig();
+  updatePreview();
+  document.getElementById('addElBtn').style.display = tpl.id === 'custom' ? '' : 'none';
+}
+
+function renderConfig() {
+  const el = document.getElementById('configFields');
+  if (!currentTpl) { el.innerHTML = ''; return; }
+
+  let html = currentTpl.config.map(c => {
+    const v = configValues[c.key];
+    if (c.type === 'text') return `<div class="field"><label>${c.label}</label><input type="text" value="${esc(v)}" onchange="setCfg('${c.key}',this.value)"></div>`;
+    if (c.type === 'textarea') return `<div class="field"><label>${c.label}</label><textarea rows="3" onchange="setCfg('${c.key}',this.value)">${esc(v)}</textarea></div>`;
+    if (c.type === 'color') return `<div class="field"><label>${c.label}</label><input type="color" value="${v}" onchange="setCfg('${c.key}',this.value)"></div>`;
+    if (c.type === 'range') return `<div class="field"><label>${c.label}: <span id="rv_${c.key}">${v}</span></label><input type="range" min="${c.min}" max="${c.max}" value="${v}" oninput="setCfg('${c.key}',+this.value);document.getElementById('rv_${c.key}').textContent=this.value"></div>`;
+    if (c.type === 'select') return `<div class="field"><label>${c.label}</label><select onchange="setCfg('${c.key}',this.value)">${c.options.map(o => `<option value="${o.v}"${v===o.v?' selected':''}>${o.l}</option>`).join('')}</select></div>`;
+    return '';
+  }).join('');
+
+  // Custom element editor
+  if (currentTpl.id === 'custom') {
+    html += '<h3 style="margin-top:14px">元素列表</h3>';
+    html += '<div class="elements-list">';
+    customElements.forEach((el, i) => {
+      html += `<div class="el-item${selectedElIdx===i?' active':''}" onclick="selectElement(${i})">
+        <span class="el-badge">${el.type.toUpperCase()}</span>
+        <span>${el.text || el.type}</span>
+        <div class="el-actions">
+          <button onclick="event.stopPropagation();removeElement(${i})" title="删除">✕</button>
+        </div>
+      </div>`;
+    });
+    html += '</div>';
+
+    if (selectedElIdx >= 0 && selectedElIdx < customElements.length) {
+      const sel = customElements[selectedElIdx];
+      html += '<h3 style="margin-top:14px">元素属性</h3>';
+      if (sel.type === 'text') {
+        html += `
+          <div class="field"><label>文字</label><input type="text" value="${esc(sel.text)}" onchange="setElProp('text',this.value)"></div>
+          <div class="field-row">
+            <div class="field"><label>X</label><input type="number" value="${sel.x}" onchange="setElProp('x',+this.value)"></div>
+            <div class="field"><label>Y</label><input type="number" value="${sel.y}" onchange="setElProp('y',+this.value)"></div>
+          </div>
+          <div class="field-row">
+            <div class="field"><label>字号</label><input type="number" value="${sel.size}" onchange="setElProp('size',+this.value)"></div>
+            <div class="field"><label>颜色</label><input type="color" value="${sel.color}" onchange="setElProp('color',this.value)"></div>
+          </div>`;
+      } else if (sel.type === 'rectangle') {
+        html += `
+          <div class="field-row">
+            <div class="field"><label>X</label><input type="number" value="${sel.x}" onchange="setElProp('x',+this.value)"></div>
+            <div class="field"><label>Y</label><input type="number" value="${sel.y}" onchange="setElProp('y',+this.value)"></div>
+          </div>
+          <div class="field-row">
+            <div class="field"><label>宽</label><input type="number" value="${sel.w}" onchange="setElProp('w',+this.value)"></div>
+            <div class="field"><label>高</label><input type="number" value="${sel.h}" onchange="setElProp('h',+this.value)"></div>
+          </div>
+          <div class="field"><label>颜色</label><input type="color" value="${sel.color}" onchange="setElProp('color',this.value)"></div>
+          <div class="field"><label>圆角</label><input type="number" value="${sel.radius||0}" onchange="setElProp('radius',+this.value)"></div>`;
+      } else if (sel.type === 'circle') {
+        html += `
+          <div class="field-row">
+            <div class="field"><label>中心X</label><input type="number" value="${sel.x}" onchange="setElProp('x',+this.value)"></div>
+            <div class="field"><label>中心Y</label><input type="number" value="${sel.y}" onchange="setElProp('y',+this.value)"></div>
+          </div>
+          <div class="field"><label>半径</label><input type="number" value="${sel.r}" onchange="setElProp('r',+this.value)"></div>
+          <div class="field"><label>颜色</label><input type="color" value="${sel.color}" onchange="setElProp('color',this.value)"></div>`;
+      } else if (sel.type === 'image') {
+        html += `
+          <div class="field"><label>图片路径</label><input type="text" value="${sel.src||''}" onchange="setElProp('src',this.value)" placeholder="images/icon.png"></div>
+          <div class="field-row">
+            <div class="field"><label>X</label><input type="number" value="${sel.x}" onchange="setElProp('x',+this.value)"></div>
+            <div class="field"><label>Y</label><input type="number" value="${sel.y}" onchange="setElProp('y',+this.value)"></div>
+          </div>
+          <div class="field-row">
+            <div class="field"><label>宽</label><input type="number" value="${sel.w||100}" onchange="setElProp('w',+this.value)"></div>
+            <div class="field"><label>高</label><input type="number" value="${sel.h||100}" onchange="setElProp('h',+this.value)"></div>
+          </div>`;
+      }
+    }
+  }
+
+  el.innerHTML = html;
+}
+
+function setCfg(key, val) {
+  configValues[key] = val;
+  updatePreview();
+}
+
+function selectElement(idx) {
+  selectedElIdx = idx;
+  renderConfig();
+  updatePreview();
+}
+
+function removeElement(idx) {
+  customElements.splice(idx, 1);
+  if (selectedElIdx >= customElements.length) selectedElIdx = customElements.length - 1;
+  renderConfig();
+  updatePreview();
+}
+
+function setElProp(prop, val) {
+  if (selectedElIdx >= 0) {
+    customElements[selectedElIdx][prop] = val;
+    updatePreview();
+  }
+}
+
+function addCustomElement() {
+  const types = [
+    { label: '文字', type: 'text', def: { type: 'text', text: '新文字', x: 30, y: 60, size: 24, color: '#ffffff' } },
+    { label: '矩形', type: 'rectangle', def: { type: 'rectangle', x: 30, y: 60, w: 100, h: 40, color: '#333333', radius: 0 } },
+    { label: '圆形', type: 'circle', def: { type: 'circle', x: 100, y: 100, r: 30, color: '#6c5ce7' } },
+    { label: '图片', type: 'image', def: { type: 'image', src: 'images/icon.png', x: 30, y: 60, w: 80, h: 80 } },
+  ];
+  const choice = prompt('添加元素类型：\n1 = 文字\n2 = 矩形\n3 = 圆形\n4 = 图片');
+  const idx = parseInt(choice) - 1;
+  if (idx >= 0 && idx < types.length) {
+    customElements.push(JSON.parse(JSON.stringify(types[idx].def)));
+    selectedElIdx = customElements.length - 1;
+    renderConfig();
+    updatePreview();
+  }
+}
+
+// ─── MAML Generation ───────────────────────────────────────────────
+
+function generateMAML() {
+  if (!currentTpl) return '';
+  if (currentTpl.id === 'custom') return generateCustomMAML();
+  return currentTpl.gen(configValues);
+}
+
+function generateCustomMAML() {
+  const c = configValues;
+  let body = `  <Rectangle w="#view_width" h="#view_height" fillColor="${c.bgColor}" />\n`;
+  customElements.forEach(el => {
+    if (el.type === 'text') {
+      body += `  <Text text="${esc(el.text)}" x="${el.x}" y="${el.y}" size="${el.size}" color="${el.color}" />\n`;
+    } else if (el.type === 'rectangle') {
+      body += `  <Rectangle x="${el.x}" y="${el.y}" w="${el.w}" h="${el.h}" fillColor="${el.color}"${el.radius ? ` cornerRadius="${el.radius}"` : ''} />\n`;
+    } else if (el.type === 'circle') {
+      body += `  <Circle x="${el.x}" y="${el.y}" r="${el.r}" fillColor="${el.color}" />\n`;
+    } else if (el.type === 'image') {
+      body += `  <Image src="${esc(el.src)}" x="${el.x}" y="${el.y}" w="${el.w||100}" h="${el.h||100}" />\n`;
+    }
+  });
+  return `<Widget screenWidth="480" frameRate="0" scaleByDensity="false" name="${esc(c.cardName)}">\n${body}</Widget>`;
+}
+
+function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+// ─── Preview ───────────────────────────────────────────────────────
+
+function updatePreview() {
+  const device = document.getElementById('deviceSelect').value;
+  const showCam = document.getElementById('showCamera').checked;
+  const camera = document.getElementById('previewCamera');
+
+  const dims = device === 'p2' ? { w: 976, h: 596 } : { w: 904, h: 572 };
+  const marginRatio = device === 'p2' ? 0.287 : 0.308;
+  const camPx = Math.round(240 * marginRatio);
+
+  camera.style.width = camPx + 'px';
+  camera.className = 'preview-camera' + (showCam ? '' : ' hidden');
+
+  // Render preview
+  const content = document.getElementById('previewContent');
+  content.innerHTML = renderPreviewHTML(marginRatio, showCam);
+
+  // Update code panel
+  document.getElementById('codeContent').textContent = generateMAML();
+}
+
+function renderPreviewHTML(marginRatio, showCam) {
+  if (!currentTpl) return '';
+  const c = configValues;
+  const ml = Math.round(240 * marginRatio);
+  const sw = 240 - ml - 10;
+
+  if (currentTpl.id === 'clock') {
+    const now = new Date();
+    const timeStr = c.timeFormat === 'HH:mm'
+      ? String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0')
+      : (now.getHours() % 12 || 12) + ':' + String(now.getMinutes()).padStart(2,'0');
+    const days = ['日','一','二','三','四','五','六'];
+    const dateStr = `${now.getFullYear()}/${String(now.getMonth()+1).padStart(2,'0')}/${String(now.getDate()).padStart(2,'0')} 星期${days[now.getDay()]}`;
+    return `<div style="position:absolute;left:0;top:0;width:100%;height:100%;background:${c.bgColor}"></div>
+      <div style="position:absolute;left:${ml}px;top:50px;font-size:${Math.round(c.timeSize*0.45)}px;color:${c.timeColor};font-weight:700">${timeStr}</div>
+      <div style="position:absolute;left:${ml}px;top:${50+c.timeSize*0.45+8}px;font-size:10px;color:${c.dateColor}">${dateStr}</div>`;
+  }
+
+  if (currentTpl.id === 'quote') {
+    const lines = c.text.split('\n');
+    return `<div style="position:absolute;left:0;top:0;width:100%;height:100%;background:${c.bgColor}"></div>
+      <div style="position:absolute;left:${ml+5}px;top:30px;width:${sw}px;font-size:${Math.round(c.textSize*0.5)}px;color:${c.textColor};line-height:1.4">${lines.map(l=>esc(l)).join('<br>')}</div>
+      <div style="position:absolute;left:${ml+5}px;bottom:30px;font-size:9px;color:${c.authorColor}">${esc(c.author)}</div>`;
+  }
+
+  if (currentTpl.id === 'battery') {
+    return `<div style="position:absolute;left:0;top:0;width:100%;height:100%;background:${c.bgColor}"></div>
+      <div style="position:absolute;left:${ml+5}px;top:30px;font-size:10px;color:${c.textColor};opacity:0.6">电量</div>
+      <div style="position:absolute;left:${ml+5}px;top:45px;font-size:28px;color:${c.textColor};font-weight:700">78%</div>
+      <div style="position:absolute;left:${ml+5}px;top:90px;width:${sw-10}px;height:6px;background:#333;border-radius:3px">
+        <div style="width:78%;height:100%;background:${c.barColor};border-radius:3px"></div>
+      </div>
+      <div style="position:absolute;left:${ml+5}px;top:105px;font-size:9px;color:${c.textColor};opacity:0.5">电量充足</div>`;
+  }
+
+  if (currentTpl.id === 'status') {
+    const items = [c.item1, c.item2, c.item3, c.item4].filter(Boolean);
+    return `<div style="position:absolute;left:0;top:0;width:100%;height:100%;background:${c.bgColor}"></div>
+      <div style="position:absolute;left:${ml}px;top:25px;display:flex;align-items:center;gap:6px">
+        <div style="width:3px;height:14px;background:${c.accentColor};border-radius:2px"></div>
+        <span style="font-size:12px;color:${c.textColor};font-weight:600">${esc(c.title)}</span>
+      </div>
+      ${items.map((t,i) => `<div style="position:absolute;left:${ml+10}px;top:${55+i*24}px;font-size:9px;color:${c.textColor};opacity:0.8">${esc(t)}</div>`).join('')}`;
+  }
+
+  if (currentTpl.id === 'countdown') {
+    return `<div style="position:absolute;left:0;top:0;width:100%;height:100%;background:${c.bgColor}"></div>
+      <div style="position:absolute;left:${ml+5}px;top:30px;font-size:10px;color:${c.textColor};opacity:0.6">${esc(c.eventName)}</div>
+      <div style="position:absolute;left:${ml+5}px;top:48px;font-size:40px;color:${c.accentColor};font-weight:700">42</div>
+      <div style="position:absolute;left:${ml+5}px;top:95px;font-size:11px;color:${c.textColor};opacity:0.5">天</div>`;
+  }
+
+  if (currentTpl.id === 'music') {
+    return `<div style="position:absolute;left:0;top:0;width:100%;height:100%;background:${c.bgColor}"></div>
+      <div style="position:absolute;left:${ml+5}px;top:25px;display:flex;gap:8px;align-items:center">
+        <div style="width:28px;height:28px;background:${c.accentColor};border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:14px;color:#fff">♪</div>
+        <span style="font-size:7px;color:${c.accentColor}">正在播放</span>
+      </div>
+      <div style="position:absolute;left:${ml+5}px;top:65px;font-size:13px;color:${c.titleColor};font-weight:600">歌曲名称</div>
+      <div style="position:absolute;left:${ml+5}px;top:82px;font-size:9px;color:${c.artistColor}">歌手名称</div>
+      <div style="position:absolute;left:${ml+5}px;top:105px;width:${sw-10}px;height:2px;background:#333;border-radius:1px">
+        <div style="width:40%;height:100%;background:${c.accentColor};border-radius:1px"></div>
+      </div>`;
+  }
+
+  if (currentTpl.id === 'gradient') {
+    const lines = c.text.split('\n');
+    return `<div style="position:absolute;left:0;top:0;width:50%;height:100%;background:${c.bgColor1}"></div>
+      <div style="position:absolute;left:50%;top:0;width:50%;height:100%;background:${c.bgColor2};opacity:0.7"></div>
+      <div style="position:absolute;left:${ml}px;top:30%;width:${sw}px;text-align:center;font-size:${Math.round(c.textSize*0.5)}px;color:${c.textColor};font-weight:700;line-height:1.3">${lines.map(l=>esc(l)).join('<br>')}</div>`;
+  }
+
+  if (currentTpl.id === 'custom') {
+    let html = `<div style="position:absolute;left:0;top:0;width:100%;height:100%;background:${c.bgColor}"></div>`;
+    customElements.forEach((el, i) => {
+      const highlight = i === selectedElIdx ? 'outline:1px dashed #6c5ce7;outline-offset:1px;' : '';
+      if (el.type === 'text') {
+        html += `<div style="position:absolute;left:${el.x*0.5}px;top:${el.y*0.5}px;font-size:${el.size*0.5}px;color:${el.color};${highlight}">${esc(el.text)}</div>`;
+      } else if (el.type === 'rectangle') {
+        html += `<div style="position:absolute;left:${el.x*0.5}px;top:${el.y*0.5}px;width:${el.w*0.5}px;height:${el.h*0.5}px;background:${el.color};border-radius:${(el.radius||0)*0.5}px;${highlight}"></div>`;
+      } else if (el.type === 'circle') {
+        html += `<div style="position:absolute;left:${(el.x-el.r)*0.5}px;top:${(el.y-el.r)*0.5}px;width:${el.r}px;height:${el.r}px;background:${el.color};border-radius:50%;${highlight}"></div>`;
+      } else if (el.type === 'image') {
+        html += `<div style="position:absolute;left:${el.x*0.5}px;top:${el.y*0.5}px;width:${(el.w||100)*0.5}px;height:${(el.h||100)*0.5}px;background:#333;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:8px;color:#888;${highlight}">🖼 ${esc(el.src||'')}</div>`;
+      }
+    });
+    return html;
+  }
+
+  return '';
+}
+
+// ─── Code Toggle ───────────────────────────────────────────────────
+
+function toggleCode() {
+  document.getElementById('codePanel').classList.toggle('show');
+}
+
+// ─── Export ────────────────────────────────────────────────────────
+
+async function exportZip() {
+  const maml = generateMAML();
+  if (!maml) { toast('请先选择模板', true); return; }
+
+  const zip = new JSZip();
+  zip.file('manifest.xml', maml);
+
+  // Optional var_config for custom template
+  if (currentTpl.id !== 'custom') {
+    const varConfig = `<?xml version="1.0" encoding="UTF-8"?>
+<WidgetConfig version="1">
+  <OnOff name="isDisplayDefaultBg" displayTitle="显示默认背景" default="0"/>
+</WidgetConfig>`;
+    zip.file('var_config.xml', varConfig);
+  }
+
+  const blob = await zip.generateAsync({ type: 'blob' });
+  const fileName = (configValues.cardName || 'card') + '.zip';
+
+  // Android WebView bridge
+  if (typeof AndroidBridge !== 'undefined') {
+    const reader = new FileReader();
+    reader.onload = function() {
+      const base64 = reader.result.split(',')[1];
+      AndroidBridge.saveZip(base64, fileName);
+    };
+    reader.readAsDataURL(blob);
+    toast('✅ ZIP 已导出: ' + fileName);
+    return;
+  }
+
+  // Browser fallback
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = fileName;
+  a.click();
+  URL.revokeObjectURL(url);
+  toast('✅ ZIP 已导出: ' + fileName);
+}
+
+// ─── Utils ─────────────────────────────────────────────────────────
+
+function toast(msg, err) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.style.background = err ? 'var(--red)' : 'var(--green)';
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 2500);
+}
+
+init();
+</script>
+</body>
+</html>
