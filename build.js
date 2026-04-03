@@ -33,6 +33,7 @@ const html = `<!DOCTYPE html>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Janus 卡片制作器</title>
+<script>try{var t=localStorage.getItem('jcm-theme');if(t){document.documentElement.setAttribute('data-theme',t);window.__themeBtn=t==='dark'?'🌙':'☀️'}}catch(e){}</script>
 <style>${css}</style>
 </head>
 <body>
