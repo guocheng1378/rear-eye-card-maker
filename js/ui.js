@@ -152,6 +152,7 @@ function renderConfig() {
     var label = el.type === 'text' ? (el.text || '')
       : el.type === 'image' ? '🖼 ' + (el.fileName || '图片')
       : el.type === 'video' ? '🎬 ' + (el.fileName || '视频')
+      : (el.type === 'rectangle' && el.h <= 3 && el.radius >= 1) ? 'line'
       : el.type + ' #' + (i + 1);
     var inCam = JCM.isInCameraZone(el, device);
     html += '<div class="el-item' + (_selIdx === i ? ' active' : '') + '" data-sel="' + i + '">' +
@@ -374,9 +375,7 @@ function renderPreview() {
 
 function generateCustomMAML(device) {
   var lines = [
-    '  <Var name="marginL" type="number" expression="(#view_width * 0.30)" />',
     '  <Rectangle w="#view_width" h="#view_height" fillColor="' + _cfg.bgColor + '" />',
-    '  <Group x="#marginL" y="0">',
   ];
   _elements.forEach(function (el) {
     switch (el.type) {
@@ -404,7 +403,6 @@ function generateCustomMAML(device) {
         break;
     }
   });
-  lines.push('  </Group>');
   return lines.join('\n');
 }
 
@@ -735,6 +733,7 @@ function setupEvents() {
       var cidx = Number(swatch.dataset.cidx);
       var cprop = swatch.dataset.cprop;
       if (cidx >= 0 && cidx < _elements.length) {
+        captureState();
         _elements[cidx][cprop] = swatch.dataset.color;
         _dirty = true;
         renderConfig();
