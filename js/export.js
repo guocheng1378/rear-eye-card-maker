@@ -193,8 +193,8 @@ JCM.exportPNG = function (cardName) {
 };
 
 // ─── Export Template Config JSON ───────────────────────────────────
-JCM.exportTemplateJSON = function (tplId, cfg) {
-  var data = JSON.stringify({ templateId: tplId, config: cfg }, null, 2);
+JCM.exportTemplateJSON = function (tplId, cfg, elements) {
+  var data = JSON.stringify({ templateId: tplId, config: cfg, elements: elements || [] }, null, 2);
   var blob = new Blob([data], { type: 'application/json' });
   var a = document.createElement('a');
   a.href = URL.createObjectURL(blob);

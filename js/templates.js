@@ -81,6 +81,7 @@ JCM.TEMPLATES = [
       { group: '样式', fields: [
         { key: 'barColor', label: '电量条颜色', type: 'color', default: '#00b894' },
         { key: 'textColor', label: '文字颜色', type: 'color', default: '#ffffff' },
+        { key: 'demoLevel', label: '预览电量 (0-100)', type: 'range', min: 0, max: 100, default: 78 },
       ]},
     ],
     gen: function (c) {

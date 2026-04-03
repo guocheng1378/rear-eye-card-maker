@@ -19,6 +19,7 @@
       <h1><span>🃏</span> Janus 卡片制作器</h1>
       <span class="badge">MAML</span>
       <button class="theme-toggle" id="themeToggle" onclick="JCM.toggleTheme()" title="切换主题">🌙</button>
+      <button class="theme-toggle" id="helpBtn" onclick="JCM.toggleHelp()" title="快捷键帮助">⌨️</button>
       <a class="theme-toggle" href="https://github.com/guocheng1378/janus-card-maker" target="_blank" title="GitHub">⭐</a>
     </div>
     <div class="steps" id="stepIndicator">
@@ -67,6 +68,8 @@
         <select id="deviceSelect" onchange="renderPreview()">
           <option value="q200">Pro — 904×572</option>
           <option value="p2">Pro Max — 976×596</option>
+          <option value="q100">标准版 — 840×520</option>
+          <option value="ultra">Ultra — 1020×620</option>
         </select>
         <label class="check-label">
           <input type="checkbox" id="showCamera" checked onchange="renderPreview()"> 摄像头遮挡区
@@ -111,6 +114,27 @@
       <button class="btn btn-primary" id="btnNext" onclick="JCM.nextStep()">
         下一步 <span class="btn-icon">→</span>
       </button>
+    </div>
+  </div>
+</div>
+
+<!-- Keyboard Shortcut Help Modal -->
+<div class="modal-overlay" id="helpModal" style="display:none" onclick="JCM.toggleHelp()">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-header">
+      <h3>⌨️ 快捷键</h3>
+      <button class="modal-close" onclick="JCM.toggleHelp()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="shortcut-list">
+        <div class="shortcut-item"><kbd>Ctrl</kbd>+<kbd>Z</kbd><span>撤销</span></div>
+        <div class="shortcut-item"><kbd>Ctrl</kbd>+<kbd>Y</kbd> / <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>Z</kbd><span>重做</span></div>
+        <div class="shortcut-item"><kbd>Ctrl</kbd>+<kbd>D</kbd><span>复制当前元素</span></div>
+        <div class="shortcut-item"><kbd>Ctrl</kbd>+<kbd>C</kbd><span>复制到剪贴板</span></div>
+        <div class="shortcut-item"><kbd>Ctrl</kbd>+<kbd>V</kbd><span>从剪贴板粘贴</span></div>
+        <div class="shortcut-item"><kbd>Delete</kbd><span>删除当前元素</span></div>
+      </div>
+      <div class="shortcut-tip">在预览区可直接拖拽移动元素，拖拽右下角调整大小</div>
     </div>
   </div>
 </div>

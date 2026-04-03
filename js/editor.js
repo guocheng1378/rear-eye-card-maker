@@ -4,7 +4,7 @@ JCM.ElementDefaults = {
   text: function () { return { type: 'text', text: '新文字', x: 10, y: 60, size: 24, color: '#ffffff', textAlign: 'left', bold: false, multiLine: false, w: 200, shadow: 'none', opacity: 100 }; },
   rectangle: function () { return { type: 'rectangle', x: 10, y: 60, w: 100, h: 40, color: '#333333', radius: 0, opacity: 100 }; },
   circle: function () { return { type: 'circle', x: 50, y: 100, r: 30, color: '#6c5ce7', opacity: 100 }; },
-  line: function () { return { type: 'rectangle', x: 10, y: 100, w: 200, h: 2, color: '#555555', radius: 1, opacity: 60 }; },
+  line: function () { return { type: 'rectangle', x: 10, y: 100, w: 200, h: 2, color: '#555555', radius: 1, opacity: 60, _isLine: true }; },
 };
 
 JCM.isInCameraZone = function (el, device) {
@@ -104,7 +104,7 @@ function colorField(label, value, prop, idx) {
 }
 
 function esc(s) {
-  return String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  return JCM.escHtml(s);
 }
 
 function fmtSize(bytes) {

@@ -26,16 +26,19 @@ function debounce(fn, ms) {
 // ─── Undo/Redo ────────────────────────────────────────────────────
 var _history = [];
 var _redoStack = [];
+var _deepClone = typeof structuredClone === 'function'
+  ? function (v) { return structuredClone(v); }
+  : function (v) { return JSON.parse(JSON.stringify(v)); };
 
 function captureState() {
-  _history.push({ cfg: JSON.parse(JSON.stringify(_cfg)), elements: JSON.parse(JSON.stringify(_elements)) });
+  _history.push({ cfg: _deepClone(_cfg), elements: _deepClone(_elements) });
   _redoStack = [];
   if (_history.length > 50) _history.shift();
 }
 
 function undo() {
   if (_history.length === 0) return;
-  _redoStack.push({ cfg: JSON.parse(JSON.stringify(_cfg)), elements: JSON.parse(JSON.stringify(_elements)) });
+  _redoStack.push({ cfg: _deepClone(_cfg), elements: _deepClone(_elements) });
   var state = _history.pop();
   _cfg = state.cfg;
   _elements = state.elements;
@@ -46,7 +49,7 @@ function undo() {
 
 function redo() {
   if (_redoStack.length === 0) return;
-  _history.push({ cfg: JSON.parse(JSON.stringify(_cfg)), elements: JSON.parse(JSON.stringify(_elements)) });
+  _history.push({ cfg: _deepClone(_cfg), elements: _deepClone(_elements) });
   var state = _redoStack.pop();
   _cfg = state.cfg;
   _elements = state.elements;
@@ -78,7 +81,7 @@ JCM.goStep = function (n) {
   }
 
   if (n === 1) renderConfig();
-  if (n === 2 && _dirty) renderPreview();
+  if (n === 2) renderPreview();
   // Auto-refresh for time-based templates
   clearInterval(_previewTimer);
   if (n === 2 && _tpl && (_tpl.updater === 'DateTime.Minute' || _tpl.updater === 'DateTime.Day')) {
@@ -349,7 +352,7 @@ function renderPreview() {
   var showCam = document.getElementById('showCamera').checked;
 
   document.getElementById('deviceLabel').textContent = device.label;
-  document.getElementById('previewCamera').style.width = showCam ? '30%' : '0';
+  document.getElementById('previewCamera').style.width = showCam ? (device.cameraZoneRatio * 100) + '%' : '0';
 
   var r = new JCM.PreviewRenderer(device, showCam);
   var html = '';
@@ -429,6 +432,12 @@ JCM.handleExport = function () {
     uploadedFiles: JCM.uploadedFiles,
   });
 
+  // XML 校验
+  var validation = JCM.validateMAML(maml);
+  if (!validation.valid) {
+    return toast('XML 校验失败: ' + validation.errors[0], 'error');
+  }
+
   JCM.exportZip(maml, _cfg.cardName || 'card', _elements, JCM.uploadedFiles, _tpl.id === 'custom')
     .then(function () { toast('✅ ZIP 已导出', 'success'); })
     .catch(function (e) { toast('导出失败: ' + e.message, 'error'); });
@@ -467,7 +476,7 @@ JCM.handleImportZip = function () {
 };
 
 JCM.handleExportTemplate = function () {
-  JCM.exportTemplateJSON(_tpl ? _tpl.id : 'custom', _cfg);
+  JCM.exportTemplateJSON(_tpl ? _tpl.id : 'custom', _cfg, _elements);
   toast('✅ 配置已导出', 'success');
 };
 
@@ -489,7 +498,13 @@ JCM.handleImportTemplate = function () {
           else _cfg[f.key] = f.default;
         });
       });
+      // Restore elements if present
+      if (Array.isArray(data.elements)) {
+        _elements = data.elements;
+      }
       _dirty = true;
+      _history = [];
+      _redoStack = [];
       renderTplGrid();
       renderConfig();
       toast('✅ 配置已导入', 'success');
@@ -816,7 +831,7 @@ function toast(msg, type) {
   setTimeout(function () { el.classList.remove('show'); }, 2500);
 }
 
-function escH(s) { return String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+function escH(s) { return JCM.escHtml(s); }
 
 // ─── Init ─────────────────────────────────────────────────────────
 // Expose internal state for editor.js
@@ -824,6 +839,12 @@ JCM._elements = null; // set dynamically
 JCM._captureState = captureState;
 
 Object.defineProperty(JCM, 'elements', { get: function () { return _elements; } });
+
+// ─── Help Modal ───────────────────────────────────────────────────
+JCM.toggleHelp = function () {
+  var modal = document.getElementById('helpModal');
+  if (modal) modal.style.display = modal.style.display === 'none' ? '' : 'none';
+};
 
 // ─── Theme ────────────────────────────────────────────────────────
 JCM.toggleTheme = function () {

@@ -1,4 +1,4 @@
-// ─── MAML: XML 生成 + 转义 ────────────────────────────────────────
+// ─── MAML: XML 生成 + 转义 + 校验 ──────────────────────────────────
 
 JCM.escXml = function (s) {
   return String(s)
@@ -70,3 +70,25 @@ function renderEl(el, files) {
       return '';
   }
 }
+
+// ─── XML 校验 ────────────────────────────────────────────────────
+JCM.validateMAML = function (xml) {
+  var errors = [];
+  // Check root Widget tag
+  if (!xml.match(/<Widget[\s>]/)) errors.push('缺少 <Widget> 根标签');
+  if (!xml.match(/<\/Widget>\s*$/)) errors.push('缺少 </Widget> 闭合标签');
+  // Check balanced tags
+  var openTags = xml.match(/<[A-Z][a-zA-Z]*\s[^/]*>/g) || [];
+  var closeTags = xml.match(/<\/[A-Z][a-zA-Z]*>/g) || [];
+  var selfClose = xml.match(/<[A-Z][a-zA-Z]*\s[^>]*\/>/g) || [];
+  if (openTags.length !== closeTags.length + selfClose.length) {
+    errors.push('标签开闭不匹配 (开:' + openTags.length + ' 闭:' + closeTags.length + ' 自闭:' + selfClose.length + ')');
+  }
+  // Check for unescaped special chars in attribute values
+  if (xml.match(/="[^"]*[&<][^"]*"/)) {
+    errors.push('属性值中存在未转义的 & 或 < 字符');
+  }
+  // Check name attribute
+  if (!xml.match(/name="/)) errors.push('缺少 name 属性');
+  return { valid: errors.length === 0, errors: errors };
+};

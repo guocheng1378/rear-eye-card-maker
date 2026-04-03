@@ -77,7 +77,7 @@ PreviewRenderer.prototype.renderQuote = function (c) {
 };
 
 PreviewRenderer.prototype.renderBattery = function (c) {
-  var level = 78;
+  var level = Number(c.demoLevel) || 78;
   var bw = PREVIEW_W - this.camW - 20;
   var status = level < 20 ? '电量极低' : level < 80 ? '电量偏低' : '电量充足';
   return this.bg(c.bgColor,
