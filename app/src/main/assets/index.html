@@ -733,9 +733,11 @@ function renderConfig() {
         : el.type === 'image' ? '🖼 ' + (el.fileName || '图片')
         : el.type === 'video' ? '🎬 ' + (el.fileName || '视频')
         : el.type + ' #' + (i+1);
+      const inCam = isInCameraZone(el);
       html += `<div class="el-item${selectedElIdx===i?' active':''}" onclick="selectElement(${i})">
         <span class="el-badge">${el.type}</span>
         <span class="el-item-name">${esc(label)}</span>
+        ${inCam ? '<span title="在摄像头遮挡区内" style="color:#e17055;font-size:14px">⚠️</span>' : ''}
         <button class="el-item-del" onclick="event.stopPropagation();removeElement(${i})">✕</button>
       </div>`;
     });
@@ -769,6 +771,13 @@ function renderField(f) {
 
 function renderElementEditor(el, idx) {
   let html = `<div class="el-detail">`;
+
+  // Camera zone warning
+  if (isInCameraZone(el)) {
+    html += `<div style="display:flex;align-items:center;gap:8px;padding:8px 12px;margin-bottom:12px;background:rgba(225,112,85,0.1);border:1px solid rgba(225,112,85,0.3);border-radius:8px;font-size:12px;color:#e17055">
+      <span>⚠️</span> 此元素位于摄像头遮挡区内，导出后可能被遮挡。建议将 X 调整到 ≥ ${Math.ceil(480 * CAMERA_ZONE_RATIO)}
+    </div>`;
+  }
 
   // Media picker for image/video
   if (el.type === 'image' || el.type === 'video') {
@@ -898,7 +907,7 @@ function handleFilePicked(e) {
           type: type,
           fileName: safeName,
           src: safeName,
-          x: 30, y: 60,
+          x: 10, y: 60,
           w: type === 'image' ? 200 : 240,
           h: type === 'image' ? 200 : 135,
         };
@@ -925,9 +934,9 @@ function formatFileSize(bytes) {
 
 function addElement(type) {
   const defs = {
-    text: { type: 'text', text: '新文字', x: 30, y: 60, size: 24, color: '#ffffff' },
-    rectangle: { type: 'rectangle', x: 30, y: 60, w: 100, h: 40, color: '#333333', radius: 0 },
-    circle: { type: 'circle', x: 100, y: 100, r: 30, color: '#6c5ce7' },
+    text: { type: 'text', text: '新文字', x: 10, y: 60, size: 24, color: '#ffffff' },
+    rectangle: { type: 'rectangle', x: 10, y: 60, w: 100, h: 40, color: '#333333', radius: 0 },
+    circle: { type: 'circle', x: 50, y: 100, r: 30, color: '#6c5ce7' },
   };
   if (defs[type]) {
     customElements.push(JSON.parse(JSON.stringify(defs[type])));
@@ -970,16 +979,27 @@ function generateMAML() {
   return currentTpl.gen(configValues);
 }
 
+// Camera safe zone: 30% of screen width on the left
+const CAMERA_ZONE_RATIO = 0.30;
+
+function isInCameraZone(el) {
+  const elRight = el.x + (el.w || (el.r ? el.r * 2 : 0) || (el.size ? el.text.length * el.size * 0.6 : 50));
+  return el.x < 480 * CAMERA_ZONE_RATIO;
+}
+
 function generateCustomMAML() {
   const c = configValues;
-  let body = `  <Rectangle w="#view_width" h="#view_height" fillColor="${c.bgColor}" />\n`;
+  let body = `  <Var name="marginL" type="number" expression="(#view_width * ${CAMERA_ZONE_RATIO})" />\n`;
+  body += `  <Rectangle w="#view_width" h="#view_height" fillColor="${c.bgColor}" />\n`;
+  body += `  <Group x="#marginL" y="0">\n`;
   customElements.forEach(el => {
-    if (el.type === 'text') body += `  <Text text="${esc(el.text)}" x="${el.x}" y="${el.y}" size="${el.size}" color="${el.color}" />\n`;
-    else if (el.type === 'rectangle') body += `  <Rectangle x="${el.x}" y="${el.y}" w="${el.w}" h="${el.h}" fillColor="${el.color}"${el.radius ? ` cornerRadius="${el.radius}"` : ''} />\n`;
-    else if (el.type === 'circle') body += `  <Circle x="${el.x}" y="${el.y}" r="${el.r}" fillColor="${el.color}" />\n`;
-    else if (el.type === 'image') body += `  <Image src="${esc(el.src)}" x="${el.x}" y="${el.y}" w="${el.w||100}" h="${el.h||100}" />\n`;
-    else if (el.type === 'video') body += `  <Video src="${esc(el.src)}" x="${el.x}" y="${el.y}" w="${el.w||240}" h="${el.h||135}" autoPlay="true" loop="true" />\n`;
+    if (el.type === 'text') body += `    <Text text="${esc(el.text)}" x="${el.x}" y="${el.y}" size="${el.size}" color="${el.color}" />\n`;
+    else if (el.type === 'rectangle') body += `    <Rectangle x="${el.x}" y="${el.y}" w="${el.w}" h="${el.h}" fillColor="${el.color}"${el.radius ? ` cornerRadius="${el.radius}"` : ''} />\n`;
+    else if (el.type === 'circle') body += `    <Circle x="${el.x}" y="${el.y}" r="${el.r}" fillColor="${el.color}" />\n`;
+    else if (el.type === 'image') body += `    <Image src="${esc(el.src)}" x="${el.x}" y="${el.y}" w="${el.w||100}" h="${el.h||100}" />\n`;
+    else if (el.type === 'video') body += `    <Video src="${esc(el.src)}" x="${el.x}" y="${el.y}" w="${el.w||240}" h="${el.h||135}" autoPlay="true" loop="true" />\n`;
   });
+  body += `  </Group>\n`;
   return `<Widget screenWidth="480" frameRate="0" scaleByDensity="false" name="${esc(c.cardName)}">\n${body}</Widget>`;
 }
 
@@ -1078,28 +1098,40 @@ function renderPreviewHTML(showCam) {
   }
 
   if (currentTpl.id === 'custom') {
+    // Camera safe zone in preview: elements at x=0 means marginL offset in MAML
+    // In preview, the camera overlay is at left, so elements with small x are in danger
+    const camZonePx = 260 * CAMERA_ZONE_RATIO; // ~78px in preview
     let html = `<div style="position:absolute;inset:0;background:${c.bgColor}"></div>`;
+    // Draw safe zone boundary line (subtle)
+    html += `<div style="position:absolute;left:${camZonePx}px;top:0;bottom:0;width:1px;background:rgba(255,255,255,0.06);z-index:5;pointer-events:none"></div>`;
     customElements.forEach((el, i) => {
-      const hl = i === selectedElIdx ? 'outline:1.5px dashed #6c5ce7;outline-offset:2px;' : '';
+      const elPx = el.x * 0.5; // position in preview pixels
+      const inCam = elPx < camZonePx;
+      const selected = i === selectedElIdx;
+      let borderStyle = '';
+      if (selected && inCam) borderStyle = 'outline:2px solid #e17055;outline-offset:2px;';
+      else if (selected) borderStyle = 'outline:1.5px dashed #6c5ce7;outline-offset:2px;';
+      else if (inCam) borderStyle = 'outline:1.5px dashed rgba(225,112,85,0.6);outline-offset:2px;';
+
       if (el.type === 'text') {
-        html += `<div style="position:absolute;left:${el.x*0.5}px;top:${el.y*0.5}px;font-size:${el.size*0.5}px;color:${el.color};${hl}">${esc(el.text)}</div>`;
+        html += `<div style="position:absolute;left:${elPx}px;top:${el.y*0.5}px;font-size:${el.size*0.5}px;color:${el.color};${borderStyle}">${esc(el.text)}</div>`;
       } else if (el.type === 'rectangle') {
-        html += `<div style="position:absolute;left:${el.x*0.5}px;top:${el.y*0.5}px;width:${el.w*0.5}px;height:${el.h*0.5}px;background:${el.color};border-radius:${(el.radius||0)*0.5}px;${hl}"></div>`;
+        html += `<div style="position:absolute;left:${elPx}px;top:${el.y*0.5}px;width:${el.w*0.5}px;height:${el.h*0.5}px;background:${el.color};border-radius:${(el.radius||0)*0.5}px;${borderStyle}"></div>`;
       } else if (el.type === 'circle') {
-        html += `<div style="position:absolute;left:${(el.x-el.r)*0.5}px;top:${(el.y-el.r)*0.5}px;width:${el.r}px;height:${el.r}px;background:${el.color};border-radius:50%;${hl}"></div>`;
+        html += `<div style="position:absolute;left:${(el.x-el.r)*0.5}px;top:${(el.y-el.r)*0.5}px;width:${el.r}px;height:${el.r}px;background:${el.color};border-radius:50%;${borderStyle}"></div>`;
       } else if (el.type === 'image') {
         const fileInfo = el.fileName ? uploadedFiles[el.fileName] : null;
         if (fileInfo) {
-          html += `<img src="${fileInfo.dataUrl}" style="position:absolute;left:${el.x*0.5}px;top:${el.y*0.5}px;width:${(el.w||100)*0.5}px;height:${(el.h||100)*0.5}px;object-fit:cover;border-radius:2px;${hl}">`;
+          html += `<img src="${fileInfo.dataUrl}" style="position:absolute;left:${elPx}px;top:${el.y*0.5}px;width:${(el.w||100)*0.5}px;height:${(el.h||100)*0.5}px;object-fit:cover;border-radius:2px;${borderStyle}">`;
         } else {
-          html += `<div style="position:absolute;left:${el.x*0.5}px;top:${el.y*0.5}px;width:${(el.w||100)*0.5}px;height:${(el.h||100)*0.5}px;background:#222;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:8px;color:#666;${hl}">🖼</div>`;
+          html += `<div style="position:absolute;left:${elPx}px;top:${el.y*0.5}px;width:${(el.w||100)*0.5}px;height:${(el.h||100)*0.5}px;background:#222;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:8px;color:#666;${borderStyle}">🖼</div>`;
         }
       } else if (el.type === 'video') {
         const fileInfo = el.fileName ? uploadedFiles[el.fileName] : null;
         if (fileInfo) {
-          html += `<video src="${fileInfo.dataUrl}" muted loop autoplay style="position:absolute;left:${el.x*0.5}px;top:${el.y*0.5}px;width:${(el.w||240)*0.5}px;height:${(el.h||135)*0.5}px;object-fit:cover;border-radius:2px;${hl}"></video>`;
+          html += `<video src="${fileInfo.dataUrl}" muted loop autoplay style="position:absolute;left:${elPx}px;top:${el.y*0.5}px;width:${(el.w||240)*0.5}px;height:${(el.h||135)*0.5}px;object-fit:cover;border-radius:2px;${borderStyle}"></video>`;
         } else {
-          html += `<div style="position:absolute;left:${el.x*0.5}px;top:${el.y*0.5}px;width:${(el.w||240)*0.5}px;height:${(el.h||135)*0.5}px;background:#1a1a2e;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:16px;color:#555;${hl}">🎬</div>`;
+          html += `<div style="position:absolute;left:${elPx}px;top:${el.y*0.5}px;width:${(el.w||240)*0.5}px;height:${(el.h||135)*0.5}px;background:#1a1a2e;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:16px;color:#555;${borderStyle}">🎬</div>`;
         }
       }
     });
