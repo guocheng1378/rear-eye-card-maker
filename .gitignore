@@ -9,3 +9,8 @@
 .cxx
 local.properties
 /app/build
+
+# Build
+node_modules/
+dist/
+package-lock.json

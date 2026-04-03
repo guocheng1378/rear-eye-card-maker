@@ -1,0 +1,14 @@
+{
+  "name": "janus-card-maker",
+  "version": "2.0.0",
+  "private": true,
+  "scripts": {
+    "build": "npx esbuild src/app.ts --bundle --format=iife --target=es2020 --outfile=dist/app.js --minify",
+    "html": "node build.js",
+    "all": "npm run build && npm run html"
+  },
+  "devDependencies": {
+    "esbuild": "^0.20.0",
+    "typescript": "^6.0.2"
+  }
+}
