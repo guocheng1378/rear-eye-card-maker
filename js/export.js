@@ -125,7 +125,7 @@ JCM.importZip = function (file) {
           promises.push(entry.async('arraybuffer').then(function (buf) {
             var fname = path.replace(/^(images|videos)\//, '');
             var ext = fname.split('.').pop().toLowerCase();
-            var isVideo = ['mp4', 'webm', '3gp', 'mkv'].indexOf(ext) >= 0;
+            var isVideo = ['mp4', 'webm', '3gp', 'mkv', 'mov', 'avi', 'ts', 'flv'].indexOf(ext) >= 0;
             var mime = isVideo ? 'video/' + ext : 'image/' + (ext === 'jpg' ? 'jpeg' : ext);
             // Create data URL for preview
             var bytes = new Uint8Array(buf);
