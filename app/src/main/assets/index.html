@@ -146,7 +146,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC',sans-
   background:var(--accent);color:#fff;text-transform:uppercase;letter-spacing:.3px;
   flex-shrink:0;
 }
-.el-item-name{flex:1;font-size:13px;font-weight:500}
+.el-item-name{flex:1;font-size:13px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .el-item-del{
   background:none;border:none;color:var(--text3);cursor:pointer;font-size:16px;
   padding:4px 6px;border-radius:6px;transition:var(--transition);
@@ -158,6 +158,28 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC',sans-
   border-radius:var(--radius);animation:fadeIn .2s ease;
 }
 @keyframes fadeIn{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
+
+/* Media file picker */
+.media-picker{
+  display:flex;align-items:center;gap:12px;padding:12px;
+  background:var(--surface);border:1.5px dashed var(--border);border-radius:var(--radius-sm);
+  cursor:pointer;transition:var(--transition);margin-bottom:12px;
+}
+.media-picker:hover{border-color:var(--accent);background:var(--accent-glow)}
+.media-picker.has-file{border-style:solid;border-color:var(--green)}
+.media-picker-icon{font-size:24px;flex-shrink:0}
+.media-picker-info{flex:1;min-width:0}
+.media-picker-name{font-size:12px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.media-picker-hint{font-size:10px;color:var(--text3);margin-top:2px}
+.media-picker-thumb{
+  width:48px;height:48px;border-radius:8px;object-fit:cover;flex-shrink:0;
+  background:var(--surface3);
+}
+.media-picker-change{
+  padding:5px 10px;border-radius:6px;border:1px solid var(--border);background:var(--surface2);
+  color:var(--text2);font-size:11px;cursor:pointer;transition:var(--transition);flex-shrink:0;
+}
+.media-picker-change:hover{border-color:var(--accent);color:var(--accent2)}
 
 /* ─── Page 3: Preview & Export ─── */
 .page-preview{padding:24px 32px;overflow-y:auto}
@@ -266,6 +288,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC',sans-
 </style>
 </head>
 <body>
+
+<!-- Hidden file inputs -->
+<input type="file" id="fileImagePick" accept="image/*" style="display:none">
+<input type="file" id="fileVideoPick" accept="video/*" style="display:none">
+
 <div class="app">
 
   <!-- Top Bar -->
@@ -319,8 +346,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC',sans-
       <div class="device-row">
         <label>机型</label>
         <select id="deviceSelect" onchange="renderPreview()">
-          <option value="p2">Pro Max — 976×596</option>
           <option value="q200">Pro — 904×572</option>
+          <option value="p2">Pro Max — 976×596</option>
         </select>
         <label class="check-label">
           <input type="checkbox" id="showCamera" checked onchange="renderPreview()"> 摄像头遮挡区
@@ -579,7 +606,7 @@ const TEMPLATES = [
 </Widget>`
   },
   {
-    id: 'custom', icon: '🛠️', name: '自定义', desc: '从零开始，手动添加文字、形状、图片',
+    id: 'custom', icon: '🛠️', name: '自定义', desc: '从零开始，手动添加文字、形状、图片、视频',
     config: [
       { group: '基本', fields: [
         { key: 'cardName', label: '卡片名称', type: 'text', default: '自定义卡片' },
@@ -597,7 +624,10 @@ let currentTpl = null;
 let configValues = {};
 let customElements = [];
 let selectedElIdx = -1;
-let previewDirty = true; // need re-render after config change
+let previewDirty = true;
+let uploadedFiles = {};  // { filename: { data: ArrayBuffer, mimeType, dataUrl, originalName } }
+let pendingMediaAdd = null; // 'image' | 'video' | null — tracks which type we're adding via file picker
+let pendingMediaReplace = -1; // element index being replaced, or -1
 
 // ─── Step Navigation ───────────────────────────────────────────────
 
@@ -636,6 +666,9 @@ function prevStep() { goStep(currentStep - 1); }
 
 function init() {
   renderTplGrid();
+  // File input listeners
+  document.getElementById('fileImagePick').addEventListener('change', handleFilePicked);
+  document.getElementById('fileVideoPick').addEventListener('change', handleFilePicked);
 }
 
 function renderTplGrid() {
@@ -654,7 +687,6 @@ function selectTemplate(id) {
   if (!tpl) return;
   currentTpl = tpl;
   configValues = {};
-  // flatten all groups to get defaults
   tpl.config.forEach(g => g.fields.forEach(f => configValues[f.key] = f.default));
   customElements = tpl.id === 'custom' ? [
     { type: 'text', text: 'Hello Card', x: 30, y: 60, size: 28, color: '#ffffff' }
@@ -662,7 +694,6 @@ function selectTemplate(id) {
   selectedElIdx = -1;
   previewDirty = true;
   renderTplGrid();
-  // auto go to step 1
   goStep(1);
 }
 
@@ -681,9 +712,7 @@ function renderConfig() {
     html += `<div class="config-section">
       <div class="config-section-title"><span>▸</span> ${group.group}</div>
       <div class="config-grid">`;
-    group.fields.forEach(f => {
-      html += renderField(f);
-    });
+    group.fields.forEach(f => { html += renderField(f); });
     html += `</div></div>`;
   });
 
@@ -695,13 +724,18 @@ function renderConfig() {
         <button class="el-btn" onclick="addElement('text')"><span class="el-btn-icon">T</span> 文字</button>
         <button class="el-btn" onclick="addElement('rectangle')"><span class="el-btn-icon">▢</span> 矩形</button>
         <button class="el-btn" onclick="addElement('circle')"><span class="el-btn-icon">○</span> 圆形</button>
-        <button class="el-btn" onclick="addElement('image')"><span class="el-btn-icon">🖼</span> 图片</button>
+        <button class="el-btn" onclick="pickMedia('image')"><span class="el-btn-icon">🖼</span> 图片</button>
+        <button class="el-btn" onclick="pickMedia('video')"><span class="el-btn-icon">🎬</span> 视频</button>
       </div>
       <div class="el-list">`;
     customElements.forEach((el, i) => {
+      const label = el.type === 'text' ? el.text
+        : el.type === 'image' ? '🖼 ' + (el.fileName || '图片')
+        : el.type === 'video' ? '🎬 ' + (el.fileName || '视频')
+        : el.type + ' #' + (i+1);
       html += `<div class="el-item${selectedElIdx===i?' active':''}" onclick="selectElement(${i})">
         <span class="el-badge">${el.type}</span>
-        <span class="el-item-name">${el.text || el.src || el.type + ' #' + (i+1)}</span>
+        <span class="el-item-name">${esc(label)}</span>
         <button class="el-item-del" onclick="event.stopPropagation();removeElement(${i})">✕</button>
       </div>`;
     });
@@ -710,15 +744,13 @@ function renderConfig() {
     }
     html += `</div>`;
 
-    // Element detail editor
     if (selectedElIdx >= 0 && selectedElIdx < customElements.length) {
-      html += renderElementEditor(customElements[selectedElIdx]);
+      html += renderElementEditor(customElements[selectedElIdx], selectedElIdx);
     }
     html += `</div>`;
   }
 
   document.getElementById('cfgContent').innerHTML = html;
-  // update color value displays
   document.querySelectorAll('.color-val').forEach(el => {
     const input = el.previousElementSibling;
     if (input) el.textContent = input.value;
@@ -735,9 +767,42 @@ function renderField(f) {
   return '';
 }
 
-function renderElementEditor(el) {
+function renderElementEditor(el, idx) {
   let html = `<div class="el-detail">`;
-  if (el.type === 'text') {
+
+  // Media picker for image/video
+  if (el.type === 'image' || el.type === 'video') {
+    const isImage = el.type === 'image';
+    const fileInfo = el.fileName ? uploadedFiles[el.fileName] : null;
+    const hasFile = !!fileInfo;
+
+    html += `<div class="media-picker ${hasFile ? 'has-file' : ''}" onclick="pickMediaReplace(${idx})">`;
+    if (hasFile && isImage) {
+      html += `<img class="media-picker-thumb" src="${fileInfo.dataUrl}" alt="">`;
+    } else if (hasFile && !isImage) {
+      html += `<span class="media-picker-icon">🎬</span>`;
+    } else {
+      html += `<span class="media-picker-icon">${isImage ? '🖼' : '🎬'}</span>`;
+    }
+    html += `<div class="media-picker-info">
+      <div class="media-picker-name">${hasFile ? esc(fileInfo.originalName) : (isImage ? '点击选择图片' : '点击选择视频')}</div>
+      <div class="media-picker-hint">${hasFile ? formatFileSize(fileInfo.data.byteLength) + ' · 点击更换' : (isImage ? '支持 JPG / PNG / GIF / WebP' : '支持 MP4 / WebM / 3GP')}</div>
+    </div>`;
+    if (hasFile) {
+      html += `<button class="media-picker-change" onclick="event.stopPropagation();pickMediaReplace(${idx})">更换</button>`;
+    }
+    html += `</div>`;
+
+    // Position & size
+    html += `<div class="config-grid">
+      <div class="field"><label>X</label><input type="number" value="${el.x}" onchange="setElProp('x',+this.value)"></div>
+      <div class="field"><label>Y</label><input type="number" value="${el.y}" onchange="setElProp('y',+this.value)"></div>
+      <div class="field"><label>宽</label><input type="number" value="${el.w||100}" onchange="setElProp('w',+this.value)"></div>
+      <div class="field"><label>高</label><input type="number" value="${el.h||100}" onchange="setElProp('h',+this.value)"></div>
+    </div>`;
+  }
+  // Text element
+  else if (el.type === 'text') {
     html += `<div class="config-grid">
       <div class="field"><label>文字</label><input type="text" value="${esc(el.text)}" onchange="setElProp('text',this.value)"></div>
       <div class="field"><label>字号</label><input type="number" value="${el.size}" onchange="setElProp('size',+this.value)"></div>
@@ -745,7 +810,9 @@ function renderElementEditor(el) {
       <div class="field"><label>X</label><input type="number" value="${el.x}" onchange="setElProp('x',+this.value)"></div>
       <div class="field"><label>Y</label><input type="number" value="${el.y}" onchange="setElProp('y',+this.value)"></div>
     </div>`;
-  } else if (el.type === 'rectangle') {
+  }
+  // Rectangle
+  else if (el.type === 'rectangle') {
     html += `<div class="config-grid">
       <div class="field"><label>X</label><input type="number" value="${el.x}" onchange="setElProp('x',+this.value)"></div>
       <div class="field"><label>Y</label><input type="number" value="${el.y}" onchange="setElProp('y',+this.value)"></div>
@@ -754,22 +821,17 @@ function renderElementEditor(el) {
       <div class="field field-color"><label>颜色</label><input type="color" value="${el.color}" onchange="setElProp('color',this.value);this.nextElementSibling.textContent=this.value"><span class="color-val">${el.color}</span></div>
       <div class="field"><label>圆角</label><input type="number" value="${el.radius||0}" onchange="setElProp('radius',+this.value)"></div>
     </div>`;
-  } else if (el.type === 'circle') {
+  }
+  // Circle
+  else if (el.type === 'circle') {
     html += `<div class="config-grid">
       <div class="field"><label>中心 X</label><input type="number" value="${el.x}" onchange="setElProp('x',+this.value)"></div>
       <div class="field"><label>中心 Y</label><input type="number" value="${el.y}" onchange="setElProp('y',+this.value)"></div>
       <div class="field"><label>半径</label><input type="number" value="${el.r}" onchange="setElProp('r',+this.value)"></div>
       <div class="field field-color"><label>颜色</label><input type="color" value="${el.color}" onchange="setElProp('color',this.value);this.nextElementSibling.textContent=this.value"><span class="color-val">${el.color}</span></div>
     </div>`;
-  } else if (el.type === 'image') {
-    html += `<div class="config-grid">
-      <div class="field" style="grid-column:1/-1"><label>图片路径</label><input type="text" value="${esc(el.src||'')}" onchange="setElProp('src',this.value)" placeholder="images/icon.png"></div>
-      <div class="field"><label>X</label><input type="number" value="${el.x}" onchange="setElProp('x',+this.value)"></div>
-      <div class="field"><label>Y</label><input type="number" value="${el.y}" onchange="setElProp('y',+this.value)"></div>
-      <div class="field"><label>宽</label><input type="number" value="${el.w||100}" onchange="setElProp('w',+this.value)"></div>
-      <div class="field"><label>高</label><input type="number" value="${el.h||100}" onchange="setElProp('h',+this.value)"></div>
-    </div>`;
   }
+
   html += `</div>`;
   return html;
 }
@@ -779,6 +841,86 @@ function setCfg(key, val) {
   previewDirty = true;
 }
 
+// ─── Media Upload ──────────────────────────────────────────────────
+
+function pickMedia(type) {
+  pendingMediaAdd = type;
+  pendingMediaReplace = -1;
+  const input = document.getElementById(type === 'image' ? 'fileImagePick' : 'fileVideoPick');
+  input.value = '';
+  input.click();
+}
+
+function pickMediaReplace(idx) {
+  const el = customElements[idx];
+  if (!el) return;
+  pendingMediaAdd = el.type;
+  pendingMediaReplace = idx;
+  const input = document.getElementById(el.type === 'image' ? 'fileImagePick' : 'fileVideoPick');
+  input.value = '';
+  input.click();
+}
+
+function handleFilePicked(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  const type = pendingMediaAdd;
+  const replaceIdx = pendingMediaReplace;
+  pendingMediaAdd = null;
+  pendingMediaReplace = -1;
+
+  // Generate a unique filename for packing
+  const ext = file.name.split('.').pop() || (type === 'image' ? 'png' : 'mp4');
+  const safeName = 'media_' + Date.now() + '.' + ext;
+
+  const reader = new FileReader();
+  reader.onload = function(ev) {
+    const arrayBuf = ev.target.result;
+    // Create data URL for preview
+    const blob = new Blob([arrayBuf], { type: file.type });
+    const urlReader = new FileReader();
+    urlReader.onload = function() {
+      uploadedFiles[safeName] = {
+        data: arrayBuf,
+        mimeType: file.type,
+        dataUrl: urlReader.result,
+        originalName: file.name
+      };
+
+      if (replaceIdx >= 0 && replaceIdx < customElements.length) {
+        // Replace file on existing element
+        customElements[replaceIdx].fileName = safeName;
+        customElements[replaceIdx].src = safeName;
+      } else {
+        // Add new element
+        const el = {
+          type: type,
+          fileName: safeName,
+          src: safeName,
+          x: 30, y: 60,
+          w: type === 'image' ? 200 : 240,
+          h: type === 'image' ? 200 : 135,
+        };
+        customElements.push(el);
+        selectedElIdx = customElements.length - 1;
+      }
+
+      previewDirty = true;
+      renderConfig();
+      toast(file.name + ' 已添加', 'success');
+    };
+    urlReader.readAsDataURL(blob);
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+function formatFileSize(bytes) {
+  if (bytes < 1024) return bytes + ' B';
+  if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
+  return (bytes / 1048576).toFixed(1) + ' MB';
+}
+
 // ─── Custom Elements ───────────────────────────────────────────────
 
 function addElement(type) {
@@ -786,7 +928,6 @@ function addElement(type) {
     text: { type: 'text', text: '新文字', x: 30, y: 60, size: 24, color: '#ffffff' },
     rectangle: { type: 'rectangle', x: 30, y: 60, w: 100, h: 40, color: '#333333', radius: 0 },
     circle: { type: 'circle', x: 100, y: 100, r: 30, color: '#6c5ce7' },
-    image: { type: 'image', src: 'images/icon.png', x: 30, y: 60, w: 80, h: 80 },
   };
   if (defs[type]) {
     customElements.push(JSON.parse(JSON.stringify(defs[type])));
@@ -802,6 +943,12 @@ function selectElement(idx) {
 }
 
 function removeElement(idx) {
+  const el = customElements[idx];
+  // Clean up uploaded file if no other element uses it
+  if (el && el.fileName) {
+    const stillUsed = customElements.some((e, i) => i !== idx && e.fileName === el.fileName);
+    if (!stillUsed) delete uploadedFiles[el.fileName];
+  }
   customElements.splice(idx, 1);
   if (selectedElIdx >= customElements.length) selectedElIdx = customElements.length - 1;
   previewDirty = true;
@@ -831,6 +978,7 @@ function generateCustomMAML() {
     else if (el.type === 'rectangle') body += `  <Rectangle x="${el.x}" y="${el.y}" w="${el.w}" h="${el.h}" fillColor="${el.color}"${el.radius ? ` cornerRadius="${el.radius}"` : ''} />\n`;
     else if (el.type === 'circle') body += `  <Circle x="${el.x}" y="${el.y}" r="${el.r}" fillColor="${el.color}" />\n`;
     else if (el.type === 'image') body += `  <Image src="${esc(el.src)}" x="${el.x}" y="${el.y}" w="${el.w||100}" h="${el.h||100}" />\n`;
+    else if (el.type === 'video') body += `  <Video src="${esc(el.src)}" x="${el.x}" y="${el.y}" w="${el.w||240}" h="${el.h||135}" autoPlay="true" loop="true" />\n`;
   });
   return `<Widget screenWidth="480" frameRate="0" scaleByDensity="false" name="${esc(c.cardName)}">\n${body}</Widget>`;
 }
@@ -844,7 +992,6 @@ function renderPreview() {
   const device = document.getElementById('deviceSelect').value;
   const showCam = document.getElementById('showCamera').checked;
 
-  const dims = device === 'p2' ? { w: 976, h: 596 } : { w: 904, h: 572 };
   document.getElementById('deviceLabel').textContent =
     device === 'p2' ? 'Pro Max — 976 × 596' : 'Pro — 904 × 572';
 
@@ -862,7 +1009,6 @@ function renderPreview() {
 function renderPreviewHTML(showCam) {
   if (!currentTpl) return '';
   const c = configValues;
-  const ml = showCam ? 0 : 0;
   const sw = 260 - (showCam ? 74 : 0) - 10;
 
   if (currentTpl.id === 'clock') {
@@ -935,10 +1081,27 @@ function renderPreviewHTML(showCam) {
     let html = `<div style="position:absolute;inset:0;background:${c.bgColor}"></div>`;
     customElements.forEach((el, i) => {
       const hl = i === selectedElIdx ? 'outline:1.5px dashed #6c5ce7;outline-offset:2px;' : '';
-      if (el.type === 'text') html += `<div style="position:absolute;left:${el.x*0.5}px;top:${el.y*0.5}px;font-size:${el.size*0.5}px;color:${el.color};${hl}">${esc(el.text)}</div>`;
-      else if (el.type === 'rectangle') html += `<div style="position:absolute;left:${el.x*0.5}px;top:${el.y*0.5}px;width:${el.w*0.5}px;height:${el.h*0.5}px;background:${el.color};border-radius:${(el.radius||0)*0.5}px;${hl}"></div>`;
-      else if (el.type === 'circle') html += `<div style="position:absolute;left:${(el.x-el.r)*0.5}px;top:${(el.y-el.r)*0.5}px;width:${el.r}px;height:${el.r}px;background:${el.color};border-radius:50%;${hl}"></div>`;
-      else if (el.type === 'image') html += `<div style="position:absolute;left:${el.x*0.5}px;top:${el.y*0.5}px;width:${(el.w||100)*0.5}px;height:${(el.h||100)*0.5}px;background:#222;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:8px;color:#666;${hl}">🖼 ${esc(el.src||'')}</div>`;
+      if (el.type === 'text') {
+        html += `<div style="position:absolute;left:${el.x*0.5}px;top:${el.y*0.5}px;font-size:${el.size*0.5}px;color:${el.color};${hl}">${esc(el.text)}</div>`;
+      } else if (el.type === 'rectangle') {
+        html += `<div style="position:absolute;left:${el.x*0.5}px;top:${el.y*0.5}px;width:${el.w*0.5}px;height:${el.h*0.5}px;background:${el.color};border-radius:${(el.radius||0)*0.5}px;${hl}"></div>`;
+      } else if (el.type === 'circle') {
+        html += `<div style="position:absolute;left:${(el.x-el.r)*0.5}px;top:${(el.y-el.r)*0.5}px;width:${el.r}px;height:${el.r}px;background:${el.color};border-radius:50%;${hl}"></div>`;
+      } else if (el.type === 'image') {
+        const fileInfo = el.fileName ? uploadedFiles[el.fileName] : null;
+        if (fileInfo) {
+          html += `<img src="${fileInfo.dataUrl}" style="position:absolute;left:${el.x*0.5}px;top:${el.y*0.5}px;width:${(el.w||100)*0.5}px;height:${(el.h||100)*0.5}px;object-fit:cover;border-radius:2px;${hl}">`;
+        } else {
+          html += `<div style="position:absolute;left:${el.x*0.5}px;top:${el.y*0.5}px;width:${(el.w||100)*0.5}px;height:${(el.h||100)*0.5}px;background:#222;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:8px;color:#666;${hl}">🖼</div>`;
+        }
+      } else if (el.type === 'video') {
+        const fileInfo = el.fileName ? uploadedFiles[el.fileName] : null;
+        if (fileInfo) {
+          html += `<video src="${fileInfo.dataUrl}" muted loop autoplay style="position:absolute;left:${el.x*0.5}px;top:${el.y*0.5}px;width:${(el.w||240)*0.5}px;height:${(el.h||135)*0.5}px;object-fit:cover;border-radius:2px;${hl}"></video>`;
+        } else {
+          html += `<div style="position:absolute;left:${el.x*0.5}px;top:${el.y*0.5}px;width:${(el.w||240)*0.5}px;height:${(el.h||135)*0.5}px;background:#1a1a2e;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:16px;color:#555;${hl}">🎬</div>`;
+        }
+      }
     });
     return html;
   }
@@ -961,6 +1124,27 @@ async function exportZip() {
 <WidgetConfig version="1">
   <OnOff name="isDisplayDefaultBg" displayTitle="显示默认背景" default="0"/>
 </WidgetConfig>`);
+  }
+
+  // Pack uploaded images and videos
+  if (currentTpl?.id === 'custom') {
+    const usedFiles = new Set();
+    customElements.forEach(el => {
+      if ((el.type === 'image' || el.type === 'video') && el.fileName && uploadedFiles[el.fileName]) {
+        usedFiles.add(el.fileName);
+      }
+    });
+    const imgFolder = zip.folder('images');
+    const vidFolder = zip.folder('videos');
+    usedFiles.forEach(fname => {
+      const info = uploadedFiles[fname];
+      const isVideo = info.mimeType.startsWith('video/');
+      if (isVideo) {
+        vidFolder.file(fname, info.data);
+      } else {
+        imgFolder.file(fname, info.data);
+      }
+    });
   }
 
   const blob = await zip.generateAsync({ type: 'blob' });

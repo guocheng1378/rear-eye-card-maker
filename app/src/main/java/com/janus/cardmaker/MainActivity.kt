@@ -3,12 +3,14 @@ package com.janus.cardmaker
 import android.annotation.SuppressLint
 import android.content.ContentValues
 import android.content.Intent
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Environment
 import android.provider.MediaStore
 import android.util.Base64
 import android.webkit.JavascriptInterface
+import android.webkit.ValueCallback
 import android.webkit.WebChromeClient
 import android.webkit.WebView
 import android.webkit.WebViewClient
@@ -22,6 +24,8 @@ import java.io.FileOutputStream
 class MainActivity : AppCompatActivity() {
 
     private lateinit var webView: WebView
+    private var fileUploadCallback: ValueCallback<Array<Uri>>? = null
+    private val FILE_CHOOSER_REQUEST = 1001
 
     @SuppressLint("SetJavaScriptEnabled")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -35,6 +39,7 @@ class MainActivity : AppCompatActivity() {
             settings.useWideViewPort = true
             settings.loadWithOverviewMode = true
             settings.setSupportZoom(false)
+            settings.mediaPlaybackRequiresUserGesture = false
 
             val assetLoader = WebViewAssetLoader.Builder()
                 .addPathHandler("/assets/", WebViewAssetLoader.AssetsPathHandler(this@MainActivity))
@@ -42,7 +47,27 @@ class MainActivity : AppCompatActivity() {
 
             addJavascriptInterface(AndroidBridge(), "AndroidBridge")
 
-            webChromeClient = WebChromeClient()
+            webChromeClient = object : WebChromeClient() {
+                override fun onShowFileChooser(
+                    webView: WebView?,
+                    filePathCallback: ValueCallback<Array<Uri>>?,
+                    fileChooserParams: FileChooserParams?
+                ): Boolean {
+                    fileUploadCallback?.onReceiveValue(null)
+                    fileUploadCallback = filePathCallback
+
+                    val intent = fileChooserParams?.createIntent()
+                    if (intent != null) {
+                        try {
+                            startActivityForResult(intent, FILE_CHOOSER_REQUEST)
+                        } catch (e: Exception) {
+                            fileUploadCallback = null
+                            filePathCallback?.onReceiveValue(null)
+                        }
+                    }
+                    return true
+                }
+            }
 
             webViewClient = object : WebViewClient() {
                 override fun shouldInterceptRequest(
@@ -57,6 +82,26 @@ class MainActivity : AppCompatActivity() {
         }
 
         setContentView(webView)
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == FILE_CHOOSER_REQUEST) {
+            val results: Array<Uri>? = when {
+                resultCode != RESULT_OK -> null
+                data?.data != null -> arrayOf(data.data!!)
+                data?.clipData != null -> {
+                    val uris = mutableListOf<Uri>()
+                    for (i in 0 until data.clipData!!.itemCount) {
+                        data.clipData!!.getItemAt(i).uri?.let { uris.add(it) }
+                    }
+                    uris.toTypedArray()
+                }
+                else -> null
+            }
+            fileUploadCallback?.onReceiveValue(results)
+            fileUploadCallback = null
+        }
     }
 
     @Deprecated("Deprecated in Java")
@@ -87,7 +132,6 @@ class MainActivity : AppCompatActivity() {
                             os.write(bytes)
                         }
                     }
-                    // For sharing, also save a copy to app-private dir
                     savedFile = File(getExternalFilesDir("cards"), fileName).apply {
                         parentFile?.mkdirs()
                         writeBytes(bytes)
@@ -123,7 +167,7 @@ class MainActivity : AppCompatActivity() {
                             }
                             startActivity(Intent.createChooser(intent, "分享卡片 ZIP"))
                         } catch (e: Exception) {
-                            // FileProvider might fail on some devices, just show toast
+                            // FileProvider might fail on some devices
                         }
                     }
                 }
