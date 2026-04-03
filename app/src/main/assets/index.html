@@ -149,6 +149,15 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC',sans-
 }
 .el-z-btn:hover{border-color:var(--accent);color:var(--accent2)}
 
+/* ─── Color Presets ─── */
+.color-presets{display:flex;gap:4px;flex-wrap:wrap;margin-top:10px;padding:8px;background:var(--surface);border-radius:8px}
+.color-swatch{
+  width:22px;height:22px;border-radius:4px;cursor:pointer;border:2px solid transparent;
+  transition:var(--transition);flex-shrink:0;
+}
+.color-swatch:hover{transform:scale(1.2);border-color:var(--accent)}
+.color-swatch:active{transform:scale(0.95)}
+
 /* ─── Element Detail ─── */
 .el-detail{
   margin-top:14px;padding:16px;background:var(--surface2);border:1px solid var(--border);
@@ -1105,9 +1114,10 @@ JCM.PreviewRenderer = PreviewRenderer;
 // ─── Editor: 自定义元素编辑 ──────────────────────────────────────
 
 JCM.ElementDefaults = {
-  text: function () { return { type: 'text', text: '新文字', x: 10, y: 60, size: 24, color: '#ffffff', textAlign: 'left', bold: false, multiLine: false, w: 200 }; },
-  rectangle: function () { return { type: 'rectangle', x: 10, y: 60, w: 100, h: 40, color: '#333333', radius: 0 }; },
-  circle: function () { return { type: 'circle', x: 50, y: 100, r: 30, color: '#6c5ce7' }; },
+  text: function () { return { type: 'text', text: '新文字', x: 10, y: 60, size: 24, color: '#ffffff', textAlign: 'left', bold: false, multiLine: false, w: 200, shadow: 'none', opacity: 100 }; },
+  rectangle: function () { return { type: 'rectangle', x: 10, y: 60, w: 100, h: 40, color: '#333333', radius: 0, opacity: 100 }; },
+  circle: function () { return { type: 'circle', x: 50, y: 100, r: 30, color: '#6c5ce7', opacity: 100 }; },
+  line: function () { return { type: 'rectangle', x: 10, y: 100, w: 200, h: 2, color: '#555555', radius: 1, opacity: 60 }; },
 };
 
 JCM.isInCameraZone = function (el, device) {
@@ -1215,6 +1225,26 @@ function fmtSize(bytes) {
   if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
   return (bytes / 1048576).toFixed(1) + ' MB';
 }
+
+// ─── Color Presets ────────────────────────────────────────────────
+JCM.COLOR_PRESETS = [
+  '#ffffff', '#e0e0e0', '#888888', '#333333', '#000000',
+  '#ff6b6b', '#ee5a24', '#f0932b', '#fdcb6e', '#ffeaa7',
+  '#00b894', '#55efc4', '#4ecdc4', '#0984e3', '#74b9ff',
+  '#6c5ce7', '#a29bfe', '#fd79a8', '#e84393', '#d63031',
+];
+
+JCM.renderColorPresets = function (prop, idx) {
+  return '<div class="color-presets">' +
+    JCM.COLOR_PRESETS.map(function (c) {
+      return '<div class="color-swatch" style="background:' + c + '" data-color="' + c + '" data-cprop="' + prop + '" data-cidx="' + idx + '" title="' + c + '"></div>';
+    }).join('') +
+    '</div>';
+};
+
+// ─── Quick Alignment ──────────────────────────────────────────────
+// These functions are called from ui.js which has access to internal state
+// Defined here for reference, actual implementations in ui.js
 
 // ─── Export: ZIP 打包 / 导入 / PNG 导出 ────────────────────────────
 
@@ -1445,6 +1475,7 @@ var _pendingAdd = null;
 var _pendingReplace = -1;
 var SNAP_GRID = 10;
 var _previewTimer = null;
+var _clipboard = null; // Copy/paste buffer
 
 // ─── Undo/Redo ────────────────────────────────────────────────────
 var _history = [];
@@ -1566,6 +1597,7 @@ function renderConfig() {
     '<button class="el-btn" data-add="text"><span class="el-btn-icon">T</span> 文字</button>' +
     '<button class="el-btn" data-add="rectangle"><span class="el-btn-icon">▢</span> 矩形</button>' +
     '<button class="el-btn" data-add="circle"><span class="el-btn-icon">○</span> 圆形</button>' +
+    '<button class="el-btn" data-add="line"><span class="el-btn-icon">─</span> 线条</button>' +
     '<button class="el-btn" data-pick="image"><span class="el-btn-icon">🖼</span> 图片</button>' +
     '<button class="el-btn" data-pick="video"><span class="el-btn-icon">🎬</span> 视频</button>' +
     '<button class="el-btn" data-action="importZip" title="导入 MAML ZIP"><span class="el-btn-icon">📦</span> 导入ZIP</button>' +
@@ -1603,6 +1635,33 @@ function renderConfig() {
 
   if (_selIdx >= 0 && _selIdx < _elements.length) {
     html += JCM.renderElementEditor(_elements[_selIdx], _selIdx, device);
+
+    // Quick alignment
+    html += '<div class="config-section" style="margin-top:12px"><div class="config-section-title"><span>▸</span> 快速操作</div>' +
+      '<div class="el-toolbar">' +
+      '<button class="el-btn" data-align="left" data-ai="' + _selIdx + '">⬅ 左对齐</button>' +
+      '<button class="el-btn" data-align="hcenter" data-ai="' + _selIdx + '">↔ 水平居中</button>' +
+      '<button class="el-btn" data-align="right" data-ai="' + _selIdx + '">➡ 右对齐</button>' +
+      '<button class="el-btn" data-align="top" data-ai="' + _selIdx + '">⬆ 顶对齐</button>' +
+      '<button class="el-btn" data-align="vcenter" data-ai="' + _selIdx + '">↕ 垂直居中</button>' +
+      '<button class="el-btn" data-align="bottom" data-ai="' + _selIdx + '">⬇ 底对齐</button>' +
+      '</div>';
+
+    // Quick sizes (only for rect/image/video)
+    var selEl = _elements[_selIdx];
+    if (selEl.type === 'rectangle' || selEl.type === 'image' || selEl.type === 'video') {
+      html += '<div class="el-toolbar" style="margin-top:8px">' +
+        '<button class="el-btn" data-qsize="full" data-qi="' + _selIdx + '">全屏</button>' +
+        '<button class="el-btn" data-qsize="half" data-qi="' + _selIdx + '">半屏</button>' +
+        '<button class="el-btn" data-qsize="quarter" data-qi="' + _selIdx + '">1/4</button>' +
+        '</div>';
+    }
+
+    // Color presets (if element has color)
+    if (selEl.color !== undefined) {
+      html += JCM.renderColorPresets('color', _selIdx);
+    }
+    html += '</div>';
   }
   html += '</div>';
 
@@ -1678,6 +1737,42 @@ JCM.moveElementZ = function (idx, dir) {
   _elements[idx] = _elements[newIdx];
   _elements[newIdx] = tmp;
   _selIdx = newIdx;
+  _dirty = true;
+  renderConfig();
+};
+
+JCM.alignElement = function (idx, align) {
+  if (idx < 0 || idx >= _elements.length) return;
+  captureState();
+  var device = getSelectedDevice();
+  var el = _elements[idx];
+  var ew = el.w || (el.r ? el.r * 2 : 0) || 100;
+  var eh = el.h || (el.r ? el.r * 2 : 0) || 30;
+  var safeW = device.width * (1 - device.cameraZoneRatio);
+  var marginL = Math.ceil(device.width * device.cameraZoneRatio);
+  switch (align) {
+    case 'left':    el.x = marginL + 10; break;
+    case 'hcenter': el.x = marginL + Math.round((safeW - ew) / 2); break;
+    case 'right':   el.x = marginL + safeW - ew - 10; break;
+    case 'top':     el.y = 10; break;
+    case 'vcenter': el.y = Math.round((device.height - eh) / 2); break;
+    case 'bottom':  el.y = device.height - eh - 10; break;
+  }
+  _dirty = true;
+  renderConfig();
+};
+
+JCM.applyQuickSize = function (idx, size) {
+  if (idx < 0 || idx >= _elements.length) return;
+  captureState();
+  var device = getSelectedDevice();
+  var el = _elements[idx];
+  var safeW = device.width * (1 - device.cameraZoneRatio);
+  switch (size) {
+    case 'full':    el.w = Math.round(safeW - 20); el.h = device.height - 20; break;
+    case 'half':    el.w = Math.round(safeW - 20); el.h = Math.round(device.height / 2 - 20); break;
+    case 'quarter': el.w = Math.round(safeW / 2 - 20); el.h = Math.round(device.height / 2 - 20); break;
+  }
   _dirty = true;
   renderConfig();
 };
@@ -2091,6 +2186,24 @@ function setupEvents() {
       else if (a === 'importTemplate') JCM.handleImportTemplate();
       return;
     }
+    // Alignment
+    var alignBtn = e.target.closest('[data-align]');
+    if (alignBtn) { JCM.alignElement(Number(alignBtn.dataset.ai), alignBtn.dataset.align); return; }
+    // Quick size
+    var sizeBtn = e.target.closest('[data-qsize]');
+    if (sizeBtn) { JCM.applyQuickSize(Number(sizeBtn.dataset.qi), sizeBtn.dataset.qsize); return; }
+    // Color preset
+    var swatch = e.target.closest('.color-swatch');
+    if (swatch) {
+      var cidx = Number(swatch.dataset.cidx);
+      var cprop = swatch.dataset.cprop;
+      if (cidx >= 0 && cidx < _elements.length) {
+        _elements[cidx][cprop] = swatch.dataset.color;
+        _dirty = true;
+        renderConfig();
+      }
+      return;
+    }
   });
 
   // File inputs
@@ -2122,6 +2235,23 @@ function setupEvents() {
       renderConfig();
       toast('✅ 已复制元素', 'success');
     }
+    if (e.ctrlKey && e.key === 'c' && _selIdx >= 0 && _selIdx < _elements.length) {
+      e.preventDefault();
+      _clipboard = JSON.parse(JSON.stringify(_elements[_selIdx]));
+      toast('📋 已复制到剪贴板', 'success');
+    }
+    if (e.ctrlKey && e.key === 'v' && _clipboard) {
+      e.preventDefault();
+      captureState();
+      var paste = JSON.parse(JSON.stringify(_clipboard));
+      paste.x += 10;
+      paste.y += 10;
+      _elements.push(paste);
+      _selIdx = _elements.length - 1;
+      _dirty = true;
+      renderConfig();
+      toast('📋 已粘贴', 'success');
+    }
   });
 }
 
@@ -2137,6 +2267,12 @@ function toast(msg, type) {
 function escH(s) { return String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
 
 // ─── Init ─────────────────────────────────────────────────────────
+// Expose internal state for editor.js
+JCM._elements = null; // set dynamically
+JCM._captureState = captureState;
+
+Object.defineProperty(JCM, 'elements', { get: function () { return _elements; } });
+
 JCM.initUI = function () {
   renderTplGrid();
   setupEvents();

@@ -1,9 +1,10 @@
 // ─── Editor: 自定义元素编辑 ──────────────────────────────────────
 
 JCM.ElementDefaults = {
-  text: function () { return { type: 'text', text: '新文字', x: 10, y: 60, size: 24, color: '#ffffff', textAlign: 'left', bold: false, multiLine: false, w: 200 }; },
-  rectangle: function () { return { type: 'rectangle', x: 10, y: 60, w: 100, h: 40, color: '#333333', radius: 0 }; },
-  circle: function () { return { type: 'circle', x: 50, y: 100, r: 30, color: '#6c5ce7' }; },
+  text: function () { return { type: 'text', text: '新文字', x: 10, y: 60, size: 24, color: '#ffffff', textAlign: 'left', bold: false, multiLine: false, w: 200, shadow: 'none', opacity: 100 }; },
+  rectangle: function () { return { type: 'rectangle', x: 10, y: 60, w: 100, h: 40, color: '#333333', radius: 0, opacity: 100 }; },
+  circle: function () { return { type: 'circle', x: 50, y: 100, r: 30, color: '#6c5ce7', opacity: 100 }; },
+  line: function () { return { type: 'rectangle', x: 10, y: 100, w: 200, h: 2, color: '#555555', radius: 1, opacity: 60 }; },
 };
 
 JCM.isInCameraZone = function (el, device) {
@@ -111,3 +112,23 @@ function fmtSize(bytes) {
   if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
   return (bytes / 1048576).toFixed(1) + ' MB';
 }
+
+// ─── Color Presets ────────────────────────────────────────────────
+JCM.COLOR_PRESETS = [
+  '#ffffff', '#e0e0e0', '#888888', '#333333', '#000000',
+  '#ff6b6b', '#ee5a24', '#f0932b', '#fdcb6e', '#ffeaa7',
+  '#00b894', '#55efc4', '#4ecdc4', '#0984e3', '#74b9ff',
+  '#6c5ce7', '#a29bfe', '#fd79a8', '#e84393', '#d63031',
+];
+
+JCM.renderColorPresets = function (prop, idx) {
+  return '<div class="color-presets">' +
+    JCM.COLOR_PRESETS.map(function (c) {
+      return '<div class="color-swatch" style="background:' + c + '" data-color="' + c + '" data-cprop="' + prop + '" data-cidx="' + idx + '" title="' + c + '"></div>';
+    }).join('') +
+    '</div>';
+};
+
+// ─── Quick Alignment ──────────────────────────────────────────────
+// These functions are called from ui.js which has access to internal state
+// Defined here for reference, actual implementations in ui.js

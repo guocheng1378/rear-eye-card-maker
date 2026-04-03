@@ -12,6 +12,7 @@ var _pendingAdd = null;
 var _pendingReplace = -1;
 var SNAP_GRID = 10;
 var _previewTimer = null;
+var _clipboard = null; // Copy/paste buffer
 
 // ─── Undo/Redo ────────────────────────────────────────────────────
 var _history = [];
@@ -133,6 +134,7 @@ function renderConfig() {
     '<button class="el-btn" data-add="text"><span class="el-btn-icon">T</span> 文字</button>' +
     '<button class="el-btn" data-add="rectangle"><span class="el-btn-icon">▢</span> 矩形</button>' +
     '<button class="el-btn" data-add="circle"><span class="el-btn-icon">○</span> 圆形</button>' +
+    '<button class="el-btn" data-add="line"><span class="el-btn-icon">─</span> 线条</button>' +
     '<button class="el-btn" data-pick="image"><span class="el-btn-icon">🖼</span> 图片</button>' +
     '<button class="el-btn" data-pick="video"><span class="el-btn-icon">🎬</span> 视频</button>' +
     '<button class="el-btn" data-action="importZip" title="导入 MAML ZIP"><span class="el-btn-icon">📦</span> 导入ZIP</button>' +
@@ -170,6 +172,33 @@ function renderConfig() {
 
   if (_selIdx >= 0 && _selIdx < _elements.length) {
     html += JCM.renderElementEditor(_elements[_selIdx], _selIdx, device);
+
+    // Quick alignment
+    html += '<div class="config-section" style="margin-top:12px"><div class="config-section-title"><span>▸</span> 快速操作</div>' +
+      '<div class="el-toolbar">' +
+      '<button class="el-btn" data-align="left" data-ai="' + _selIdx + '">⬅ 左对齐</button>' +
+      '<button class="el-btn" data-align="hcenter" data-ai="' + _selIdx + '">↔ 水平居中</button>' +
+      '<button class="el-btn" data-align="right" data-ai="' + _selIdx + '">➡ 右对齐</button>' +
+      '<button class="el-btn" data-align="top" data-ai="' + _selIdx + '">⬆ 顶对齐</button>' +
+      '<button class="el-btn" data-align="vcenter" data-ai="' + _selIdx + '">↕ 垂直居中</button>' +
+      '<button class="el-btn" data-align="bottom" data-ai="' + _selIdx + '">⬇ 底对齐</button>' +
+      '</div>';
+
+    // Quick sizes (only for rect/image/video)
+    var selEl = _elements[_selIdx];
+    if (selEl.type === 'rectangle' || selEl.type === 'image' || selEl.type === 'video') {
+      html += '<div class="el-toolbar" style="margin-top:8px">' +
+        '<button class="el-btn" data-qsize="full" data-qi="' + _selIdx + '">全屏</button>' +
+        '<button class="el-btn" data-qsize="half" data-qi="' + _selIdx + '">半屏</button>' +
+        '<button class="el-btn" data-qsize="quarter" data-qi="' + _selIdx + '">1/4</button>' +
+        '</div>';
+    }
+
+    // Color presets (if element has color)
+    if (selEl.color !== undefined) {
+      html += JCM.renderColorPresets('color', _selIdx);
+    }
+    html += '</div>';
   }
   html += '</div>';
 
@@ -245,6 +274,42 @@ JCM.moveElementZ = function (idx, dir) {
   _elements[idx] = _elements[newIdx];
   _elements[newIdx] = tmp;
   _selIdx = newIdx;
+  _dirty = true;
+  renderConfig();
+};
+
+JCM.alignElement = function (idx, align) {
+  if (idx < 0 || idx >= _elements.length) return;
+  captureState();
+  var device = getSelectedDevice();
+  var el = _elements[idx];
+  var ew = el.w || (el.r ? el.r * 2 : 0) || 100;
+  var eh = el.h || (el.r ? el.r * 2 : 0) || 30;
+  var safeW = device.width * (1 - device.cameraZoneRatio);
+  var marginL = Math.ceil(device.width * device.cameraZoneRatio);
+  switch (align) {
+    case 'left':    el.x = marginL + 10; break;
+    case 'hcenter': el.x = marginL + Math.round((safeW - ew) / 2); break;
+    case 'right':   el.x = marginL + safeW - ew - 10; break;
+    case 'top':     el.y = 10; break;
+    case 'vcenter': el.y = Math.round((device.height - eh) / 2); break;
+    case 'bottom':  el.y = device.height - eh - 10; break;
+  }
+  _dirty = true;
+  renderConfig();
+};
+
+JCM.applyQuickSize = function (idx, size) {
+  if (idx < 0 || idx >= _elements.length) return;
+  captureState();
+  var device = getSelectedDevice();
+  var el = _elements[idx];
+  var safeW = device.width * (1 - device.cameraZoneRatio);
+  switch (size) {
+    case 'full':    el.w = Math.round(safeW - 20); el.h = device.height - 20; break;
+    case 'half':    el.w = Math.round(safeW - 20); el.h = Math.round(device.height / 2 - 20); break;
+    case 'quarter': el.w = Math.round(safeW / 2 - 20); el.h = Math.round(device.height / 2 - 20); break;
+  }
   _dirty = true;
   renderConfig();
 };
@@ -658,6 +723,24 @@ function setupEvents() {
       else if (a === 'importTemplate') JCM.handleImportTemplate();
       return;
     }
+    // Alignment
+    var alignBtn = e.target.closest('[data-align]');
+    if (alignBtn) { JCM.alignElement(Number(alignBtn.dataset.ai), alignBtn.dataset.align); return; }
+    // Quick size
+    var sizeBtn = e.target.closest('[data-qsize]');
+    if (sizeBtn) { JCM.applyQuickSize(Number(sizeBtn.dataset.qi), sizeBtn.dataset.qsize); return; }
+    // Color preset
+    var swatch = e.target.closest('.color-swatch');
+    if (swatch) {
+      var cidx = Number(swatch.dataset.cidx);
+      var cprop = swatch.dataset.cprop;
+      if (cidx >= 0 && cidx < _elements.length) {
+        _elements[cidx][cprop] = swatch.dataset.color;
+        _dirty = true;
+        renderConfig();
+      }
+      return;
+    }
   });
 
   // File inputs
@@ -689,6 +772,23 @@ function setupEvents() {
       renderConfig();
       toast('✅ 已复制元素', 'success');
     }
+    if (e.ctrlKey && e.key === 'c' && _selIdx >= 0 && _selIdx < _elements.length) {
+      e.preventDefault();
+      _clipboard = JSON.parse(JSON.stringify(_elements[_selIdx]));
+      toast('📋 已复制到剪贴板', 'success');
+    }
+    if (e.ctrlKey && e.key === 'v' && _clipboard) {
+      e.preventDefault();
+      captureState();
+      var paste = JSON.parse(JSON.stringify(_clipboard));
+      paste.x += 10;
+      paste.y += 10;
+      _elements.push(paste);
+      _selIdx = _elements.length - 1;
+      _dirty = true;
+      renderConfig();
+      toast('📋 已粘贴', 'success');
+    }
   });
 }
 
@@ -704,6 +804,12 @@ function toast(msg, type) {
 function escH(s) { return String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
 
 // ─── Init ─────────────────────────────────────────────────────────
+// Expose internal state for editor.js
+JCM._elements = null; // set dynamically
+JCM._captureState = captureState;
+
+Object.defineProperty(JCM, 'elements', { get: function () { return _elements; } });
+
 JCM.initUI = function () {
   renderTplGrid();
   setupEvents();
