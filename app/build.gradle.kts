@@ -11,13 +11,30 @@ android {
         applicationId = "com.janus.cardmaker"
         minSdk = 26
         targetSdk = 34
-        versionCode = 5
-        versionName = "2.0.0"
+        versionCode = 6
+        versionName = "3.0.0"
+    }
+
+    signingConfigs {
+        create("release") {
+            storeFile = file("janus-release.p12")
+            storePassword = "januscardmaker"
+            keyAlias = "janus"
+            keyPassword = "januscardmaker"
+        }
+        // CI: 从环境变量读取
+        create("ci") {
+            storeFile = file("${System.getenv("KEYSTORE_PATH")}")
+            storePassword = System.getenv("KEYSTORE_PASSWORD")
+            keyAlias = "janus"
+            keyPassword = System.getenv("KEY_PASSWORD")
+        }
     }
 
     buildTypes {
         release {
             isMinifyEnabled = false
+            signingConfig = signingConfigs.getByName("ci")
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"

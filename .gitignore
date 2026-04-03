@@ -3,3 +3,10 @@ dist/
 .DS_Store
 *.log
 gradle/wrapper/gradle-wrapper.jar
+
+# Keystore (use GitHub Secrets)
+*.p12
+*.jks
+*.pem
+janus-key.pem
+janus-cert.pem
