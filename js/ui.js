@@ -222,6 +222,36 @@ function renderConfig() {
     '<button class="el-btn" data-action="importTemplate"><span class="el-btn-icon">📂</span> 导入配置</button>' +
     '</div></div>';
 
+  // Asset manager — show when there are uploaded files
+  var fileKeys = Object.keys(JCM.uploadedFiles);
+  if (fileKeys.length > 0) {
+    html += '<div class="config-section"><div class="config-section-title"><span>▸</span> 素材管理 (' + fileKeys.length + ')</div>';
+    fileKeys.forEach(function (fname) {
+      var fi = JCM.uploadedFiles[fname];
+      var isVideo = fi.mimeType && fi.mimeType.indexOf('video/') === 0;
+      var thumb = '';
+      if (isVideo) {
+        thumb = '<div style="width:48px;height:48px;border-radius:8px;background:#1a1a2e;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">🎬</div>';
+      } else if (fi.dataUrl) {
+        thumb = '<img class="media-picker-thumb" src="' + fi.dataUrl + '" alt="">';
+      } else {
+        thumb = '<div style="width:48px;height:48px;border-radius:8px;background:var(--surface3);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">🖼</div>';
+      }
+      var sz = fi.data ? (fi.data.byteLength || fi.data.size || 0) : 0;
+      var sizeStr = fmtSize(sz);
+      var useCount = _elements.filter(function (e) { return e.fileName === fname; }).length;
+      html += '<div class="media-picker has-file" data-replace-asset="' + fname + '">' +
+        thumb +
+        '<div class="media-picker-info">' +
+        '<div class="media-picker-name">' + escH(fi.originalName || fname) + '</div>' +
+        '<div class="media-picker-hint">' + sizeStr + (useCount > 0 ? ' · 引用x' + useCount : '') + '</div>' +
+        '</div>' +
+        '<button class="media-picker-change" data-replace-btn="' + fname + '">替换</button>' +
+        '</div>';
+    });
+    html += '</div>';
+  }
+
   document.getElementById('cfgContent').innerHTML = html;
 
   document.querySelectorAll('.color-val').forEach(function (el) {
@@ -514,6 +544,41 @@ JCM.handleImportTemplate = function () {
       renderConfig();
       toast('✅ 配置已导入', 'success');
     }).catch(function (e) { toast('导入失败: ' + e.message, 'error'); });
+  };
+  input.click();
+};
+
+// ─── Asset Replacement ────────────────────────────────────────────
+JCM._pendingReplaceAsset = null;
+
+JCM.replaceAssetPrompt = function (fname) {
+  JCM._pendingReplaceAsset = fname;
+  var fi = JCM.uploadedFiles[fname];
+  var isVideo = fi && fi.mimeType && fi.mimeType.indexOf('video/') === 0;
+  var input = document.createElement('input');
+  input.type = 'file';
+  input.accept = isVideo ? 'video/*' : 'image/*';
+  input.onchange = function () {
+    var file = input.files && input.files[0];
+    if (!file) return;
+    var oldName = JCM._pendingReplaceAsset;
+    JCM._pendingReplaceAsset = null;
+    var reader = new FileReader();
+    reader.onload = function (ev) {
+      var dataUrl = ev.target.result;
+      var base64 = dataUrl.split(',')[1];
+      var bin = atob(base64);
+      var arr = new Uint8Array(bin.length);
+      for (var i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
+
+      captureState();
+      // Replace the file data in uploadedFiles (keep same key so all references update)
+      JCM.uploadedFiles[oldName] = { data: arr.buffer, mimeType: file.type, dataUrl: dataUrl, originalName: file.name };
+      _dirty = true;
+      renderConfig();
+      toast('✅ 已替换: ' + file.name, 'success');
+    };
+    reader.readAsDataURL(file);
   };
   input.click();
 };

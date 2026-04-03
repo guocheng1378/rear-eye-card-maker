@@ -112,6 +112,7 @@ function fmtSize(bytes) {
   if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
   return (bytes / 1048576).toFixed(1) + ' MB';
 }
+JCM.fmtSize = fmtSize;
 
 // ─── Color Presets ────────────────────────────────────────────────
 JCM.COLOR_PRESETS = [
