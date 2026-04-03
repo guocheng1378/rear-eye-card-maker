@@ -26,18 +26,20 @@ jobs:
         run: gradle assembleDebug
 
       - name: Rename APK
+        if: success()
         run: |
           APK=$(find app/build/outputs -name "*.apk" | head -1)
-          cp "$APK" "janus-card-maker-v3.0.0.apk"
-
-      - name: Upload APK to Release
-        if: github.event_name == 'release'
-        uses: softprops/action-gh-release@v2
-        with:
-          files: janus-card-maker-v3.0.0.apk
+          cp "$APK" "janus-card-maker-v3.3.0.apk"
 
       - name: Upload APK artifact
+        if: success()
         uses: actions/upload-artifact@v4
         with:
           name: janus-card-maker-apk
-          path: janus-card-maker-v3.0.0.apk
+          path: janus-card-maker-v3.3.0.apk
+
+      - name: Upload APK to Release
+        if: github.event_name == 'release' && success()
+        uses: softprops/action-gh-release@v2
+        with:
+          files: janus-card-maker-v3.3.0.apk
