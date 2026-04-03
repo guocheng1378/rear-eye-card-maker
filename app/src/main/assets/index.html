@@ -814,9 +814,23 @@ function renderElementEditor(el, idx) {
   // Text element
   else if (el.type === 'text') {
     html += `<div class="config-grid">
-      <div class="field"><label>文字</label><input type="text" value="${esc(el.text)}" onchange="setElProp('text',this.value)"></div>
+      <div class="field" style="grid-column:1/-1"><label>文字</label><input type="text" value="${esc(el.text)}" onchange="setElProp('text',this.value)"></div>
       <div class="field"><label>字号</label><input type="number" value="${el.size}" onchange="setElProp('size',+this.value)"></div>
       <div class="field field-color"><label>颜色</label><input type="color" value="${el.color}" onchange="setElProp('color',this.value);this.nextElementSibling.textContent=this.value"><span class="color-val">${el.color}</span></div>
+      <div class="field"><label>对齐</label><select onchange="setElProp('textAlign',this.value)">
+        <option value="left"${el.textAlign==='left'?' selected':''}>左对齐</option>
+        <option value="center"${el.textAlign==='center'?' selected':''}>居中</option>
+        <option value="right"${el.textAlign==='right'?' selected':''}>右对齐</option>
+      </select></div>
+      <div class="field"><label>加粗</label><select onchange="setElProp('bold',this.value==='true')">
+        <option value="false"${!el.bold?' selected':''}>否</option>
+        <option value="true"${el.bold?' selected':''}>是</option>
+      </select></div>
+      <div class="field"><label>多行</label><select onchange="setElProp('multiLine',this.value==='true')">
+        <option value="false"${!el.multiLine?' selected':''}>否</option>
+        <option value="true"${el.multiLine?' selected':''}>是</option>
+      </select></div>
+      <div class="field"><label>宽度</label><input type="number" value="${el.w||200}" onchange="setElProp('w',+this.value)"></div>
       <div class="field"><label>X</label><input type="number" value="${el.x}" onchange="setElProp('x',+this.value)"></div>
       <div class="field"><label>Y</label><input type="number" value="${el.y}" onchange="setElProp('y',+this.value)"></div>
     </div>`;
@@ -935,7 +949,7 @@ function formatFileSize(bytes) {
 
 function addElement(type) {
   const defs = {
-    text: { type: 'text', text: '新文字', x: 10, y: 60, size: 24, color: '#ffffff' },
+    text: { type: 'text', text: '新文字', x: 10, y: 60, size: 24, color: '#ffffff', textAlign: 'left', bold: false, multiLine: false, w: 200 },
     rectangle: { type: 'rectangle', x: 10, y: 60, w: 100, h: 40, color: '#333333', radius: 0 },
     circle: { type: 'circle', x: 50, y: 100, r: 30, color: '#6c5ce7' },
   };
@@ -994,7 +1008,11 @@ function generateCustomMAML() {
   body += `  <Rectangle w="#view_width" h="#view_height" fillColor="${c.bgColor}" />\n`;
   body += `  <Group x="#marginL" y="0">\n`;
   customElements.forEach(el => {
-    if (el.type === 'text') body += `    <Text text="${esc(el.text)}" x="${el.x}" y="${el.y}" size="${el.size}" color="${el.color}" />\n`;
+    if (el.type === 'text') {
+      const align = el.textAlign && el.textAlign !== 'left' ? ` textAlign="${el.textAlign}"` : '';
+      const ml = el.multiLine ? ' multiLine="true"' : '';
+      const w = el.multiLine || (el.textAlign && el.textAlign !== 'left') ? ` w="${el.w||200}"` : '';
+      body += `    <Text text="${esc(el.text)}" x="${el.x}" y="${el.y}" size="${el.size}" color="${el.color}"${w}${align}${ml}${el.bold ? ' bold="true"' : ''} />\n`;
     else if (el.type === 'rectangle') body += `    <Rectangle x="${el.x}" y="${el.y}" w="${el.w}" h="${el.h}" fillColor="${el.color}"${el.radius ? ` cornerRadius="${el.radius}"` : ''} />\n`;
     else if (el.type === 'circle') body += `    <Circle x="${el.x}" y="${el.y}" r="${el.r}" fillColor="${el.color}" />\n`;
     else if (el.type === 'image') body += `    <Image src="${esc(el.src)}" x="${el.x}" y="${el.y}" w="${el.w||100}" h="${el.h||100}" />\n`;
@@ -1115,7 +1133,12 @@ function renderPreviewHTML(showCam) {
       else if (inCam) bdr = 'outline:1.5px dashed rgba(225,112,85,0.6);outline-offset:2px;';
 
       if (el.type === 'text') {
-        html += `<div style="position:absolute;left:${px}px;top:${py}px;font-size:${el.size*S}px;color:${el.color};${bdr}">${esc(el.text)}</div>`;
+        const txtAlign = el.textAlign || 'left';
+        const fw = el.bold ? 'font-weight:700;' : '';
+        const ta = txtAlign !== 'left' ? `text-align:${txtAlign};` : '';
+        const w = el.multiLine || txtAlign !== 'left' ? `width:${(el.w||200)*S}px;` : '';
+        const lh = el.multiLine ? 'white-space:pre-wrap;line-height:1.4;' : '';
+        html += `<div style="position:absolute;left:${px}px;top:${py}px;font-size:${el.size*S}px;color:${el.color};${w}${ta}${fw}${lh}${bdr}">${esc(el.text)}</div>`;
       } else if (el.type === 'rectangle') {
         html += `<div style="position:absolute;left:${px}px;top:${py}px;width:${el.w*S}px;height:${el.h*S}px;background:${el.color};border-radius:${(el.radius||0)*S}px;${bdr}"></div>`;
       } else if (el.type === 'circle') {
