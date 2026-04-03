@@ -1,2 +1,2 @@
-include ':app'
-rootProject.name = 'janus-card-maker'
+include(":app")
+rootProject.name = "janus-card-maker"
