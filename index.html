@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh-CN" data-theme="dark">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -22,6 +22,7 @@
     <div class="topbar-left">
       <h1><span>🃏</span> Janus 卡片制作器</h1>
       <span class="badge">MAML</span>
+      <button class="theme-toggle" id="themeToggle" onclick="JCM.toggleTheme()" title="切换主题">🌙</button>
     </div>
     <div class="steps" id="stepIndicator">
       <div class="step-dot active" onclick="JCM.goStep(0)">
