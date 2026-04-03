@@ -8,6 +8,8 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -27,30 +29,20 @@ jobs:
       - name: Build Debug APK
         run: ./gradlew assembleDebug
 
-      - name: Build Release APK
-        run: ./gradlew assembleRelease
-        continue-on-error: true
-
       - name: Upload Debug APK
         uses: actions/upload-artifact@v4
         with:
           name: janus-card-maker-debug
           path: app/build/outputs/apk/debug/*.apk
 
-      - name: Upload Release APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: janus-card-maker-release
-          path: app/build/outputs/apk/release/*.apk
-        continue-on-error: true
-
       - name: Create Release
         if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           tag_name: v1.0.0
           name: "Janus 卡片制作器 v1.0.0"
           files: app/build/outputs/apk/debug/*.apk
           generate_release_notes: true
+          make_latest: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
