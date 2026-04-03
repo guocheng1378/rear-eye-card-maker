@@ -809,7 +809,27 @@ JCM._captureState = captureState;
 
 Object.defineProperty(JCM, 'elements', { get: function () { return _elements; } });
 
+// ─── Theme ────────────────────────────────────────────────────────
+JCM.toggleTheme = function () {
+  var html = document.documentElement;
+  var current = html.getAttribute('data-theme') || 'dark';
+  var next = current === 'dark' ? 'light' : 'dark';
+  html.setAttribute('data-theme', next);
+  localStorage.setItem('jcm-theme', next);
+  document.getElementById('themeToggle').textContent = next === 'dark' ? '🌙' : '☀️';
+};
+
+function initTheme() {
+  var saved = localStorage.getItem('jcm-theme');
+  if (saved) {
+    document.documentElement.setAttribute('data-theme', saved);
+    var btn = document.getElementById('themeToggle');
+    if (btn) btn.textContent = saved === 'dark' ? '🌙' : '☀️';
+  }
+}
+
 JCM.initUI = function () {
+  initTheme();
   renderTplGrid();
   setupEvents();
 };
