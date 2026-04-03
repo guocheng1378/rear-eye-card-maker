@@ -361,6 +361,13 @@ JCM.TEMPLATES = [
       { group: '基本', fields: [
         { key: 'cardName', label: '卡片名称', type: 'text', default: '自定义卡片' },
         { key: 'bgColor', label: '背景颜色', type: 'color', default: '#000000' },
+        { key: 'bgPattern', label: '背景图案', type: 'select', options: [
+          { v: 'solid', l: '纯色' },
+          { v: 'dots', l: '点阵' },
+          { v: 'grid', l: '网格' },
+          { v: 'gradient', l: '渐变' },
+        ], default: 'solid' },
+        { key: 'bgColor2', label: '渐变色2（仅渐变）', type: 'color', default: '#1a1a2e' },
       ]},
     ],
     gen: null,

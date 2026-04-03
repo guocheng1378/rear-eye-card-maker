@@ -59,6 +59,12 @@ JCM.renderElementEditor = function (el, idx, device) {
         '<option value="false"' + (!el.multiLine ? ' selected' : '') + '>否</option>' +
         '<option value="true"' + (el.multiLine ? ' selected' : '') + '>是</option></select>') +
       field('宽度', '<input type="number" value="' + (el.w || 200) + '" data-prop="w" data-idx="' + idx + '">') +
+      field('阴影', '<select data-prop="shadow" data-idx="' + idx + '">' +
+        '<option value="none"' + (!el.shadow || el.shadow === 'none' ? ' selected' : '') + '>无</option>' +
+        '<option value="light"' + (el.shadow === 'light' ? ' selected' : '') + '>浅色</option>' +
+        '<option value="dark"' + (el.shadow === 'dark' ? ' selected' : '') + '>深色</option>' +
+        '<option value="glow"' + (el.shadow === 'glow' ? ' selected' : '') + '>发光</option></select>') +
+      field('透明度', '<input type="range" min="0" max="100" value="' + (el.opacity !== undefined ? el.opacity : 100) + '" data-prop="opacity" data-idx="' + idx + '">') +
       field('X', '<input type="number" value="' + el.x + '" data-prop="x" data-idx="' + idx + '">') +
       field('Y', '<input type="number" value="' + el.y + '" data-prop="y" data-idx="' + idx + '">') +
       '</div>';
@@ -70,6 +76,7 @@ JCM.renderElementEditor = function (el, idx, device) {
       field('高', '<input type="number" value="' + el.h + '" data-prop="h" data-idx="' + idx + '">') +
       colorField('颜色', el.color || '#333333', 'color', idx) +
       field('圆角', '<input type="number" value="' + (el.radius || 0) + '" data-prop="radius" data-idx="' + idx + '">') +
+      field('透明度', '<input type="range" min="0" max="100" value="' + (el.opacity !== undefined ? el.opacity : 100) + '" data-prop="opacity" data-idx="' + idx + '">') +
       '</div>';
   } else if (el.type === 'circle') {
     html += '<div class="config-grid">' +
@@ -77,6 +84,7 @@ JCM.renderElementEditor = function (el, idx, device) {
       field('中心 Y', '<input type="number" value="' + el.y + '" data-prop="y" data-idx="' + idx + '">') +
       field('半径', '<input type="number" value="' + el.r + '" data-prop="r" data-idx="' + idx + '">') +
       colorField('颜色', el.color || '#6c5ce7', 'color', idx) +
+      field('透明度', '<input type="range" min="0" max="100" value="' + (el.opacity !== undefined ? el.opacity : 100) + '" data-prop="opacity" data-idx="' + idx + '">') +
       '</div>';
   }
 

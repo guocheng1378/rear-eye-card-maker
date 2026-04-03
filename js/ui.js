@@ -11,6 +11,7 @@ JCM.uploadedFiles = {};
 var _pendingAdd = null;
 var _pendingReplace = -1;
 var SNAP_GRID = 10;
+var _previewTimer = null;
 
 // ─── Undo/Redo ────────────────────────────────────────────────────
 var _history = [];
@@ -68,6 +69,11 @@ JCM.goStep = function (n) {
 
   if (n === 1) renderConfig();
   if (n === 2 && _dirty) renderPreview();
+  // Auto-refresh for time-based templates
+  clearInterval(_previewTimer);
+  if (n === 2 && _tpl && (_tpl.updater === 'DateTime.Minute' || _tpl.updater === 'DateTime.Day')) {
+    _previewTimer = setInterval(renderPreview, 1000);
+  }
 };
 
 JCM.nextStep = function () { JCM.goStep(_step + 1); };
@@ -280,9 +286,9 @@ function renderPreview() {
     case 'countdown': html = r.renderCountdown(_cfg); break;
     case 'music':     html = r.renderMusic(_cfg); break;
     case 'gradient':  html = r.renderGradient(_cfg); break;
-    case 'weather':   html = r.renderCustom(_cfg); break;
-    case 'steps':     html = r.renderCustom(_cfg); break;
-    case 'calendar':  html = r.renderCustom(_cfg); break;
+    case 'weather':   html = r.renderWeather(_cfg); break;
+    case 'steps':     html = r.renderSteps(_cfg); break;
+    case 'calendar':  html = r.renderCalendar(_cfg); break;
     case 'custom':    html = r.renderCustom(_cfg); break;
   }
   html += r.renderElements(_elements, JCM.uploadedFiles, _selIdx);
@@ -462,8 +468,36 @@ function handleFilePicked(e) {
 
 // ─── Drag & Drop in Preview ───────────────────────────────────────
 var _dragging = null;
+var _resizing = null;
 
 function onPreviewMouseDown(e) {
+  // Resize handle
+  var rh = e.target.closest('[data-resize-idx]');
+  if (rh) {
+    var idx = parseInt(rh.dataset.resizeIdx, 10);
+    if (!isNaN(idx) && idx < _elements.length) {
+      e.preventDefault();
+      e.stopPropagation();
+      var device = getSelectedDevice();
+      var screen = document.querySelector('.preview-screen');
+      var rect = screen.getBoundingClientRect();
+      var scale = rect.width / device.width;
+      _resizing = {
+        idx: idx,
+        startX: e.clientX,
+        startY: e.clientY,
+        origW: _elements[idx].w || 100,
+        origH: _elements[idx].h || 100,
+        scale: scale
+      };
+      captureState();
+      document.addEventListener('mousemove', onResizeMove);
+      document.addEventListener('mouseup', onResizeUp);
+      return;
+    }
+  }
+
+  // Element drag
   var el = e.target.closest('[data-el-idx]');
   if (!el) return;
   var idx = parseInt(el.dataset.elIdx, 10);
@@ -492,6 +526,36 @@ function onPreviewMouseDown(e) {
 
   document.addEventListener('mousemove', onPreviewMouseMove);
   document.addEventListener('mouseup', onPreviewMouseUp);
+}
+
+function onResizeMove(e) {
+  if (!_resizing) return;
+  var dx = (e.clientX - _resizing.startX) / _resizing.scale;
+  var dy = (e.clientY - _resizing.startY) / _resizing.scale;
+  var nw = Math.max(20, Math.round(_resizing.origW + dx));
+  var nh = Math.max(20, Math.round(_resizing.origH + dy));
+
+  var snap = document.getElementById('snapToggle');
+  if (snap && snap.checked) {
+    nw = Math.round(nw / SNAP_GRID) * SNAP_GRID;
+    nh = Math.round(nh / SNAP_GRID) * SNAP_GRID;
+  }
+
+  _elements[_resizing.idx].w = nw;
+  _elements[_resizing.idx].h = nh;
+  renderPreview();
+  // Update field inputs if visible
+  var wInput = document.querySelector('[data-prop="w"][data-idx="' + _resizing.idx + '"]');
+  var hInput = document.querySelector('[data-prop="h"][data-idx="' + _resizing.idx + '"]');
+  if (wInput) wInput.value = nw;
+  if (hInput) hInput.value = nh;
+}
+
+function onResizeUp() {
+  _resizing = null;
+  document.removeEventListener('mousemove', onResizeMove);
+  document.removeEventListener('mouseup', onResizeUp);
+  renderConfig();
 }
 
 function onPreviewMouseMove(e) {
@@ -547,7 +611,7 @@ function setupEvents() {
     if (t.dataset.prop) {
       var idx = Number(t.dataset.idx);
       var prop = t.dataset.prop;
-      if (t.type === 'number') _elements[idx][prop] = Number(t.value);
+      if (t.type === 'number' || t.type === 'range') _elements[idx][prop] = Number(t.value);
       else if (t.type === 'color') {
         _elements[idx][prop] = t.value;
         var cv2 = t.nextElementSibling;
@@ -605,8 +669,26 @@ function setupEvents() {
 
   // Keyboard shortcuts
   document.addEventListener('keydown', function (e) {
+    // Don't trigger in inputs
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') return;
     if (e.ctrlKey && e.key === 'z' && !e.shiftKey) { e.preventDefault(); undo(); }
     if (e.ctrlKey && (e.key === 'y' || (e.key === 'z' && e.shiftKey))) { e.preventDefault(); redo(); }
+    if (e.key === 'Delete' && _selIdx >= 0 && _selIdx < _elements.length) {
+      e.preventDefault();
+      JCM.removeElement(_selIdx);
+    }
+    if (e.ctrlKey && e.key === 'd' && _selIdx >= 0 && _selIdx < _elements.length) {
+      e.preventDefault();
+      captureState();
+      var clone = JSON.parse(JSON.stringify(_elements[_selIdx]));
+      clone.x += 10;
+      clone.y += 10;
+      _elements.push(clone);
+      _selIdx = _elements.length - 1;
+      _dirty = true;
+      renderConfig();
+      toast('✅ 已复制元素', 'success');
+    }
   });
 }
 
