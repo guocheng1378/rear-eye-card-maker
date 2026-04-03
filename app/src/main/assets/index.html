@@ -24,11 +24,7 @@
 }
 html,body{height:100%;overflow:hidden}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC',sans-serif;background:var(--bg);color:var(--text)}
-
-/* ─── App Shell ─── */
 .app{display:flex;flex-direction:column;height:100vh;overflow:hidden}
-
-/* ─── Top Bar ─── */
 .topbar{
   display:flex;align-items:center;justify-content:space-between;
   padding:14px 24px;background:var(--surface);border-bottom:1px solid var(--border);
@@ -38,13 +34,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC',sans-
 .topbar-left h1{font-size:17px;font-weight:700;display:flex;align-items:center;gap:8px}
 .topbar-left h1 span{font-size:20px}
 .topbar-left .badge{font-size:10px;color:var(--accent2);background:var(--accent-glow);padding:2px 8px;border-radius:6px;font-weight:600}
-
-/* ─── Step Indicator ─── */
 .steps{display:flex;align-items:center;gap:0}
 .step-dot{
   display:flex;align-items:center;gap:8px;padding:6px 14px;border-radius:20px;
-  font-size:12px;font-weight:600;color:var(--text3);cursor:pointer;transition:var(--transition);
-  position:relative;
+  font-size:12px;font-weight:600;color:var(--text3);cursor:pointer;transition:var(--transition);position:relative;
 }
 .step-dot:hover{color:var(--text2)}
 .step-dot.active{color:var(--accent2);background:var(--accent-glow)}
@@ -57,8 +50,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC',sans-
 .step-dot.done .step-num{background:var(--green);border-color:var(--green);color:#fff}
 .step-line{width:24px;height:1px;background:var(--border);margin:0 4px}
 .step-line.done{background:var(--green)}
-
-/* ─── Content Area ─── */
 .content{flex:1;overflow:hidden;position:relative}
 .page{
   position:absolute;inset:0;display:flex;flex-direction:column;
@@ -66,12 +57,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC',sans-
   transition:opacity .3s ease,transform .3s ease;
 }
 .page.active{opacity:1;pointer-events:auto;transform:translateX(0)}
-
-/* ─── Page 1: Template Selection ─── */
 .page-tpl{padding:28px 32px;overflow-y:auto}
 .page-title{font-size:22px;font-weight:700;margin-bottom:4px}
 .page-subtitle{font-size:13px;color:var(--text2);margin-bottom:24px}
-
 .tpl-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px}
 .tpl-card{
   padding:18px 20px;border-radius:var(--radius);cursor:pointer;
@@ -89,14 +77,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC',sans-
 .tpl-icon{font-size:28px;margin-bottom:10px;display:block;position:relative}
 .tpl-card-name{font-size:14px;font-weight:700;margin-bottom:4px;position:relative}
 .tpl-card-desc{font-size:11px;color:var(--text2);line-height:1.4;position:relative}
-
-/* ─── Page 2: Config ─── */
 .page-config{padding:28px 32px;overflow-y:auto}
 .config-header{display:flex;align-items:center;gap:16px;margin-bottom:24px}
 .config-header .tpl-icon{font-size:32px}
 .config-header h2{font-size:18px;font-weight:700}
 .config-header p{font-size:12px;color:var(--text2);margin-top:2px}
-
 .config-section{margin-bottom:24px}
 .config-section-title{
   font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;
@@ -104,26 +89,20 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC',sans-
   display:flex;align-items:center;gap:6px;
 }
 .config-section-title span{font-size:13px}
-
 .config-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px}
 .field{display:flex;flex-direction:column;gap:5px}
 .field label{font-size:12px;color:var(--text2);font-weight:500}
 .field input[type=text],.field input[type=number],.field select,.field textarea{
   padding:9px 12px;background:var(--surface2);border:1px solid var(--border);
-  border-radius:var(--radius-sm);color:var(--text);font-size:13px;outline:none;transition:var(--transition);
-  font-family:inherit;
+  border-radius:var(--radius-sm);color:var(--text);font-size:13px;outline:none;transition:var(--transition);font-family:inherit;
 }
 .field input:focus,.field select:focus,.field textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-glow)}
 .field input[type=color]{height:40px;padding:4px;cursor:pointer;border-radius:var(--radius-sm)}
 .field input[type=range]{padding:0;background:transparent;border:none;height:36px}
 .field .hint{font-size:10px;color:var(--text3)}
-
-/* Color field inline */
 .field-color{flex-direction:row;align-items:center;gap:10px}
 .field-color input[type=color]{width:40px;flex-shrink:0}
 .field-color .color-val{font-size:11px;color:var(--text3);font-family:monospace}
-
-/* Custom elements */
 .el-toolbar{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap}
 .el-btn{
   padding:7px 14px;border-radius:8px;border:1px solid var(--border);background:var(--surface2);
@@ -132,7 +111,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC',sans-
 }
 .el-btn:hover{border-color:var(--accent);color:var(--accent2)}
 .el-btn .el-btn-icon{font-size:14px}
-
 .el-list{display:flex;flex-direction:column;gap:8px}
 .el-item{
   display:flex;align-items:center;gap:10px;padding:10px 14px;
@@ -143,8 +121,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC',sans-
 .el-item.active{border-color:var(--accent);background:var(--accent-glow)}
 .el-badge{
   font-size:10px;font-weight:700;padding:3px 8px;border-radius:5px;
-  background:var(--accent);color:#fff;text-transform:uppercase;letter-spacing:.3px;
-  flex-shrink:0;
+  background:var(--accent);color:#fff;text-transform:uppercase;letter-spacing:.3px;flex-shrink:0;
 }
 .el-item-name{flex:1;font-size:13px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .el-item-del{
@@ -152,14 +129,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC',sans-
   padding:4px 6px;border-radius:6px;transition:var(--transition);
 }
 .el-item-del:hover{color:var(--red);background:rgba(225,112,85,.1)}
-
 .el-detail{
   margin-top:14px;padding:16px;background:var(--surface2);border:1px solid var(--border);
   border-radius:var(--radius);animation:fadeIn .2s ease;
 }
 @keyframes fadeIn{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
-
-/* Media file picker */
 .media-picker{
   display:flex;align-items:center;gap:12px;padding:12px;
   background:var(--surface);border:1.5px dashed var(--border);border-radius:var(--radius-sm);
@@ -171,20 +145,14 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC',sans-
 .media-picker-info{flex:1;min-width:0}
 .media-picker-name{font-size:12px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .media-picker-hint{font-size:10px;color:var(--text3);margin-top:2px}
-.media-picker-thumb{
-  width:48px;height:48px;border-radius:8px;object-fit:cover;flex-shrink:0;
-  background:var(--surface3);
-}
+.media-picker-thumb{width:48px;height:48px;border-radius:8px;object-fit:cover;flex-shrink:0;background:var(--surface3)}
 .media-picker-change{
   padding:5px 10px;border-radius:6px;border:1px solid var(--border);background:var(--surface2);
   color:var(--text2);font-size:11px;cursor:pointer;transition:var(--transition);flex-shrink:0;
 }
 .media-picker-change:hover{border-color:var(--accent);color:var(--accent2)}
-
-/* ─── Page 3: Preview & Export ─── */
 .page-preview{padding:24px 32px;overflow-y:auto}
 .preview-layout{display:grid;grid-template-columns:1fr 1fr;gap:24px;height:100%}
-
 .preview-phone-wrap{display:flex;align-items:center;justify-content:center;flex-direction:column;gap:16px}
 .preview-phone{
   width:420px;height:252px;border-radius:20px;overflow:hidden;position:relative;
@@ -208,10 +176,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC',sans-
 .preview-placeholder span{font-size:40px}
 .preview-placeholder p{font-size:13px}
 .preview-device-label{font-size:11px;color:var(--text3);text-align:center}
-
 .preview-side{display:flex;flex-direction:column;gap:16px}
 .preview-side h3{font-size:14px;font-weight:700;display:flex;align-items:center;gap:6px}
-
 .xml-preview{
   flex:1;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
   overflow:auto;max-height:400px;
@@ -222,14 +188,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC',sans-
 }
 .xml-preview::-webkit-scrollbar{width:5px}
 .xml-preview::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
-
 .preview-actions{display:flex;gap:10px;flex-wrap:wrap}
-
-/* ─── Buttons ─── */
 .btn{
   padding:10px 20px;border-radius:var(--radius-sm);border:none;font-size:13px;font-weight:600;
-  cursor:pointer;transition:var(--transition);display:flex;align-items:center;gap:7px;
-  font-family:inherit;
+  cursor:pointer;transition:var(--transition);display:flex;align-items:center;gap:7px;font-family:inherit;
 }
 .btn:active{transform:scale(.97)}
 .btn-primary{background:var(--accent);color:#fff}
@@ -242,16 +204,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC',sans-
 .btn-back:hover{border-color:var(--text2);color:var(--text)}
 .btn:disabled{opacity:.35;cursor:not-allowed;transform:none}
 .btn .btn-icon{font-size:15px}
-
-/* ─── Bottom Bar (nav) ─── */
 .bottombar{
   display:flex;align-items:center;justify-content:space-between;
-  padding:12px 24px;background:var(--surface);border-top:1px solid var(--border);
-  flex-shrink:0;
+  padding:12px 24px;background:var(--surface);border-top:1px solid var(--border);flex-shrink:0;
 }
 .bottombar-left,.bottombar-right{display:flex;gap:10px}
-
-/* ─── Device Selector (Page 3) ─── */
 .device-row{display:flex;align-items:center;gap:14px;margin-bottom:16px;flex-wrap:wrap}
 .device-row label{font-size:12px;color:var(--text2);font-weight:500}
 .device-row select{
@@ -261,8 +218,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC',sans-
 .device-row .check-label{
   display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2);cursor:pointer;
 }
-
-/* ─── Toast ─── */
 .toast{
   position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(10px);
   padding:10px 24px;border-radius:10px;font-size:13px;font-weight:600;
@@ -272,8 +227,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC',sans-
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 .toast.success{background:var(--green);color:#fff}
 .toast.error{background:var(--red);color:#fff}
-
-/* ─── Responsive ─── */
 @media(max-width:768px){
   .topbar{padding:10px 16px}
   .topbar-left h1{font-size:15px}
@@ -290,47 +243,40 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC',sans-
 </head>
 <body>
 
-<!-- Hidden file inputs -->
 <input type="file" id="fileImagePick" accept="image/*" style="display:none">
 <input type="file" id="fileVideoPick" accept="video/*" style="display:none">
 
 <div class="app">
-
-  <!-- Top Bar -->
   <div class="topbar">
     <div class="topbar-left">
       <h1><span>🃏</span> Janus 卡片制作器</h1>
       <span class="badge">MAML</span>
     </div>
     <div class="steps" id="stepIndicator">
-      <div class="step-dot active" data-step="0" onclick="goStep(0)">
+      <div class="step-dot active" data-step="0" onclick="window.__app.goStep(0)">
         <span class="step-num">1</span>
         <span class="step-label">选择模板</span>
       </div>
       <div class="step-line"></div>
-      <div class="step-dot" data-step="1" onclick="goStep(1)">
+      <div class="step-dot" data-step="1" onclick="window.__app.goStep(1)">
         <span class="step-num">2</span>
         <span class="step-label">配置参数</span>
       </div>
       <div class="step-line"></div>
-      <div class="step-dot" data-step="2" onclick="goStep(2)">
+      <div class="step-dot" data-step="2" onclick="window.__app.goStep(2)">
         <span class="step-num">3</span>
         <span class="step-label">预览导出</span>
       </div>
     </div>
   </div>
 
-  <!-- Content -->
   <div class="content">
-
-    <!-- Step 1: Template Selection -->
     <div class="page page-tpl active" id="page0">
       <div class="page-title">选择卡片模板</div>
       <div class="page-subtitle">从预设模板开始，或选择自定义从零创建</div>
       <div class="tpl-grid" id="tplGrid"></div>
     </div>
 
-    <!-- Step 2: Config -->
     <div class="page page-config" id="page1">
       <div class="config-header">
         <span class="tpl-icon" id="cfgIcon"></span>
@@ -342,16 +288,15 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC',sans-
       <div id="cfgContent"></div>
     </div>
 
-    <!-- Step 3: Preview & Export -->
     <div class="page page-preview" id="page2">
       <div class="device-row">
         <label>机型</label>
-        <select id="deviceSelect" onchange="renderPreview()">
+        <select id="deviceSelect" onchange="window.__app.renderPreview()">
           <option value="q200">Pro — 904×572</option>
           <option value="p2">Pro Max — 976×596</option>
         </select>
         <label class="check-label">
-          <input type="checkbox" id="showCamera" checked onchange="renderPreview()"> 摄像头遮挡区
+          <input type="checkbox" id="showCamera" checked onchange="window.__app.renderPreview()"> 摄像头遮挡区
         </label>
       </div>
       <div class="preview-layout">
@@ -373,888 +318,146 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC',sans-
           <h3>📄 MAML XML</h3>
           <div class="xml-preview"><pre id="codeContent">选择模板并配置后，点击「生成预览」查看 XML</pre></div>
           <div class="preview-actions">
-            <button class="btn btn-secondary" onclick="renderPreview()"><span class="btn-icon">🔄</span> 生成预览</button>
-            <button class="btn btn-export" onclick="exportZip()"><span class="btn-icon">📦</span> 导出 ZIP</button>
+            <button class="btn btn-secondary" onclick="window.__app.renderPreview()"><span class="btn-icon">🔄</span> 生成预览</button>
+            <button class="btn btn-export" onclick="window.__app.handleExport()"><span class="btn-icon">📦</span> 导出 ZIP</button>
           </div>
         </div>
       </div>
     </div>
-
   </div>
 
-  <!-- Bottom Bar -->
   <div class="bottombar">
     <div class="bottombar-left">
-      <button class="btn btn-back" id="btnBack" onclick="prevStep()" style="display:none">
+      <button class="btn btn-back" id="btnBack" onclick="window.__app.prevStep()" style="display:none">
         <span class="btn-icon">←</span> 上一步
       </button>
     </div>
     <div class="bottombar-right">
-      <button class="btn btn-primary" id="btnNext" onclick="nextStep()">
+      <button class="btn btn-primary" id="btnNext" onclick="window.__app.nextStep()">
         下一步 <span class="btn-icon">→</span>
       </button>
     </div>
   </div>
-
 </div>
 
 <div class="toast" id="toast"></div>
 
-<script>
-// ─── MAML Templates ───────────────────────────────────────────────
-
-const TEMPLATES = [
-  {
-    id: 'clock', icon: '⏰', name: '时钟卡片', desc: '显示当前时间和日期',
-    config: [
-      { group: '基本', fields: [
-        { key: 'cardName', label: '卡片名称', type: 'text', default: '时钟卡片' },
-        { key: 'bgColor', label: '背景颜色', type: 'color', default: '#000000' },
-      ]},
-      { group: '样式', fields: [
-        { key: 'timeColor', label: '时间颜色', type: 'color', default: '#ffffff' },
-        { key: 'dateColor', label: '日期颜色', type: 'color', default: '#888888' },
-        { key: 'timeSize', label: '时间字号', type: 'range', min: 24, max: 96, default: 64 },
-      ]},
-      { group: '格式', fields: [
-        { key: 'dateFormat', label: '日期格式', type: 'select', options: [
-          { v: 'yyyy/MM/dd EEEE', l: '2026/04/04 星期五' },
-          { v: 'MM-dd EEEE', l: '04-04 星期五' },
-          { v: 'MM/dd', l: '04/04' },
-        ], default: 'yyyy/MM/dd EEEE' },
-        { key: 'timeFormat', label: '时间格式', type: 'select', options: [
-          { v: 'HH:mm', l: '24小时制' },
-          { v: 'hh:mm', l: '12小时制' },
-        ], default: 'HH:mm' },
-      ]},
-    ],
-    gen: (c) => `<Widget screenWidth="480" frameRate="0" scaleByDensity="false" useVariableUpdater="DateTime.Minute" name="${esc(c.cardName)}">
-  <Rectangle w="#view_width" h="#view_height" fillColor="${c.bgColor}" />
-  <Text textExp="formatDate('${c.timeFormat}', #time_sys)" x="30" y="80" size="${c.timeSize}" color="${c.timeColor}" />
-  <Text textExp="formatDate('${c.dateFormat}', #time_sys)" x="30" y="${80 + c.timeSize * 0.9}" size="20" color="${c.dateColor}" />
-</Widget>`
-  },
-  {
-    id: 'quote', icon: '💬', name: '名言卡片', desc: '显示一段文字或名言',
-    config: [
-      { group: '基本', fields: [
-        { key: 'cardName', label: '卡片名称', type: 'text', default: '名言卡片' },
-        { key: 'bgColor', label: '背景颜色', type: 'color', default: '#1a1a2e' },
-      ]},
-      { group: '内容', fields: [
-        { key: 'text', label: '文字内容', type: 'textarea', default: 'Stay hungry.\nStay foolish.' },
-        { key: 'textColor', label: '文字颜色', type: 'color', default: '#ffffff' },
-        { key: 'textSize', label: '字号', type: 'range', min: 14, max: 64, default: 28 },
-        { key: 'author', label: '作者', type: 'text', default: '— Steve Jobs' },
-        { key: 'authorColor', label: '作者颜色', type: 'color', default: '#6c5ce7' },
-      ]},
-    ],
-    gen: (c) => `<Widget screenWidth="336" frameRate="0" scaleByDensity="false" name="${esc(c.cardName)}">
-  <Var name="scale" type="number" expression="(#view_width / 336)" />
-  <Var name="marginL" type="number" expression="(#view_width * 0.30)" />
-  <Var name="safeW" type="number" expression="(#view_width - #marginL - 20)" />
-  <Rectangle w="#view_width" h="#view_height" fillColor="${c.bgColor}" />
-  <Group x="#marginL" y="40" w="#safeW">
-    <Text text="${esc(c.text)}" size="${c.textSize}" color="${c.textColor}" w="#safeW" multiLine="true" />
-    <Text text="${esc(c.author)}" x="0" y="(#view_height - 80)" size="16" color="${c.authorColor}" />
-  </Group>
-</Widget>`
-  },
-  {
-    id: 'battery', icon: '🔋', name: '电池卡片', desc: '显示电池电量和状态',
-    config: [
-      { group: '基本', fields: [
-        { key: 'cardName', label: '卡片名称', type: 'text', default: '电池卡片' },
-        { key: 'bgColor', label: '背景颜色', type: 'color', default: '#0d1117' },
-      ]},
-      { group: '样式', fields: [
-        { key: 'barColor', label: '电量条颜色', type: 'color', default: '#00b894' },
-        { key: 'textColor', label: '文字颜色', type: 'color', default: '#ffffff' },
-      ]},
-    ],
-    gen: (c) => `<Widget screenWidth="480" frameRate="0" scaleByDensity="false" useVariableUpdater="Battery" name="${esc(c.cardName)}">
-  <Var name="marginL" type="number" expression="(#view_width * 0.30)" />
-  <Var name="safeW" type="number" expression="(#view_width - #marginL - 40)" />
-  <Var name="barW" type="number" expression="(#safeW * #battery_level / 100)" />
-  <Rectangle w="#view_width" h="#view_height" fillColor="${c.bgColor}" />
-  <Group x="#marginL" y="0">
-    <Text text="电量" x="0" y="50" size="18" color="${c.textColor}" alpha="0.6" />
-    <Text textExp="(#battery_level + '%')" x="0" y="80" size="56" color="${c.textColor}" />
-    <Rectangle x="0" y="160" w="#safeW" h="12" fillColor="#333333" cornerRadius="6" />
-    <Rectangle x="0" y="160" w="#barW" h="12" fillColor="${c.barColor}" cornerRadius="6" />
-    <Text textExp="ifelse((#battery_level }= 80), '电量充足', ifelse((#battery_level }= 20), '电量偏低', '电量极低'))"
-          x="0" y="200" size="16" color="${c.textColor}" alpha="0.5" />
-  </Group>
-</Widget>`
-  },
-  {
-    id: 'status', icon: '📊', name: '状态卡片', desc: '显示多个状态指标',
-    config: [
-      { group: '基本', fields: [
-        { key: 'cardName', label: '卡片名称', type: 'text', default: '状态卡片' },
-        { key: 'bgColor', label: '背景颜色', type: 'color', default: '#0f0f1a' },
-        { key: 'title', label: '标题', type: 'text', default: '系统状态' },
-      ]},
-      { group: '项目', fields: [
-        { key: 'item1', label: '项目1', type: 'text', default: 'WiFi: 已连接' },
-        { key: 'item2', label: '项目2', type: 'text', default: '蓝牙: 已开启' },
-        { key: 'item3', label: '项目3', type: 'text', default: 'GPS: 已关闭' },
-        { key: 'item4', label: '项目4', type: 'text', default: 'NFC: 已开启' },
-      ]},
-      { group: '样式', fields: [
-        { key: 'accentColor', label: '强调色', type: 'color', default: '#6c5ce7' },
-        { key: 'textColor', label: '文字颜色', type: 'color', default: '#e0e0e0' },
-      ]},
-    ],
-    gen: (c) => {
-      const items = [c.item1, c.item2, c.item3, c.item4].filter(Boolean);
-      return `<Widget screenWidth="336" frameRate="0" scaleByDensity="false" name="${esc(c.cardName)}">
-  <Var name="marginL" type="number" expression="(#view_width * 0.30)" />
-  <Var name="safeW" type="number" expression="(#view_width - #marginL - 30)" />
-  <Rectangle w="#view_width" h="#view_height" fillColor="${c.bgColor}" />
-  <Group x="#marginL" y="0">
-    <Rectangle x="0" y="40" w="4" h="24" fillColor="${c.accentColor}" cornerRadius="2" />
-    <Text text="${esc(c.title)}" x="14" y="42" size="22" color="${c.textColor}" />
-    ${items.map((t, i) => `<Text text="${esc(t)}" x="14" y="${90 + i * 40}" size="16" color="${c.textColor}" alpha="0.8" />`).join('\n    ')}
-  </Group>
-</Widget>`;
-    }
-  },
-  {
-    id: 'countdown', icon: '⏳', name: '倒计时卡片', desc: '倒计时到指定日期',
-    config: [
-      { group: '基本', fields: [
-        { key: 'cardName', label: '卡片名称', type: 'text', default: '倒计时卡片' },
-        { key: 'bgColor', label: '背景颜色', type: 'color', default: '#1a0a2e' },
-      ]},
-      { group: '内容', fields: [
-        { key: 'eventName', label: '事件名称', type: 'text', default: '距离新年' },
-        { key: 'targetDate', label: '目标日期 (MMdd)', type: 'text', default: '0101' },
-      ]},
-      { group: '样式', fields: [
-        { key: 'accentColor', label: '强调色', type: 'color', default: '#a29bfe' },
-        { key: 'textColor', label: '文字颜色', type: 'color', default: '#ffffff' },
-      ]},
-    ],
-    gen: (c) => `<Widget screenWidth="336" frameRate="0" scaleByDensity="false" useVariableUpdater="DateTime.Day" name="${esc(c.cardName)}">
-  <Var name="marginL" type="number" expression="(#view_width * 0.30)" />
-  <Var name="safeW" type="number" expression="(#view_width - #marginL - 30)" />
-  <Var name="nowMonth" type="number" expression="#month" />
-  <Var name="nowDay" type="number" expression="#date" />
-  <Var name="nowCode" type="number" expression="(#nowMonth * 100 + #nowDay)" />
-  <Var name="target" type="number" expression="${c.targetDate}" />
-  <Var name="diff" type="number" expression="ifelse((#nowCode }= #target), (365 - #nowCode + #target), (#target - #nowCode))" />
-  <Rectangle w="#view_width" h="#view_height" fillColor="${c.bgColor}" />
-  <Group x="#marginL" y="0">
-    <Text text="${esc(c.eventName)}" x="0" y="50" size="18" color="${c.textColor}" alpha="0.6" />
-    <Text textExp="#diff" x="0" y="80" size="72" color="${c.accentColor}" />
-    <Text text="天" x="0" y="160" size="20" color="${c.textColor}" alpha="0.5" />
-  </Group>
-</Widget>`
-  },
-  {
-    id: 'music', icon: '🎵', name: '音乐信息卡片', desc: '显示歌曲名和歌手',
-    config: [
-      { group: '基本', fields: [
-        { key: 'cardName', label: '卡片名称', type: 'text', default: '音乐卡片' },
-        { key: 'bgColor', label: '背景颜色', type: 'color', default: '#0a0a0a' },
-      ]},
-      { group: '样式', fields: [
-        { key: 'titleColor', label: '歌名颜色', type: 'color', default: '#ffffff' },
-        { key: 'artistColor', label: '歌手颜色', type: 'color', default: '#888888' },
-        { key: 'accentColor', label: '强调色', type: 'color', default: '#1db954' },
-      ]},
-    ],
-    gen: (c) => `<Widget screenWidth="336" frameRate="0" scaleByDensity="false" name="${esc(c.cardName)}">
-  <Var name="marginL" type="number" expression="(#view_width * 0.30)" />
-  <Var name="safeW" type="number" expression="(#view_width - #marginL - 30)" />
-  <Rectangle w="#view_width" h="#view_height" fillColor="${c.bgColor}" />
-  <Group x="#marginL" y="0">
-    <Rectangle x="0" y="40" w="48" h="48" fillColor="${c.accentColor}" cornerRadius="12" />
-    <Text text="♪" x="14" y="52" size="28" color="#ffffff" />
-    <Text text="正在播放" x="60" y="48" size="12" color="${c.accentColor}" />
-    <Text text="歌曲名称" x="0" y="120" size="24" color="${c.titleColor}" />
-    <Text text="歌手名称" x="0" y="152" size="16" color="${c.artistColor}" />
-    <Rectangle x="0" y="200" w="#safeW" h="3" fillColor="#333333" cornerRadius="1.5" />
-    <Rectangle x="0" y="200" w="(#safeW * 0.4)" h="3" fillColor="${c.accentColor}" cornerRadius="1.5" />
-  </Group>
-</Widget>`
-  },
-  {
-    id: 'gradient', icon: '🌈', name: '渐变文字卡片', desc: '渐变背景 + 居中文字',
-    config: [
-      { group: '基本', fields: [
-        { key: 'cardName', label: '卡片名称', type: 'text', default: '渐变卡片' },
-      ]},
-      { group: '渐变', fields: [
-        { key: 'bgColor1', label: '渐变色1', type: 'color', default: '#667eea' },
-        { key: 'bgColor2', label: '渐变色2', type: 'color', default: '#764ba2' },
-      ]},
-      { group: '文字', fields: [
-        { key: 'text', label: '文字', type: 'textarea', default: 'Hello\nWorld' },
-        { key: 'textColor', label: '文字颜色', type: 'color', default: '#ffffff' },
-        { key: 'textSize', label: '字号', type: 'range', min: 16, max: 72, default: 36 },
-      ]},
-    ],
-    gen: (c) => `<Widget screenWidth="336" frameRate="0" scaleByDensity="false" name="${esc(c.cardName)}">
-  <Var name="marginL" type="number" expression="(#view_width * 0.30)" />
-  <Var name="safeW" type="number" expression="(#view_width - #marginL - 30)" />
-  <Rectangle w="#view_width" h="#view_height" fillColor="${c.bgColor1}" />
-  <Rectangle x="(#view_width * 0.5)" w="(#view_width * 0.5)" h="#view_height" fillColor="${c.bgColor2}" alpha="0.7" />
-  <Group x="#marginL" y="0" w="#safeW" h="#view_height">
-    <Text text="${esc(c.text)}" x="0" y="(#view_height * 0.3)" size="${c.textSize}" color="${c.textColor}" w="#safeW" multiLine="true" textAlign="center" />
-  </Group>
-</Widget>`
-  },
-  {
-    id: 'custom', icon: '🛠️', name: '自定义', desc: '从零开始，手动添加文字、形状、图片、视频',
-    config: [
-      { group: '基本', fields: [
-        { key: 'cardName', label: '卡片名称', type: 'text', default: '自定义卡片' },
-        { key: 'bgColor', label: '背景颜色', type: 'color', default: '#000000' },
-      ]},
-    ],
-    gen: null, elements: []
-  },
-];
-
-// ─── State ─────────────────────────────────────────────────────────
-
-let currentStep = 0;
-let currentTpl = null;
-let configValues = {};
-let customElements = [];
-let selectedElIdx = -1;
-let previewDirty = true;
-let uploadedFiles = {};  // { filename: { data: ArrayBuffer, mimeType, dataUrl, originalName } }
-let pendingMediaAdd = null; // 'image' | 'video' | null — tracks which type we're adding via file picker
-let pendingMediaReplace = -1; // element index being replaced, or -1
-
-// ─── Step Navigation ───────────────────────────────────────────────
-
-function goStep(n) {
-  if (n === 1 && !currentTpl) { toast('请先选择一个模板', 'error'); return; }
-  if (n === 2 && !currentTpl) { toast('请先选择模板并配置', 'error'); return; }
-  currentStep = n;
-  document.querySelectorAll('.page').forEach((p, i) => {
-    p.classList.toggle('active', i === n);
-  });
-  document.querySelectorAll('.step-dot').forEach((d, i) => {
-    d.classList.remove('active', 'done');
-    if (i === n) d.classList.add('active');
-    else if (i < n) d.classList.add('done');
-  });
-  document.querySelectorAll('.step-line').forEach((l, i) => {
-    l.classList.toggle('done', i < n);
-  });
-  document.getElementById('btnBack').style.display = n > 0 ? '' : 'none';
-  const btnNext = document.getElementById('btnNext');
-  if (n === 2) {
-    btnNext.style.display = 'none';
-  } else {
-    btnNext.style.display = '';
-    btnNext.innerHTML = n === 0
-      ? '下一步 <span class="btn-icon">→</span>'
-      : '预览 & 导出 <span class="btn-icon">→</span>';
-  }
-  if (n === 1) renderConfig();
-  if (n === 2 && previewDirty) renderPreview();
-}
-function nextStep() { goStep(currentStep + 1); }
-function prevStep() { goStep(currentStep - 1); }
-
-// ─── Init ──────────────────────────────────────────────────────────
-
-function init() {
-  renderTplGrid();
-  // File input listeners
-  document.getElementById('fileImagePick').addEventListener('change', handleFilePicked);
-  document.getElementById('fileVideoPick').addEventListener('change', handleFilePicked);
-}
-
-function renderTplGrid() {
-  const grid = document.getElementById('tplGrid');
-  grid.innerHTML = TEMPLATES.map(t =>
-    `<div class="tpl-card${currentTpl?.id === t.id ? ' active' : ''}" onclick="selectTemplate('${t.id}')">
+<script>"use strict";(()=>{var W={q200:{id:"q200",label:"Pro \u2014 904\xD7572",width:904,height:572,cameraZoneRatio:.3},p2:{id:"p2",label:"Pro Max \u2014 976\xD7596",width:976,height:596,cameraZoneRatio:.3}};function D(e){return W[e]||W.q200}function P(e){return Math.ceil(e.width*e.cameraZoneRatio)}function g(e){return String(e).replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/'/g,"&apos;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/\n/g,"&#10;")}function S(e){let{cardName:t,device:o,innerXml:i,updater:n,extraElements:a,uploadedFiles:l}=e,r=[],m=`screenWidth="${o.width}" frameRate="0" scaleByDensity="false"`;if(n&&(m+=` useVariableUpdater="${n}"`),m+=` name="${g(t)}"`,r.push(`<Widget ${m}>`),r.push(i),a.length>0){r.push('  <Group x="#marginL" y="0">');for(let h of a)r.push(H(h,l));r.push("  </Group>")}return r.push("</Widget>"),r.join(`
+`)}function H(e,t){let o="    ";switch(e.type){case"text":{let i=`text="${g(e.text||"")}"`,n=e.textAlign&&e.textAlign!=="left"?` textAlign="${e.textAlign}"`:"",a=e.multiLine?' multiLine="true"':"",l=e.multiLine||e.textAlign&&e.textAlign!=="left"?` w="${e.w||200}"`:"",r=e.bold?' bold="true"':"";return`${o}<Text ${i} x="${e.x}" y="${e.y}" size="${e.size}" color="${e.color}"${l}${n}${a}${r} />`}case"rectangle":return`${o}<Rectangle x="${e.x}" y="${e.y}" w="${e.w}" h="${e.h}" fillColor="${e.color}"${e.radius?` cornerRadius="${e.radius}"`:""} />`;case"circle":return`${o}<Circle x="${e.x}" y="${e.y}" r="${e.r}" fillColor="${e.color}" />`;case"image":{let i=e.src&&t[e.src]?.mimeType?.startsWith("video/")?"videos":"images",n=e.src?`${i}/${g(e.src)}`:"";return`${o}<Image src="${n}" x="${e.x}" y="${e.y}" w="${e.w||100}" h="${e.h||100}" />`}case"video":{let i=e.src?`videos/${g(e.src)}`:"";return`${o}<Video src="${i}" x="${e.x}" y="${e.y}" w="${e.w||240}" h="${e.h||135}" autoPlay="true" loop="true" />`}default:return""}}var z=[{id:"clock",icon:"\u23F0",name:"\u65F6\u949F\u5361\u7247",desc:"\u663E\u793A\u5F53\u524D\u65F6\u95F4\u548C\u65E5\u671F",updater:"DateTime.Minute",config:[{group:"\u57FA\u672C",fields:[{key:"cardName",label:"\u5361\u7247\u540D\u79F0",type:"text",default:"\u65F6\u949F\u5361\u7247"},{key:"bgColor",label:"\u80CC\u666F\u989C\u8272",type:"color",default:"#000000"}]},{group:"\u6837\u5F0F",fields:[{key:"timeColor",label:"\u65F6\u95F4\u989C\u8272",type:"color",default:"#ffffff"},{key:"dateColor",label:"\u65E5\u671F\u989C\u8272",type:"color",default:"#888888"},{key:"timeSize",label:"\u65F6\u95F4\u5B57\u53F7",type:"range",min:24,max:96,default:64}]},{group:"\u683C\u5F0F",fields:[{key:"dateFormat",label:"\u65E5\u671F\u683C\u5F0F",type:"select",options:[{v:"yyyy/MM/dd EEEE",l:"2026/04/04 \u661F\u671F\u4E94"},{v:"MM-dd EEEE",l:"04-04 \u661F\u671F\u4E94"},{v:"MM/dd",l:"04/04"}],default:"yyyy/MM/dd EEEE"},{key:"timeFormat",label:"\u65F6\u95F4\u683C\u5F0F",type:"select",options:[{v:"HH:mm",l:"24\u5C0F\u65F6\u5236"},{v:"hh:mm a",l:"12\u5C0F\u65F6\u5236"}],default:"HH:mm"}]}],gen:e=>{let o=Math.round(80+Number(e.timeSize)*.9);return['  <Var name="marginL" type="number" expression="(#view_width * 0.30)" />',`  <Rectangle w="#view_width" h="#view_height" fillColor="${e.bgColor}" />`,'  <Group x="#marginL" y="0">',`    <Text textExp="formatDate('${e.timeFormat}', #time_sys)" x="0" y="80" size="${e.timeSize}" color="${e.timeColor}" />`,`    <Text textExp="formatDate('${e.dateFormat}', #time_sys)" x="0" y="${o}" size="20" color="${e.dateColor}" />`,"  </Group>"].join(`
+`)}},{id:"quote",icon:"\u{1F4AC}",name:"\u540D\u8A00\u5361\u7247",desc:"\u663E\u793A\u4E00\u6BB5\u6587\u5B57\u6216\u540D\u8A00",config:[{group:"\u57FA\u672C",fields:[{key:"cardName",label:"\u5361\u7247\u540D\u79F0",type:"text",default:"\u540D\u8A00\u5361\u7247"},{key:"bgColor",label:"\u80CC\u666F\u989C\u8272",type:"color",default:"#1a1a2e"}]},{group:"\u5185\u5BB9",fields:[{key:"text",label:"\u6587\u5B57\u5185\u5BB9",type:"textarea",default:`Stay hungry.
+Stay foolish.`},{key:"textColor",label:"\u6587\u5B57\u989C\u8272",type:"color",default:"#ffffff"},{key:"textSize",label:"\u5B57\u53F7",type:"range",min:14,max:64,default:28},{key:"author",label:"\u4F5C\u8005",type:"text",default:"\u2014 Steve Jobs"},{key:"authorColor",label:"\u4F5C\u8005\u989C\u8272",type:"color",default:"#6c5ce7"}]}],gen:e=>['  <Var name="marginL" type="number" expression="(#view_width * 0.30)" />','  <Var name="safeW" type="number" expression="(#view_width - #marginL - 20)" />',`  <Rectangle w="#view_width" h="#view_height" fillColor="${e.bgColor}" />`,'  <Group x="#marginL" y="40" w="#safeW">',`    <Text text="${g(e.text)}" size="${e.textSize}" color="${e.textColor}" w="#safeW" multiLine="true" />`,`    <Text text="${g(e.author)}" x="0" y="(#view_height - 80)" size="16" color="${e.authorColor}" w="#safeW" />`,"  </Group>"].join(`
+`)},{id:"battery",icon:"\u{1F50B}",name:"\u7535\u6C60\u5361\u7247",desc:"\u663E\u793A\u7535\u6C60\u7535\u91CF\u548C\u72B6\u6001",updater:"Battery",config:[{group:"\u57FA\u672C",fields:[{key:"cardName",label:"\u5361\u7247\u540D\u79F0",type:"text",default:"\u7535\u6C60\u5361\u7247"},{key:"bgColor",label:"\u80CC\u666F\u989C\u8272",type:"color",default:"#0d1117"}]},{group:"\u6837\u5F0F",fields:[{key:"barColor",label:"\u7535\u91CF\u6761\u989C\u8272",type:"color",default:"#00b894"},{key:"textColor",label:"\u6587\u5B57\u989C\u8272",type:"color",default:"#ffffff"}]}],gen:e=>['  <Var name="marginL" type="number" expression="(#view_width * 0.30)" />','  <Var name="safeW" type="number" expression="(#view_width - #marginL - 40)" />','  <Var name="barW" type="number" expression="(#safeW * #battery_level / 100)" />',`  <Rectangle w="#view_width" h="#view_height" fillColor="${e.bgColor}" />`,'  <Group x="#marginL" y="0">',`    <Text text="\u7535\u91CF" x="0" y="50" size="18" color="${e.textColor}" alpha="0.6" />`,`    <Text textExp="(#battery_level + '%')" x="0" y="80" size="56" color="${e.textColor}" />`,'    <Rectangle x="0" y="160" w="#safeW" h="12" fillColor="#333333" cornerRadius="6" />',`    <Rectangle x="0" y="160" w="#barW" h="12" fillColor="${e.barColor}" cornerRadius="6" />`,`    <Text textExp="ifelse((#battery_level >= 80), '\u7535\u91CF\u5145\u8DB3', ifelse((#battery_level >= 20), '\u7535\u91CF\u504F\u4F4E', '\u7535\u91CF\u6781\u4F4E'))"`,`          x="0" y="200" size="16" color="${e.textColor}" alpha="0.5" />`,"  </Group>"].join(`
+`)},{id:"status",icon:"\u{1F4CA}",name:"\u72B6\u6001\u5361\u7247",desc:"\u663E\u793A\u591A\u4E2A\u72B6\u6001\u6307\u6807",config:[{group:"\u57FA\u672C",fields:[{key:"cardName",label:"\u5361\u7247\u540D\u79F0",type:"text",default:"\u72B6\u6001\u5361\u7247"},{key:"bgColor",label:"\u80CC\u666F\u989C\u8272",type:"color",default:"#0f0f1a"},{key:"title",label:"\u6807\u9898",type:"text",default:"\u7CFB\u7EDF\u72B6\u6001"}]},{group:"\u9879\u76EE",fields:[{key:"item1",label:"\u9879\u76EE1",type:"text",default:"WiFi: \u5DF2\u8FDE\u63A5"},{key:"item2",label:"\u9879\u76EE2",type:"text",default:"\u84DD\u7259: \u5DF2\u5F00\u542F"},{key:"item3",label:"\u9879\u76EE3",type:"text",default:"GPS: \u5DF2\u5173\u95ED"},{key:"item4",label:"\u9879\u76EE4",type:"text",default:"NFC: \u5DF2\u5F00\u542F"}]},{group:"\u6837\u5F0F",fields:[{key:"accentColor",label:"\u5F3A\u8C03\u8272",type:"color",default:"#6c5ce7"},{key:"textColor",label:"\u6587\u5B57\u989C\u8272",type:"color",default:"#e0e0e0"}]}],gen:e=>{let t=[e.item1,e.item2,e.item3,e.item4].filter(Boolean);return['  <Var name="marginL" type="number" expression="(#view_width * 0.30)" />','  <Var name="safeW" type="number" expression="(#view_width - #marginL - 30)" />',`  <Rectangle w="#view_width" h="#view_height" fillColor="${e.bgColor}" />`,'  <Group x="#marginL" y="0">',`    <Rectangle x="0" y="40" w="4" h="24" fillColor="${e.accentColor}" cornerRadius="2" />`,`    <Text text="${g(e.title)}" x="14" y="42" size="22" color="${e.textColor}" />`,...t.map((o,i)=>`    <Text text="${g(o)}" x="14" y="${90+i*40}" size="16" color="${e.textColor}" alpha="0.8" />`),"  </Group>"].join(`
+`)}},{id:"countdown",icon:"\u23F3",name:"\u5012\u8BA1\u65F6\u5361\u7247",desc:"\u5012\u8BA1\u65F6\u5230\u6307\u5B9A\u65E5\u671F",updater:"DateTime.Day",config:[{group:"\u57FA\u672C",fields:[{key:"cardName",label:"\u5361\u7247\u540D\u79F0",type:"text",default:"\u5012\u8BA1\u65F6\u5361\u7247"},{key:"bgColor",label:"\u80CC\u666F\u989C\u8272",type:"color",default:"#1a0a2e"}]},{group:"\u5185\u5BB9",fields:[{key:"eventName",label:"\u4E8B\u4EF6\u540D\u79F0",type:"text",default:"\u8DDD\u79BB\u65B0\u5E74"},{key:"targetDate",label:"\u76EE\u6807\u65E5\u671F (MMdd)",type:"text",default:"0101"}]},{group:"\u6837\u5F0F",fields:[{key:"accentColor",label:"\u5F3A\u8C03\u8272",type:"color",default:"#a29bfe"},{key:"textColor",label:"\u6587\u5B57\u989C\u8272",type:"color",default:"#ffffff"}]}],gen:e=>['  <Var name="marginL" type="number" expression="(#view_width * 0.30)" />','  <Var name="safeW" type="number" expression="(#view_width - #marginL - 30)" />','  <Var name="m" type="number" expression="#month" />','  <Var name="d" type="number" expression="#date" />','  <Var name="doy" type="number" expression="(ifelse((#m == 1), 0, ifelse((#m == 2), 31, ifelse((#m == 3), 59, ifelse((#m == 4), 90, ifelse((#m == 5), 120, ifelse((#m == 6), 151, ifelse((#m == 7), 181, ifelse((#m == 8), 212, ifelse((#m == 9), 243, ifelse((#m == 10), 273, ifelse((#m == 11), 304, 334))))))))))) + #d)" />',`  <Var name="target" type="number" expression="${e.targetDate}" />`,'  <Var name="tMonth" type="number" expression="floor(#target / 100)" />','  <Var name="tDay" type="number" expression="(#target - #tMonth * 100)" />','  <Var name="tdoy" type="number" expression="(ifelse((#tMonth == 1), 0, ifelse((#tMonth == 2), 31, ifelse((#tMonth == 3), 59, ifelse((#tMonth == 4), 90, ifelse((#tMonth == 5), 120, ifelse((#tMonth == 6), 151, ifelse((#tMonth == 7), 181, ifelse((#tMonth == 8), 212, ifelse((#tMonth == 9), 243, ifelse((#tMonth == 10), 273, ifelse((#tMonth == 11), 304, 334))))))))))) + #tDay)" />','  <Var name="diff" type="number" expression="ifelse((#tdoy >= #doy), (#tdoy - #doy), (365 - #doy + #tdoy))" />',`  <Rectangle w="#view_width" h="#view_height" fillColor="${e.bgColor}" />`,'  <Group x="#marginL" y="0">',`    <Text text="${g(e.eventName)}" x="0" y="50" size="18" color="${e.textColor}" alpha="0.6" />`,`    <Text textExp="#diff" x="0" y="80" size="72" color="${e.accentColor}" />`,`    <Text text="\u5929" x="0" y="160" size="20" color="${e.textColor}" alpha="0.5" />`,"  </Group>"].join(`
+`)},{id:"music",icon:"\u{1F3B5}",name:"\u97F3\u4E50\u4FE1\u606F\u5361\u7247",desc:"\u663E\u793A\u6B4C\u66F2\u540D\u548C\u6B4C\u624B",config:[{group:"\u57FA\u672C",fields:[{key:"cardName",label:"\u5361\u7247\u540D\u79F0",type:"text",default:"\u97F3\u4E50\u5361\u7247"},{key:"bgColor",label:"\u80CC\u666F\u989C\u8272",type:"color",default:"#0a0a0a"}]},{group:"\u5185\u5BB9",fields:[{key:"songName",label:"\u6B4C\u66F2\u540D\u79F0",type:"text",default:"\u6B4C\u66F2\u540D\u79F0"},{key:"artistName",label:"\u6B4C\u624B\u540D\u79F0",type:"text",default:"\u6B4C\u624B\u540D\u79F0"}]},{group:"\u6837\u5F0F",fields:[{key:"titleColor",label:"\u6B4C\u540D\u989C\u8272",type:"color",default:"#ffffff"},{key:"artistColor",label:"\u6B4C\u624B\u989C\u8272",type:"color",default:"#888888"},{key:"accentColor",label:"\u5F3A\u8C03\u8272",type:"color",default:"#1db954"}]}],gen:e=>['  <Var name="marginL" type="number" expression="(#view_width * 0.30)" />','  <Var name="safeW" type="number" expression="(#view_width - #marginL - 30)" />',`  <Rectangle w="#view_width" h="#view_height" fillColor="${e.bgColor}" />`,'  <Group x="#marginL" y="0">',`    <Rectangle x="0" y="40" w="48" h="48" fillColor="${e.accentColor}" cornerRadius="12" />`,'    <Text text="\u266A" x="14" y="52" size="28" color="#ffffff" />',`    <Text text="\u6B63\u5728\u64AD\u653E" x="60" y="48" size="12" color="${e.accentColor}" />`,`    <Text text="${g(e.songName)}" x="0" y="120" size="24" color="${e.titleColor}" />`,`    <Text text="${g(e.artistName)}" x="0" y="152" size="16" color="${e.artistColor}" />`,'    <Rectangle x="0" y="200" w="#safeW" h="3" fillColor="#333333" cornerRadius="1.5" />',`    <Rectangle x="0" y="200" w="(#safeW * 0.4)" h="3" fillColor="${e.accentColor}" cornerRadius="1.5" />`,"  </Group>"].join(`
+`)},{id:"gradient",icon:"\u{1F308}",name:"\u6E10\u53D8\u6587\u5B57\u5361\u7247",desc:"\u6E10\u53D8\u80CC\u666F + \u5C45\u4E2D\u6587\u5B57",config:[{group:"\u57FA\u672C",fields:[{key:"cardName",label:"\u5361\u7247\u540D\u79F0",type:"text",default:"\u6E10\u53D8\u5361\u7247"}]},{group:"\u6E10\u53D8",fields:[{key:"bgColor1",label:"\u6E10\u53D8\u82721",type:"color",default:"#667eea"},{key:"bgColor2",label:"\u6E10\u53D8\u82722",type:"color",default:"#764ba2"}]},{group:"\u6587\u5B57",fields:[{key:"text",label:"\u6587\u5B57",type:"textarea",default:`Hello
+World`},{key:"textColor",label:"\u6587\u5B57\u989C\u8272",type:"color",default:"#ffffff"},{key:"textSize",label:"\u5B57\u53F7",type:"range",min:16,max:72,default:36}]}],gen:e=>['  <Var name="marginL" type="number" expression="(#view_width * 0.30)" />','  <Var name="safeW" type="number" expression="(#view_width - #marginL - 30)" />',`  <Rectangle w="#view_width" h="#view_height" fillColor="${e.bgColor1}" />`,`  <Rectangle x="(#view_width * 0.5)" w="(#view_width * 0.5)" h="#view_height" fillColor="${e.bgColor2}" alpha="0.7" />`,'  <Group x="#marginL" y="0" w="#safeW" h="#view_height">',`    <Text text="${g(e.text)}" x="0" y="(#view_height * 0.3)" size="${e.textSize}" color="${e.textColor}" w="#safeW" multiLine="true" textAlign="center" />`,"  </Group>"].join(`
+`)},{id:"custom",icon:"\u{1F6E0}\uFE0F",name:"\u81EA\u5B9A\u4E49",desc:"\u4ECE\u96F6\u5F00\u59CB\uFF0C\u624B\u52A8\u6DFB\u52A0\u6587\u5B57\u3001\u5F62\u72B6\u3001\u56FE\u7247\u3001\u89C6\u9891",config:[{group:"\u57FA\u672C",fields:[{key:"cardName",label:"\u5361\u7247\u540D\u79F0",type:"text",default:"\u81EA\u5B9A\u4E49\u5361\u7247"},{key:"bgColor",label:"\u80CC\u666F\u989C\u8272",type:"color",default:"#000000"}]}],gen:null}];var R=420,k=class{constructor(t,o){this.device=t;this.showCamera=o;this.scale=R/t.width,this.camW=o?R*t.cameraZoneRatio:0}renderClock(t){let o=new Date,i=this.formatTime(o,t.timeFormat),n=this.formatDate(o,t.dateFormat),a=Math.round(Number(t.timeSize)*this.scale),l=Math.round(30+a+6*this.scale);return this.withBg(t.bgColor,`
+      <div style="position:absolute;left:${this.camW+10}px;top:30px;font-size:${a}px;color:${t.timeColor};font-weight:700;letter-spacing:1px">${this.esc(i)}</div>
+      <div style="position:absolute;left:${this.camW+10}px;top:${l}px;font-size:${Math.round(20*this.scale)}px;color:${t.dateColor}">${this.esc(n)}</div>
+    `)}renderQuote(t){let o=String(t.text).split(`
+`);return this.withBg(t.bgColor,`
+      <div style="position:absolute;left:${this.camW+10}px;top:24px;right:10px;font-size:${Math.round(Number(t.textSize)*this.scale)}px;color:${t.textColor};line-height:1.4">${o.map(i=>this.esc(i)).join("<br>")}</div>
+      <div style="position:absolute;left:${this.camW+10}px;bottom:20px;font-size:${Math.round(16*this.scale)}px;color:${t.authorColor}">${this.esc(t.author)}</div>
+    `)}renderBattery(t){let i=R-this.camW-20,n="\u7535\u91CF\u5145\u8DB3";return n="\u7535\u91CF\u504F\u4F4E",this.withBg(t.bgColor,`
+      <div style="position:absolute;left:${this.camW+10}px;top:20px;font-size:${Math.round(18*this.scale)}px;color:${t.textColor};opacity:0.6">\u7535\u91CF</div>
+      <div style="position:absolute;left:${this.camW+10}px;top:42px;font-size:${Math.round(56*this.scale)}px;color:${t.textColor};font-weight:700">78%</div>
+      <div style="position:absolute;left:${this.camW+10}px;top:110px;width:${i}px;height:7px;background:#333;border-radius:4px">
+        <div style="width:78%;height:100%;background:${t.barColor};border-radius:4px"></div>
+      </div>
+      <div style="position:absolute;left:${this.camW+10}px;top:126px;font-size:${Math.round(16*this.scale)}px;color:${t.textColor};opacity:0.5">${n}</div>
+    `)}renderStatus(t){let o=[t.item1,t.item2,t.item3,t.item4].filter(Boolean);return this.withBg(t.bgColor,`
+      <div style="position:absolute;left:${this.camW+6}px;top:18px;display:flex;align-items:center;gap:6px">
+        <div style="width:3px;height:${Math.round(24*this.scale)}px;background:${t.accentColor};border-radius:2px"></div>
+        <span style="font-size:${Math.round(22*this.scale)}px;color:${t.textColor};font-weight:600">${this.esc(t.title)}</span>
+      </div>
+      ${o.map((i,n)=>`<div style="position:absolute;left:${this.camW+16}px;top:${50+n*Math.round(40*this.scale)}px;font-size:${Math.round(16*this.scale)}px;color:${t.textColor};opacity:0.8">${this.esc(i)}</div>`).join("")}
+    `)}renderCountdown(t){let o=this.calcCountdownDiff(t.targetDate);return this.withBg(t.bgColor,`
+      <div style="position:absolute;left:${this.camW+10}px;top:20px;font-size:${Math.round(18*this.scale)}px;color:${t.textColor};opacity:0.6">${this.esc(t.eventName)}</div>
+      <div style="position:absolute;left:${this.camW+10}px;top:44px;font-size:${Math.round(72*this.scale)}px;color:${t.accentColor};font-weight:700">${o}</div>
+      <div style="position:absolute;left:${this.camW+10}px;top:${Math.round(44+72*this.scale+4)}px;font-size:${Math.round(20*this.scale)}px;color:${t.textColor};opacity:0.5">\u5929</div>
+    `)}renderMusic(t){let o=Math.round(48*this.scale),i=Math.round(12*this.scale),n=Math.round(28*this.scale),a=18+o+10;return this.withBg(t.bgColor,`
+      <div style="position:absolute;left:${this.camW+10}px;top:18px;display:flex;gap:8px;align-items:center">
+        <div style="width:${o}px;height:${o}px;background:${t.accentColor};border-radius:${i}px;display:flex;align-items:center;justify-content:center;font-size:${n}px;color:#fff">\u266A</div>
+        <span style="font-size:${Math.round(12*this.scale)}px;color:${t.accentColor}">\u6B63\u5728\u64AD\u653E</span>
+      </div>
+      <div style="position:absolute;left:${this.camW+10}px;top:${a}px;font-size:${Math.round(24*this.scale)}px;color:${t.titleColor};font-weight:600">${this.esc(t.songName)}</div>
+      <div style="position:absolute;left:${this.camW+10}px;top:${a+Math.round(28*this.scale)}px;font-size:${Math.round(16*this.scale)}px;color:${t.artistColor}">${this.esc(t.artistName)}</div>
+      <div style="position:absolute;left:${this.camW+10}px;right:10px;top:${a+Math.round(50*this.scale)}px;height:2px;background:#333;border-radius:1px">
+        <div style="width:40%;height:100%;background:${t.accentColor};border-radius:1px"></div>
+      </div>
+    `)}renderGradient(t){let o=String(t.text).split(`
+`);return`
+      <div style="position:absolute;left:0;top:0;width:50%;height:100%;background:${t.bgColor1}"></div>
+      <div style="position:absolute;left:50%;top:0;width:50%;height:100%;background:${t.bgColor2};opacity:0.7"></div>
+      <div style="position:absolute;left:${this.camW}px;right:0;top:30%;text-align:center;font-size:${Math.round(Number(t.textSize)*this.scale)}px;color:${t.textColor};font-weight:700;line-height:1.3">${o.map(i=>this.esc(i)).join("<br>")}</div>
+    `}renderCustom(t){return this.withBg(t.bgColor,"")}renderElements(t,o,i){return t.length===0?"":t.map((n,a)=>{let l=this.camW+n.x*this.scale,r=n.y*this.scale,m=n.x<this.device.width*this.device.cameraZoneRatio,h=a===i,u="";switch(h&&m?u="outline:2px solid #e17055;outline-offset:2px;":h?u="outline:1.5px dashed #6c5ce7;outline-offset:2px;":m&&(u="outline:1.5px dashed rgba(225,112,85,0.6);outline-offset:2px;"),n.type){case"text":{let c=n.textAlign&&n.textAlign!=="left"?`text-align:${n.textAlign};`:"",b=n.bold?"font-weight:700;":"",$=n.multiLine||n.textAlign&&n.textAlign!=="left"?`width:${(n.w||200)*this.scale}px;`:"",w=n.multiLine?"white-space:pre-wrap;line-height:1.4;":"";return`<div style="position:absolute;left:${l}px;top:${r}px;font-size:${n.size*this.scale}px;color:${n.color};${$}${c}${b}${w}${u}">${this.esc(n.text||"")}</div>`}case"rectangle":return`<div style="position:absolute;left:${l}px;top:${r}px;width:${n.w*this.scale}px;height:${n.h*this.scale}px;background:${n.color};border-radius:${(n.radius||0)*this.scale}px;${u}"></div>`;case"circle":return`<div style="position:absolute;left:${this.camW+(n.x-n.r)*this.scale}px;top:${(n.y-n.r)*this.scale}px;width:${n.r*2*this.scale}px;height:${n.r*2*this.scale}px;background:${n.color};border-radius:50%;${u}"></div>`;case"image":{let c=n.fileName?o[n.fileName]:null;return c?`<img src="${c.dataUrl}" style="position:absolute;left:${l}px;top:${r}px;width:${(n.w||100)*this.scale}px;height:${(n.h||100)*this.scale}px;object-fit:cover;border-radius:2px;${u}">`:`<div style="position:absolute;left:${l}px;top:${r}px;width:${(n.w||100)*this.scale}px;height:${(n.h||100)*this.scale}px;background:#222;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:8px;color:#666;${u}">\u{1F5BC}</div>`}case"video":{let c=n.fileName?o[n.fileName]:null;return c?`<video src="${c.dataUrl}" muted loop autoplay style="position:absolute;left:${l}px;top:${r}px;width:${(n.w||240)*this.scale}px;height:${(n.h||135)*this.scale}px;object-fit:cover;border-radius:2px;${u}"></video>`:`<div style="position:absolute;left:${l}px;top:${r}px;width:${(n.w||240)*this.scale}px;height:${(n.h||135)*this.scale}px;background:#1a1a2e;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:16px;color:#555;${u}">\u{1F3AC}</div>`}default:return""}}).join("")}withBg(t,o){return`<div style="position:absolute;inset:0;background:${t}"></div>${o}`}esc(t){return String(t).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")}formatTime(t,o){let i=t.getHours(),n=String(t.getMinutes()).padStart(2,"0");if(o.includes("hh")){let a=i%12||12,l=i<12?"AM":"PM";return`${String(a).padStart(2,"0")}:${n} ${l}`}return`${String(i).padStart(2,"0")}:${n}`}formatDate(t,o){let i=["\u65E5","\u4E00","\u4E8C","\u4E09","\u56DB","\u4E94","\u516D"],n=String(t.getFullYear()),a=String(t.getMonth()+1).padStart(2,"0"),l=String(t.getDate()).padStart(2,"0"),r=`\u661F\u671F${i[t.getDay()]}`;return o.replace("yyyy",n).replace("MM",a).replace("dd",l).replace("EEEE",r)}calcCountdownDiff(t){let o=Number(t);if(isNaN(o))return 0;let i=Math.floor(o/100),n=o%100,a=new Date,l=a.getFullYear(),r=new Date(l,i-1,n),m=Math.ceil((r.getTime()-a.getTime())/864e5);return m<0&&(r=new Date(l+1,i-1,n),m=Math.ceil((r.getTime()-a.getTime())/864e5)),m}};async function A(e,t,o,i,n){if(typeof JSZip>"u")throw new Error("JSZip \u672A\u52A0\u8F7D\uFF0C\u8BF7\u68C0\u67E5\u7F51\u7EDC");let a=new JSZip;a.file("manifest.xml",e),n||a.file("var_config.xml",`<?xml version="1.0" encoding="UTF-8"?>
+<WidgetConfig version="1">
+  <OnOff name="isDisplayDefaultBg" displayTitle="\u663E\u793A\u9ED8\u8BA4\u80CC\u666F" default="0"/>
+</WidgetConfig>`);let l=new Set;for(let c of o)(c.type==="image"||c.type==="video")&&c.fileName&&i[c.fileName]&&l.add(c.fileName);if(l.size>0){let c=a.folder("images"),b=a.folder("videos");for(let $ of l){let w=i[$];w.mimeType.startsWith("video/")?b.file($,w.data):c.file($,w.data)}}let r=await a.generateAsync({type:"blob"}),m=(t||"card")+".zip";if(typeof AndroidBridge<"u"){let c=new FileReader;c.onload=function(){let b=c.result.split(",")[1];AndroidBridge.saveZip(b,m)},c.readAsDataURL(r);return}let h=URL.createObjectURL(r),u=document.createElement("a");u.href=h,u.download=m,u.click(),URL.revokeObjectURL(h)}var N=0,d=null,p={},s=[],f=-1,y=!0,x={},_=null,M=-1;function L(e){if(e===1&&!d){v("\u8BF7\u5148\u9009\u62E9\u4E00\u4E2A\u6A21\u677F","error");return}if(e===2&&!d){v("\u8BF7\u5148\u9009\u62E9\u6A21\u677F\u5E76\u914D\u7F6E","error");return}N=e,document.querySelectorAll(".page").forEach((i,n)=>{i.classList.toggle("active",n===e)}),document.querySelectorAll(".step-dot").forEach((i,n)=>{i.classList.remove("active","done"),n===e?i.classList.add("active"):n<e&&i.classList.add("done")}),document.querySelectorAll(".step-line").forEach((i,n)=>{i.classList.toggle("done",n<e)});let t=document.getElementById("btnBack");t.style.display=e>0?"":"none";let o=document.getElementById("btnNext");e===2?o.style.display="none":(o.style.display="",o.innerHTML=e===0?'\u4E0B\u4E00\u6B65 <span class="btn-icon">\u2192</span>':'\u9884\u89C8 & \u5BFC\u51FA <span class="btn-icon">\u2192</span>'),e===1&&E(),e===2&&y&&F()}function U(){L(N+1)}function Z(){L(N-1)}function q(e){let t=z.find(o=>o.id===e);t&&(d=t,p={},t.config.forEach(o=>o.fields.forEach(i=>p[i.key]=i.default)),s=t.id==="custom"?[{type:"text",text:"Hello Card",x:10,y:60,size:28,color:"#ffffff",textAlign:"left",bold:!1,multiLine:!1,w:200}]:[],f=-1,y=!0,x={},I(),L(1))}function I(){let e=document.getElementById("tplGrid");e.innerHTML=z.map(t=>`<div class="tpl-card${d?.id===t.id?" active":""}" onclick="window.__app.selectTemplate('${t.id}')">
       <span class="tpl-icon">${t.icon}</span>
       <div class="tpl-card-name">${t.name}</div>
       <div class="tpl-card-desc">${t.desc}</div>
-    </div>`
-  ).join('');
-}
-
-function selectTemplate(id) {
-  const tpl = TEMPLATES.find(t => t.id === id);
-  if (!tpl) return;
-  currentTpl = tpl;
-  configValues = {};
-  tpl.config.forEach(g => g.fields.forEach(f => configValues[f.key] = f.default));
-  customElements = tpl.id === 'custom' ? [
-    { type: 'text', text: 'Hello Card', x: 10, y: 60, size: 28, color: '#ffffff', textAlign: 'left', bold: false, multiLine: false, w: 200 }
-  ] : [];
-  selectedElIdx = -1;
-  previewDirty = true;
-  renderTplGrid();
-  goStep(1);
-}
-
-// ─── Config Rendering ──────────────────────────────────────────────
-
-function renderConfig() {
-  if (!currentTpl) return;
-  document.getElementById('cfgIcon').textContent = currentTpl.icon;
-  document.getElementById('cfgTitle').textContent = currentTpl.name;
-  document.getElementById('cfgDesc').textContent = currentTpl.desc;
-
-  let html = '';
-
-  // Config groups
-  currentTpl.config.forEach(group => {
-    html += `<div class="config-section">
-      <div class="config-section-title"><span>▸</span> ${group.group}</div>
-      <div class="config-grid">`;
-    group.fields.forEach(f => { html += renderField(f); });
-    html += `</div></div>`;
-  });
-
-  // Custom elements editor (available for all templates)
-  {
-    html += `<div class="config-section">
-      <div class="config-section-title"><span>▸</span> 额外元素</div>
-      <div class="el-toolbar">
-        <button class="el-btn" onclick="addElement('text')"><span class="el-btn-icon">T</span> 文字</button>
-        <button class="el-btn" onclick="addElement('rectangle')"><span class="el-btn-icon">▢</span> 矩形</button>
-        <button class="el-btn" onclick="addElement('circle')"><span class="el-btn-icon">○</span> 圆形</button>
-        <button class="el-btn" onclick="pickMedia('image')"><span class="el-btn-icon">🖼</span> 图片</button>
-        <button class="el-btn" onclick="pickMedia('video')"><span class="el-btn-icon">🎬</span> 视频</button>
-      </div>
-      <div class="el-list">`;
-    customElements.forEach((el, i) => {
-      const label = el.type === 'text' ? el.text
-        : el.type === 'image' ? '🖼 ' + (el.fileName || '图片')
-        : el.type === 'video' ? '🎬 ' + (el.fileName || '视频')
-        : el.type + ' #' + (i+1);
-      const inCam = isInCameraZone(el);
-      html += `<div class="el-item${selectedElIdx===i?' active':''}" onclick="selectElement(${i})">
-        <span class="el-badge">${el.type}</span>
-        <span class="el-item-name">${esc(label)}</span>
-        ${inCam ? '<span title="在摄像头遮挡区内" style="color:#e17055;font-size:14px">⚠️</span>' : ''}
-        <button class="el-item-del" onclick="event.stopPropagation();removeElement(${i})">✕</button>
-      </div>`;
-    });
-    if (customElements.length === 0) {
-      html += `<div style="text-align:center;padding:20px;color:var(--text3);font-size:12px">点击上方按钮添加元素</div>`;
-    }
-    html += `</div>`;
-
-    if (selectedElIdx >= 0 && selectedElIdx < customElements.length) {
-      html += renderElementEditor(customElements[selectedElIdx], selectedElIdx);
-    }
-    html += `</div>`;
-  }
-
-  document.getElementById('cfgContent').innerHTML = html;
-  document.querySelectorAll('.color-val').forEach(el => {
-    const input = el.previousElementSibling;
-    if (input) el.textContent = input.value;
-  });
-}
-
-function renderField(f) {
-  const v = configValues[f.key];
-  if (f.type === 'text') return `<div class="field"><label>${f.label}</label><input type="text" value="${esc(v)}" onchange="setCfg('${f.key}',this.value)"></div>`;
-  if (f.type === 'textarea') return `<div class="field"><label>${f.label}</label><textarea rows="3" onchange="setCfg('${f.key}',this.value)">${esc(v)}</textarea></div>`;
-  if (f.type === 'color') return `<div class="field field-color"><label>${f.label}</label><input type="color" value="${v}" onchange="setCfg('${f.key}',this.value);this.nextElementSibling.textContent=this.value"><span class="color-val">${v}</span></div>`;
-  if (f.type === 'range') return `<div class="field"><label>${f.label}: <strong>${v}</strong></label><input type="range" min="${f.min}" max="${f.max}" value="${v}" oninput="setCfg('${f.key}',+this.value);this.previousElementSibling.querySelector('strong').textContent=this.value"></div>`;
-  if (f.type === 'select') return `<div class="field"><label>${f.label}</label><select onchange="setCfg('${f.key}',this.value)">${f.options.map(o => `<option value="${o.v}"${v===o.v?' selected':''}>${o.l}</option>`).join('')}</select></div>`;
-  return '';
-}
-
-function renderElementEditor(el, idx) {
-  let html = `<div class="el-detail">`;
-
-  // Camera zone warning
-  if (isInCameraZone(el)) {
-    html += `<div style="display:flex;align-items:center;gap:8px;padding:8px 12px;margin-bottom:12px;background:rgba(225,112,85,0.1);border:1px solid rgba(225,112,85,0.3);border-radius:8px;font-size:12px;color:#e17055">
-      <span>⚠️</span> 此元素位于摄像头遮挡区内，导出后可能被遮挡。建议将 X 调整到 ≥ ${Math.ceil(480 * CAMERA_ZONE_RATIO)}
-    </div>`;
-  }
-
-  // Media picker for image/video
-  if (el.type === 'image' || el.type === 'video') {
-    const isImage = el.type === 'image';
-    const fileInfo = el.fileName ? uploadedFiles[el.fileName] : null;
-    const hasFile = !!fileInfo;
-
-    html += `<div class="media-picker ${hasFile ? 'has-file' : ''}" onclick="pickMediaReplace(${idx})">`;
-    if (hasFile && isImage) {
-      html += `<img class="media-picker-thumb" src="${fileInfo.dataUrl}" alt="">`;
-    } else if (hasFile && !isImage) {
-      html += `<span class="media-picker-icon">🎬</span>`;
-    } else {
-      html += `<span class="media-picker-icon">${isImage ? '🖼' : '🎬'}</span>`;
-    }
-    html += `<div class="media-picker-info">
-      <div class="media-picker-name">${hasFile ? esc(fileInfo.originalName) : (isImage ? '点击选择图片' : '点击选择视频')}</div>
-      <div class="media-picker-hint">${hasFile ? formatFileSize(fileInfo.data.byteLength) + ' · 点击更换' : (isImage ? '支持 JPG / PNG / GIF / WebP' : '支持 MP4 / WebM / 3GP')}</div>
-    </div>`;
-    if (hasFile) {
-      html += `<button class="media-picker-change" onclick="event.stopPropagation();pickMediaReplace(${idx})">更换</button>`;
-    }
-    html += `</div>`;
-
-    // Position & size
-    html += `<div class="config-grid">
-      <div class="field"><label>X</label><input type="number" value="${el.x}" onchange="setElProp('x',+this.value)"></div>
-      <div class="field"><label>Y</label><input type="number" value="${el.y}" onchange="setElProp('y',+this.value)"></div>
-      <div class="field"><label>宽</label><input type="number" value="${el.w||100}" onchange="setElProp('w',+this.value)"></div>
-      <div class="field"><label>高</label><input type="number" value="${el.h||100}" onchange="setElProp('h',+this.value)"></div>
-    </div>`;
-  }
-  // Text element
-  else if (el.type === 'text') {
-    html += `<div class="config-grid">
-      <div class="field" style="grid-column:1/-1"><label>文字</label><input type="text" value="${esc(el.text)}" onchange="setElProp('text',this.value)"></div>
-      <div class="field"><label>字号</label><input type="number" value="${el.size}" onchange="setElProp('size',+this.value)"></div>
-      <div class="field field-color"><label>颜色</label><input type="color" value="${el.color}" onchange="setElProp('color',this.value);this.nextElementSibling.textContent=this.value"><span class="color-val">${el.color}</span></div>
-      <div class="field"><label>对齐</label><select onchange="setElProp('textAlign',this.value)">
-        <option value="left"${el.textAlign==='left'?' selected':''}>左对齐</option>
-        <option value="center"${el.textAlign==='center'?' selected':''}>居中</option>
-        <option value="right"${el.textAlign==='right'?' selected':''}>右对齐</option>
+    </div>`).join("")}function E(){if(!d)return;let e=T();document.getElementById("cfgIcon").textContent=d.icon,document.getElementById("cfgTitle").textContent=d.name,document.getElementById("cfgDesc").textContent=d.desc;let t="";for(let o of d.config){t+=`<div class="config-section">
+      <div class="config-section-title"><span>\u25B8</span> ${o.group}</div>
+      <div class="config-grid">`;for(let i of o.fields)t+=X(i);t+="</div></div>"}t+=`<div class="config-section">
+    <div class="config-section-title"><span>\u25B8</span> \u989D\u5916\u5143\u7D20</div>
+    <div class="el-toolbar">
+      <button class="el-btn" onclick="window.__app.addElement('text')"><span class="el-btn-icon">T</span> \u6587\u5B57</button>
+      <button class="el-btn" onclick="window.__app.addElement('rectangle')"><span class="el-btn-icon">\u25A2</span> \u77E9\u5F62</button>
+      <button class="el-btn" onclick="window.__app.addElement('circle')"><span class="el-btn-icon">\u25CB</span> \u5706\u5F62</button>
+      <button class="el-btn" onclick="window.__app.pickMedia('image')"><span class="el-btn-icon">\u{1F5BC}</span> \u56FE\u7247</button>
+      <button class="el-btn" onclick="window.__app.pickMedia('video')"><span class="el-btn-icon">\u{1F3AC}</span> \u89C6\u9891</button>
+    </div>
+    <div class="el-list">`,s.forEach((o,i)=>{let n=o.type==="text"?o.text||"":o.type==="image"?"\u{1F5BC} "+(o.fileName||"\u56FE\u7247"):o.type==="video"?"\u{1F3AC} "+(o.fileName||"\u89C6\u9891"):o.type+" #"+(i+1),a=G(o,e);t+=`<div class="el-item${f===i?" active":""}" onclick="window.__app.selectElement(${i})">
+      <span class="el-badge">${o.type}</span>
+      <span class="el-item-name">${C(n)}</span>
+      ${a?'<span title="\u5728\u6444\u50CF\u5934\u906E\u6321\u533A\u5185" style="color:#e17055;font-size:14px">\u26A0\uFE0F</span>':""}
+      <button class="el-item-del" onclick="event.stopPropagation();window.__app.removeElement(${i})">\u2715</button>
+    </div>`}),s.length===0&&(t+='<div style="text-align:center;padding:20px;color:var(--text3);font-size:12px">\u70B9\u51FB\u4E0A\u65B9\u6309\u94AE\u6DFB\u52A0\u5143\u7D20</div>'),t+="</div>",f>=0&&f<s.length&&(t+=Y(s[f],f,e)),t+="</div>",document.getElementById("cfgContent").innerHTML=t,document.querySelectorAll(".color-val").forEach(o=>{let i=o.previousElementSibling;i&&(o.textContent=i.value)})}function X(e){let t=p[e.key];switch(e.type){case"text":return`<div class="field"><label>${e.label}</label><input type="text" value="${C(String(t))}" onchange="window.__app.setCfg('${e.key}',this.value)"></div>`;case"textarea":return`<div class="field"><label>${e.label}</label><textarea rows="3" onchange="window.__app.setCfg('${e.key}',this.value)">${C(String(t))}</textarea></div>`;case"color":return`<div class="field field-color"><label>${e.label}</label><input type="color" value="${t}" onchange="window.__app.setCfg('${e.key}',this.value);this.nextElementSibling.textContent=this.value"><span class="color-val">${t}</span></div>`;case"range":return`<div class="field"><label>${e.label}: <strong>${t}</strong></label><input type="range" min="${e.min}" max="${e.max}" value="${t}" oninput="window.__app.setCfg('${e.key}',+this.value);this.previousElementSibling.querySelector('strong').textContent=this.value"></div>`;case"select":return`<div class="field"><label>${e.label}</label><select onchange="window.__app.setCfg('${e.key}',this.value)">${e.options.map(o=>`<option value="${o.v}"${t===o.v?" selected":""}>${o.l}</option>`).join("")}</select></div>`;default:return""}}function Y(e,t,o){let i='<div class="el-detail">';if(G(e,o)){let n=P(o);i+=`<div style="display:flex;align-items:center;gap:8px;padding:8px 12px;margin-bottom:12px;background:rgba(225,112,85,0.1);border:1px solid rgba(225,112,85,0.3);border-radius:8px;font-size:12px;color:#e17055">
+      <span>\u26A0\uFE0F</span> \u6B64\u5143\u7D20\u4F4D\u4E8E\u6444\u50CF\u5934\u906E\u6321\u533A\u5185\uFF0C\u5BFC\u51FA\u540E\u53EF\u80FD\u88AB\u906E\u6321\u3002\u5EFA\u8BAE\u5C06 X \u8C03\u6574\u5230 \u2265 ${n}
+    </div>`}if(e.type==="image"||e.type==="video"){let n=e.type==="image",a=e.fileName?x[e.fileName]:null,l=!!a;i+=`<div class="media-picker ${l?"has-file":""}" onclick="window.__app.pickMediaReplace(${t})">`,l&&n?i+=`<img class="media-picker-thumb" src="${a.dataUrl}" alt="">`:i+=`<span class="media-picker-icon">${n?"\u{1F5BC}":"\u{1F3AC}"}</span>`,i+=`<div class="media-picker-info">
+      <div class="media-picker-name">${l?C(a.originalName):n?"\u70B9\u51FB\u9009\u62E9\u56FE\u7247":"\u70B9\u51FB\u9009\u62E9\u89C6\u9891"}</div>
+      <div class="media-picker-hint">${l?ae(a.data.byteLength)+" \xB7 \u70B9\u51FB\u66F4\u6362":n?"\u652F\u6301 JPG / PNG / GIF / WebP":"\u652F\u6301 MP4 / WebM / 3GP"}</div>
+    </div>`,l&&(i+=`<button class="media-picker-change" onclick="event.stopPropagation();window.__app.pickMediaReplace(${t})">\u66F4\u6362</button>`),i+="</div>",i+=`<div class="config-grid">
+      <div class="field"><label>X</label><input type="number" value="${e.x}" onchange="window.__app.setElProp('x',+this.value)"></div>
+      <div class="field"><label>Y</label><input type="number" value="${e.y}" onchange="window.__app.setElProp('y',+this.value)"></div>
+      <div class="field"><label>\u5BBD</label><input type="number" value="${e.w||100}" onchange="window.__app.setElProp('w',+this.value)"></div>
+      <div class="field"><label>\u9AD8</label><input type="number" value="${e.h||100}" onchange="window.__app.setElProp('h',+this.value)"></div>
+    </div>`}else e.type==="text"?i+=`<div class="config-grid">
+      <div class="field" style="grid-column:1/-1"><label>\u6587\u5B57</label><input type="text" value="${C(e.text||"")}" onchange="window.__app.setElProp('text',this.value)"></div>
+      <div class="field"><label>\u5B57\u53F7</label><input type="number" value="${e.size}" onchange="window.__app.setElProp('size',+this.value)"></div>
+      <div class="field field-color"><label>\u989C\u8272</label><input type="color" value="${e.color}" onchange="window.__app.setElProp('color',this.value);this.nextElementSibling.textContent=this.value"><span class="color-val">${e.color}</span></div>
+      <div class="field"><label>\u5BF9\u9F50</label><select onchange="window.__app.setElProp('textAlign',this.value)">
+        <option value="left"${e.textAlign==="left"?" selected":""}>\u5DE6\u5BF9\u9F50</option>
+        <option value="center"${e.textAlign==="center"?" selected":""}>\u5C45\u4E2D</option>
+        <option value="right"${e.textAlign==="right"?" selected":""}>\u53F3\u5BF9\u9F50</option>
       </select></div>
-      <div class="field"><label>加粗</label><select onchange="setElProp('bold',this.value==='true')">
-        <option value="false"${!el.bold?' selected':''}>否</option>
-        <option value="true"${el.bold?' selected':''}>是</option>
+      <div class="field"><label>\u52A0\u7C97</label><select onchange="window.__app.setElProp('bold',this.value==='true')">
+        <option value="false"${e.bold?"":" selected"}>\u5426</option>
+        <option value="true"${e.bold?" selected":""}>\u662F</option>
       </select></div>
-      <div class="field"><label>多行</label><select onchange="setElProp('multiLine',this.value==='true')">
-        <option value="false"${!el.multiLine?' selected':''}>否</option>
-        <option value="true"${el.multiLine?' selected':''}>是</option>
+      <div class="field"><label>\u591A\u884C</label><select onchange="window.__app.setElProp('multiLine',this.value==='true')">
+        <option value="false"${e.multiLine?"":" selected"}>\u5426</option>
+        <option value="true"${e.multiLine?" selected":""}>\u662F</option>
       </select></div>
-      <div class="field"><label>宽度</label><input type="number" value="${el.w||200}" onchange="setElProp('w',+this.value)"></div>
-      <div class="field"><label>X</label><input type="number" value="${el.x}" onchange="setElProp('x',+this.value)"></div>
-      <div class="field"><label>Y</label><input type="number" value="${el.y}" onchange="setElProp('y',+this.value)"></div>
-    </div>`;
-  }
-  // Rectangle
-  else if (el.type === 'rectangle') {
-    html += `<div class="config-grid">
-      <div class="field"><label>X</label><input type="number" value="${el.x}" onchange="setElProp('x',+this.value)"></div>
-      <div class="field"><label>Y</label><input type="number" value="${el.y}" onchange="setElProp('y',+this.value)"></div>
-      <div class="field"><label>宽</label><input type="number" value="${el.w}" onchange="setElProp('w',+this.value)"></div>
-      <div class="field"><label>高</label><input type="number" value="${el.h}" onchange="setElProp('h',+this.value)"></div>
-      <div class="field field-color"><label>颜色</label><input type="color" value="${el.color}" onchange="setElProp('color',this.value);this.nextElementSibling.textContent=this.value"><span class="color-val">${el.color}</span></div>
-      <div class="field"><label>圆角</label><input type="number" value="${el.radius||0}" onchange="setElProp('radius',+this.value)"></div>
-    </div>`;
-  }
-  // Circle
-  else if (el.type === 'circle') {
-    html += `<div class="config-grid">
-      <div class="field"><label>中心 X</label><input type="number" value="${el.x}" onchange="setElProp('x',+this.value)"></div>
-      <div class="field"><label>中心 Y</label><input type="number" value="${el.y}" onchange="setElProp('y',+this.value)"></div>
-      <div class="field"><label>半径</label><input type="number" value="${el.r}" onchange="setElProp('r',+this.value)"></div>
-      <div class="field field-color"><label>颜色</label><input type="color" value="${el.color}" onchange="setElProp('color',this.value);this.nextElementSibling.textContent=this.value"><span class="color-val">${el.color}</span></div>
-    </div>`;
-  }
-
-  html += `</div>`;
-  return html;
-}
-
-function setCfg(key, val) {
-  configValues[key] = val;
-  previewDirty = true;
-}
-
-// ─── Media Upload ──────────────────────────────────────────────────
-
-function pickMedia(type) {
-  pendingMediaAdd = type;
-  pendingMediaReplace = -1;
-  const input = document.getElementById(type === 'image' ? 'fileImagePick' : 'fileVideoPick');
-  input.value = '';
-  input.click();
-}
-
-function pickMediaReplace(idx) {
-  const el = customElements[idx];
-  if (!el) return;
-  pendingMediaAdd = el.type;
-  pendingMediaReplace = idx;
-  const input = document.getElementById(el.type === 'image' ? 'fileImagePick' : 'fileVideoPick');
-  input.value = '';
-  input.click();
-}
-
-function handleFilePicked(e) {
-  const file = e.target.files[0];
-  if (!file) return;
-
-  const type = pendingMediaAdd;
-  const replaceIdx = pendingMediaReplace;
-  pendingMediaAdd = null;
-  pendingMediaReplace = -1;
-
-  // Generate a unique filename for packing
-  const ext = file.name.split('.').pop() || (type === 'image' ? 'png' : 'mp4');
-  const safeName = 'media_' + Date.now() + '.' + ext;
-
-  const reader = new FileReader();
-  reader.onload = function(ev) {
-    const arrayBuf = ev.target.result;
-    // Create data URL for preview
-    const blob = new Blob([arrayBuf], { type: file.type });
-    const urlReader = new FileReader();
-    urlReader.onload = function() {
-      uploadedFiles[safeName] = {
-        data: arrayBuf,
-        mimeType: file.type,
-        dataUrl: urlReader.result,
-        originalName: file.name
-      };
-
-      if (replaceIdx >= 0 && replaceIdx < customElements.length) {
-        // Replace file on existing element
-        customElements[replaceIdx].fileName = safeName;
-        customElements[replaceIdx].src = safeName;
-      } else {
-        // Add new element
-        const el = {
-          type: type,
-          fileName: safeName,
-          src: safeName,
-          x: 10, y: 60,
-          w: type === 'image' ? 200 : 240,
-          h: type === 'image' ? 200 : 135,
-        };
-        customElements.push(el);
-        selectedElIdx = customElements.length - 1;
-      }
-
-      previewDirty = true;
-      renderConfig();
-      toast(file.name + ' 已添加', 'success');
-    };
-    urlReader.readAsDataURL(blob);
-  };
-  reader.readAsArrayBuffer(file);
-}
-
-function formatFileSize(bytes) {
-  if (bytes < 1024) return bytes + ' B';
-  if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
-  return (bytes / 1048576).toFixed(1) + ' MB';
-}
-
-// ─── Custom Elements ───────────────────────────────────────────────
-
-function addElement(type) {
-  const defs = {
-    text: { type: 'text', text: '新文字', x: 10, y: 60, size: 24, color: '#ffffff', textAlign: 'left', bold: false, multiLine: false, w: 200 },
-    rectangle: { type: 'rectangle', x: 10, y: 60, w: 100, h: 40, color: '#333333', radius: 0 },
-    circle: { type: 'circle', x: 50, y: 100, r: 30, color: '#6c5ce7' },
-  };
-  if (defs[type]) {
-    customElements.push(JSON.parse(JSON.stringify(defs[type])));
-    selectedElIdx = customElements.length - 1;
-    previewDirty = true;
-    renderConfig();
-  }
-}
-
-function selectElement(idx) {
-  selectedElIdx = idx;
-  renderConfig();
-}
-
-function removeElement(idx) {
-  const el = customElements[idx];
-  // Clean up uploaded file if no other element uses it
-  if (el && el.fileName) {
-    const stillUsed = customElements.some((e, i) => i !== idx && e.fileName === el.fileName);
-    if (!stillUsed) delete uploadedFiles[el.fileName];
-  }
-  customElements.splice(idx, 1);
-  if (selectedElIdx >= customElements.length) selectedElIdx = customElements.length - 1;
-  previewDirty = true;
-  renderConfig();
-}
-
-function setElProp(prop, val) {
-  if (selectedElIdx >= 0) {
-    customElements[selectedElIdx][prop] = val;
-    previewDirty = true;
-  }
-}
-
-// ─── MAML Generation ───────────────────────────────────────────────
-
-function generateMAML() {
-  if (!currentTpl) return '';
-  let maml;
-  if (currentTpl.id === 'custom') {
-    maml = generateCustomMAML();
-  } else {
-    maml = currentTpl.gen(configValues);
-  }
-  // Append custom elements to any template
-  if (customElements.length > 0) {
-    // Insert extra elements before the closing </Widget> tag
-    const closeIdx = maml.lastIndexOf('</Widget>');
-    if (closeIdx > 0) {
-      let extra = '';
-      customElements.forEach(el => {
-        if (el.type === 'text') {
-          const align = el.textAlign && el.textAlign !== 'left' ? ` textAlign="${el.textAlign}"` : '';
-          const ml = el.multiLine ? ' multiLine="true"' : '';
-          const w = el.multiLine || (el.textAlign && el.textAlign !== 'left') ? ` w="${el.w||200}"` : '';
-          extra += `  <Text text="${esc(el.text)}" x="${el.x}" y="${el.y}" size="${el.size}" color="${el.color}"${w}${align}${ml}${el.bold ? ' bold="true"' : ''} />\n`;
-        } else if (el.type === 'rectangle') extra += `  <Rectangle x="${el.x}" y="${el.y}" w="${el.w}" h="${el.h}" fillColor="${el.color}"${el.radius ? ` cornerRadius="${el.radius}"` : ''} />\n`;
-        else if (el.type === 'circle') extra += `  <Circle x="${el.x}" y="${el.y}" r="${el.r}" fillColor="${el.color}" />\n`;
-        else if (el.type === 'image') extra += `  <Image src="${esc(el.src)}" x="${el.x}" y="${el.y}" w="${el.w||100}" h="${el.h||100}" />\n`;
-        else if (el.type === 'video') extra += `  <Video src="${esc(el.src)}" x="${el.x}" y="${el.y}" w="${el.w||240}" h="${el.h||135}" autoPlay="true" loop="true" />\n`;
-      });
-      maml = maml.slice(0, closeIdx) + extra + maml.slice(closeIdx);
-    }
-  }
-  return maml;
-}
-
-// Camera safe zone: 30% of screen width on the left
-const CAMERA_ZONE_RATIO = 0.30;
-
-function isInCameraZone(el) {
-  const elRight = el.x + (el.w || (el.r ? el.r * 2 : 0) || (el.size ? el.text.length * el.size * 0.6 : 50));
-  return el.x < 480 * CAMERA_ZONE_RATIO;
-}
-
-function generateCustomMAML() {
-  const c = configValues;
-  let body = `  <Var name="marginL" type="number" expression="(#view_width * ${CAMERA_ZONE_RATIO})" />\n`;
-  body += `  <Rectangle w="#view_width" h="#view_height" fillColor="${c.bgColor}" />\n`;
-  body += `  <Group x="#marginL" y="0">\n`;
-  customElements.forEach(el => {
-    if (el.type === 'text') {
-      const align = el.textAlign && el.textAlign !== 'left' ? ` textAlign="${el.textAlign}"` : '';
-      const ml = el.multiLine ? ' multiLine="true"' : '';
-      const w = el.multiLine || (el.textAlign && el.textAlign !== 'left') ? ` w="${el.w||200}"` : '';
-      body += `    <Text text="${esc(el.text)}" x="${el.x}" y="${el.y}" size="${el.size}" color="${el.color}"${w}${align}${ml}${el.bold ? ' bold="true"' : ''} />\n`;
-    } else if (el.type === 'rectangle') body += `    <Rectangle x="${el.x}" y="${el.y}" w="${el.w}" h="${el.h}" fillColor="${el.color}"${el.radius ? ` cornerRadius="${el.radius}"` : ''} />\n`;
-    else if (el.type === 'circle') body += `    <Circle x="${el.x}" y="${el.y}" r="${el.r}" fillColor="${el.color}" />\n`;
-    else if (el.type === 'image') body += `    <Image src="${esc(el.src)}" x="${el.x}" y="${el.y}" w="${el.w||100}" h="${el.h||100}" />\n`;
-    else if (el.type === 'video') body += `    <Video src="${esc(el.src)}" x="${el.x}" y="${el.y}" w="${el.w||240}" h="${el.h||135}" autoPlay="true" loop="true" />\n`;
-  });
-  body += `  </Group>\n`;
-  return `<Widget screenWidth="480" frameRate="0" scaleByDensity="false" name="${esc(c.cardName)}">\n${body}</Widget>`;
-}
-
-function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-
-// ─── Preview ───────────────────────────────────────────────────────
-
-function renderPreview() {
-  if (!currentTpl) return;
-  const device = document.getElementById('deviceSelect').value;
-  const showCam = document.getElementById('showCamera').checked;
-
-  document.getElementById('deviceLabel').textContent =
-    device === 'p2' ? 'Pro Max — 976 × 596' : 'Pro — 904 × 572';
-
-  const camera = document.getElementById('previewCamera');
-  camera.style.width = showCam ? '30%' : '0';
-  camera.className = 'preview-camera' + (showCam ? '' : ' hidden');
-
-  const content = document.getElementById('previewContent');
-  content.innerHTML = renderPreviewHTML(showCam);
-
-  document.getElementById('codeContent').textContent = generateMAML();
-  previewDirty = false;
-}
-
-function renderPreviewHTML(showCam) {
-  if (!currentTpl) return '';
-  const c = configValues;
-  const PW = 420;
-  const S = PW / 480;
-  const camW = showCam ? PW * CAMERA_ZONE_RATIO : 0;
-
-  // Helper: render custom elements overlay
-  function renderElements() {
-    if (customElements.length === 0) return '';
-    let html = '';
-    customElements.forEach((el, i) => {
-      const px = camW + el.x * S;
-      const py = el.y * S;
-      const inCam = px < camW;
-      const selected = i === selectedElIdx;
-      let bdr = '';
-      if (selected && inCam) bdr = 'outline:2px solid #e17055;outline-offset:2px;';
-      else if (selected) bdr = 'outline:1.5px dashed #6c5ce7;outline-offset:2px;';
-      else if (inCam) bdr = 'outline:1.5px dashed rgba(225,112,85,0.6);outline-offset:2px;';
-      if (el.type === 'text') {
-        const ta = el.textAlign && el.textAlign !== 'left' ? `text-align:${el.textAlign};` : '';
-        const fw = el.bold ? 'font-weight:700;' : '';
-        const w = el.multiLine || (el.textAlign && el.textAlign !== 'left') ? `width:${(el.w||200)*S}px;` : '';
-        const lh = el.multiLine ? 'white-space:pre-wrap;line-height:1.4;' : '';
-        html += `<div style="position:absolute;left:${px}px;top:${py}px;font-size:${el.size*S}px;color:${el.color};${w}${ta}${fw}${lh}${bdr}">${esc(el.text)}</div>`;
-      } else if (el.type === 'rectangle') {
-        html += `<div style="position:absolute;left:${px}px;top:${py}px;width:${el.w*S}px;height:${el.h*S}px;background:${el.color};border-radius:${(el.radius||0)*S}px;${bdr}"></div>`;
-      } else if (el.type === 'circle') {
-        html += `<div style="position:absolute;left:${camW+(el.x-el.r)*S}px;top:${(el.y-el.r)*S}px;width:${el.r*2*S}px;height:${el.r*2*S}px;background:${el.color};border-radius:50%;${bdr}"></div>`;
-      } else if (el.type === 'image') {
-        const fi = el.fileName ? uploadedFiles[el.fileName] : null;
-        if (fi) html += `<img src="${fi.dataUrl}" style="position:absolute;left:${px}px;top:${py}px;width:${(el.w||100)*S}px;height:${(el.h||100)*S}px;object-fit:cover;border-radius:2px;${bdr}">`;
-        else html += `<div style="position:absolute;left:${px}px;top:${py}px;width:${(el.w||100)*S}px;height:${(el.h||100)*S}px;background:#222;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:8px;color:#666;${bdr}">🖼</div>`;
-      } else if (el.type === 'video') {
-        const fi = el.fileName ? uploadedFiles[el.fileName] : null;
-        if (fi) html += `<video src="${fi.dataUrl}" muted loop autoplay style="position:absolute;left:${px}px;top:${py}px;width:${(el.w||240)*S}px;height:${(el.h||135)*S}px;object-fit:cover;border-radius:2px;${bdr}"></video>`;
-        else html += `<div style="position:absolute;left:${px}px;top:${py}px;width:${(el.w||240)*S}px;height:${(el.h||135)*S}px;background:#1a1a2e;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:16px;color:#555;${bdr}">🎬</div>`;
-      }
-    });
-    return html;
-  }
-
-  // Helper: combine base + elements
-  function withElements(base) {
-    return base + renderElements();
-  }
-
-  if (currentTpl.id === 'clock') {
-    const now = new Date();
-    const timeStr = c.timeFormat === 'HH:mm'
-      ? String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0')
-      : (now.getHours() % 12 || 12) + ':' + String(now.getMinutes()).padStart(2,'0');
-    const days = ['日','一','二','三','四','五','六'];
-    const dateStr = `${now.getFullYear()}/${String(now.getMonth()+1).padStart(2,'0')}/${String(now.getDate()).padStart(2,'0')} 星期${days[now.getDay()]}`;
-    return withElements(`<div style="position:absolute;inset:0;background:${c.bgColor}"></div>
-      <div style="position:absolute;left:${camW+10}px;top:30px;font-size:${Math.round(c.timeSize*S)}px;color:${c.timeColor};font-weight:700;letter-spacing:1px">${timeStr}</div>
-      <div style="position:absolute;left:${camW+10}px;top:${30+c.timeSize*S+6}px;font-size:${Math.round(20*S)}px;color:${c.dateColor}">${dateStr}</div>`);
-  }
-
-  if (currentTpl.id === 'quote') {
-    const lines = c.text.split('\n');
-    return withElements(`<div style="position:absolute;inset:0;background:${c.bgColor}"></div>
-      <div style="position:absolute;left:${camW+10}px;top:24px;right:10px;font-size:${Math.round(c.textSize*S)}px;color:${c.textColor};line-height:1.4">${lines.map(l=>esc(l)).join('<br>')}</div>
-      <div style="position:absolute;left:${camW+10}px;bottom:20px;font-size:${Math.round(16*S)}px;color:${c.authorColor}">${esc(c.author)}</div>`);
-  }
-
-  if (currentTpl.id === 'battery') {
-    return withElements(`<div style="position:absolute;inset:0;background:${c.bgColor}"></div>
-      <div style="position:absolute;left:${camW+10}px;top:20px;font-size:${Math.round(18*S)}px;color:${c.textColor};opacity:0.6">电量</div>
-      <div style="position:absolute;left:${camW+10}px;top:42px;font-size:${Math.round(56*S)}px;color:${c.textColor};font-weight:700">78%</div>
-      <div style="position:absolute;left:${camW+10}px;top:110px;width:${PW-camW-20}px;height:7px;background:#333;border-radius:4px">
-        <div style="width:78%;height:100%;background:${c.barColor};border-radius:4px"></div>
-      </div>
-      <div style="position:absolute;left:${camW+10}px;top:126px;font-size:${Math.round(16*S)}px;color:${c.textColor};opacity:0.5">电量充足</div>`);
-  }
-
-  if (currentTpl.id === 'status') {
-    const items = [c.item1, c.item2, c.item3, c.item4].filter(Boolean);
-    return withElements(`<div style="position:absolute;inset:0;background:${c.bgColor}"></div>
-      <div style="position:absolute;left:${camW+6}px;top:18px;display:flex;align-items:center;gap:6px">
-        <div style="width:3px;height:${Math.round(24*S)}px;background:${c.accentColor};border-radius:2px"></div>
-        <span style="font-size:${Math.round(22*S)}px;color:${c.textColor};font-weight:600">${esc(c.title)}</span>
-      </div>
-      ${items.map((t,i) => `<div style="position:absolute;left:${camW+16}px;top:${50+i*Math.round(40*S)}px;font-size:${Math.round(16*S)}px;color:${c.textColor};opacity:0.8">${esc(t)}</div>`).join('')}`);
-  }
-
-  if (currentTpl.id === 'countdown') {
-    return withElements(`<div style="position:absolute;inset:0;background:${c.bgColor}"></div>
-      <div style="position:absolute;left:${camW+10}px;top:20px;font-size:${Math.round(18*S)}px;color:${c.textColor};opacity:0.6">${esc(c.eventName)}</div>
-      <div style="position:absolute;left:${camW+10}px;top:44px;font-size:${Math.round(72*S)}px;color:${c.accentColor};font-weight:700">42</div>
-      <div style="position:absolute;left:${camW+10}px;top:${44+72*S+4}px;font-size:${Math.round(20*S)}px;color:${c.textColor};opacity:0.5">天</div>`);
-  }
-
-  if (currentTpl.id === 'music') {
-    return withElements(`<div style="position:absolute;inset:0;background:${c.bgColor}"></div>
-      <div style="position:absolute;left:${camW+10}px;top:18px;display:flex;gap:8px;align-items:center">
-        <div style="width:${Math.round(48*S)}px;height:${Math.round(48*S)}px;background:${c.accentColor};border-radius:${Math.round(12*S)}px;display:flex;align-items:center;justify-content:center;font-size:${Math.round(28*S)}px;color:#fff">♪</div>
-        <span style="font-size:${Math.round(12*S)}px;color:${c.accentColor}">正在播放</span>
-      </div>
-      <div style="position:absolute;left:${camW+10}px;top:${18+48*S+10}px;font-size:${Math.round(24*S)}px;color:${c.titleColor};font-weight:600">歌曲名称</div>
-      <div style="position:absolute;left:${camW+10}px;top:${18+48*S+10+24*S+4}px;font-size:${Math.round(16*S)}px;color:${c.artistColor}">歌手名称</div>
-      <div style="position:absolute;left:${camW+10}px;right:10px;top:${18+48*S+10+24*S+4+22}px;height:2px;background:#333;border-radius:1px">
-        <div style="width:40%;height:100%;background:${c.accentColor};border-radius:1px"></div>
-      </div>`);
-  }
-
-  if (currentTpl.id === 'gradient') {
-    const lines = c.text.split('\n');
-    return withElements(`<div style="position:absolute;left:0;top:0;width:50%;height:100%;background:${c.bgColor1}"></div>
-      <div style="position:absolute;left:50%;top:0;width:50%;height:100%;background:${c.bgColor2};opacity:0.7"></div>
-      <div style="position:absolute;left:${camW}px;right:0;top:30%;text-align:center;font-size:${Math.round(c.textSize*S)}px;color:${c.textColor};font-weight:700;line-height:1.3">${lines.map(l=>esc(l)).join('<br>')}</div>`);
-  }
-
-  // Custom template: background + elements
-  return withElements(`<div style="position:absolute;inset:0;background:${c.bgColor}"></div>`);
-}
-
-// ─── Export ────────────────────────────────────────────────────────
-
-async function exportZip() {
-  if (typeof JSZip === 'undefined') { toast('JSZip 未加载，请检查网络', 'error'); return; }
-  const maml = generateMAML();
-  if (!maml) { toast('请先选择模板', 'error'); return; }
-
-  const zip = new JSZip();
-  zip.file('manifest.xml', maml);
-
-  if (currentTpl.id !== 'custom') {
-    zip.file('var_config.xml', `<?xml version="1.0" encoding="UTF-8"?>
-<WidgetConfig version="1">
-  <OnOff name="isDisplayDefaultBg" displayTitle="显示默认背景" default="0"/>
-</WidgetConfig>`);
-  }
-
-  // Pack uploaded images and videos
-  if (currentTpl) {
-    const usedFiles = new Set();
-    customElements.forEach(el => {
-      if ((el.type === 'image' || el.type === 'video') && el.fileName && uploadedFiles[el.fileName]) {
-        usedFiles.add(el.fileName);
-      }
-    });
-    if (usedFiles.size > 0) {
-      const imgFolder = zip.folder('images');
-      const vidFolder = zip.folder('videos');
-      usedFiles.forEach(fname => {
-        const info = uploadedFiles[fname];
-        if (info.mimeType.startsWith('video/')) vidFolder.file(fname, info.data);
-        else imgFolder.file(fname, info.data);
-      });
-    }
-  }
-
-  const blob = await zip.generateAsync({ type: 'blob' });
-  const fileName = (configValues.cardName || 'card') + '.zip';
-
-  if (typeof AndroidBridge !== 'undefined') {
-    const reader = new FileReader();
-    reader.onload = function() {
-      AndroidBridge.saveZip(reader.result.split(',')[1], fileName);
-    };
-    reader.readAsDataURL(blob);
-    toast('✅ ZIP 已导出: ' + fileName, 'success');
-    return;
-  }
-
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url; a.download = fileName; a.click();
-  URL.revokeObjectURL(url);
-  toast('✅ ZIP 已导出: ' + fileName, 'success');
-}
-
-// ─── Utils ─────────────────────────────────────────────────────────
-
-function toast(msg, type) {
-  const el = document.getElementById('toast');
-  el.textContent = msg;
-  el.className = 'toast ' + (type || 'success');
-  requestAnimationFrame(() => el.classList.add('show'));
-  setTimeout(() => el.classList.remove('show'), 2500);
-}
-
-init();
+      <div class="field"><label>\u5BBD\u5EA6</label><input type="number" value="${e.w||200}" onchange="window.__app.setElProp('w',+this.value)"></div>
+      <div class="field"><label>X</label><input type="number" value="${e.x}" onchange="window.__app.setElProp('x',+this.value)"></div>
+      <div class="field"><label>Y</label><input type="number" value="${e.y}" onchange="window.__app.setElProp('y',+this.value)"></div>
+    </div>`:e.type==="rectangle"?i+=`<div class="config-grid">
+      <div class="field"><label>X</label><input type="number" value="${e.x}" onchange="window.__app.setElProp('x',+this.value)"></div>
+      <div class="field"><label>Y</label><input type="number" value="${e.y}" onchange="window.__app.setElProp('y',+this.value)"></div>
+      <div class="field"><label>\u5BBD</label><input type="number" value="${e.w}" onchange="window.__app.setElProp('w',+this.value)"></div>
+      <div class="field"><label>\u9AD8</label><input type="number" value="${e.h}" onchange="window.__app.setElProp('h',+this.value)"></div>
+      <div class="field field-color"><label>\u989C\u8272</label><input type="color" value="${e.color}" onchange="window.__app.setElProp('color',this.value);this.nextElementSibling.textContent=this.value"><span class="color-val">${e.color}</span></div>
+      <div class="field"><label>\u5706\u89D2</label><input type="number" value="${e.radius||0}" onchange="window.__app.setElProp('radius',+this.value)"></div>
+    </div>`:e.type==="circle"&&(i+=`<div class="config-grid">
+      <div class="field"><label>\u4E2D\u5FC3 X</label><input type="number" value="${e.x}" onchange="window.__app.setElProp('x',+this.value)"></div>
+      <div class="field"><label>\u4E2D\u5FC3 Y</label><input type="number" value="${e.y}" onchange="window.__app.setElProp('y',+this.value)"></div>
+      <div class="field"><label>\u534A\u5F84</label><input type="number" value="${e.r}" onchange="window.__app.setElProp('r',+this.value)"></div>
+      <div class="field field-color"><label>\u989C\u8272</label><input type="color" value="${e.color}" onchange="window.__app.setElProp('color',this.value);this.nextElementSibling.textContent=this.value"><span class="color-val">${e.color}</span></div>
+    </div>`);return i+="</div>",i}function O(e,t){p[e]=t,y=!0}function J(e){let t={text:{type:"text",text:"\u65B0\u6587\u5B57",x:10,y:60,size:24,color:"#ffffff",textAlign:"left",bold:!1,multiLine:!1,w:200},rectangle:{type:"rectangle",x:10,y:60,w:100,h:40,color:"#333333",radius:0},circle:{type:"circle",x:50,y:100,r:30,color:"#6c5ce7"}};t[e]&&(s.push(JSON.parse(JSON.stringify(t[e]))),f=s.length-1,y=!0,E())}function Q(e){f=e,E()}function K(e){let t=s[e];t&&t.fileName&&(s.some((i,n)=>n!==e&&i.fileName===t.fileName)||delete x[t.fileName]),s.splice(e,1),f>=s.length&&(f=s.length-1),y=!0,E()}function ee(e,t){f>=0&&(s[f][e]=t,y=!0)}function te(e){_=e,M=-1;let t=document.getElementById(e==="image"?"fileImagePick":"fileVideoPick");t.value="",t.click()}function ie(e){let t=s[e];if(!t)return;_=t.type,M=e;let o=document.getElementById(t.type==="image"?"fileImagePick":"fileVideoPick");o.value="",o.click()}function B(e){let o=e.target.files?.[0];if(!o)return;let i=_,n=M;_=null,M=-1;let a=o.name.split(".").pop()||(i==="image"?"png":"mp4"),l="media_"+Date.now()+"."+a,r=new FileReader;r.onload=function(m){let h=m.target.result,u=new Blob([h],{type:o.type}),c=new FileReader;c.onload=function(){x[l]={data:h,mimeType:o.type,dataUrl:c.result,originalName:o.name},n>=0&&n<s.length?(s[n].fileName=l,s[n].src=l):(s.push({type:i,fileName:l,src:l,x:10,y:60,w:i==="image"?200:240,h:i==="image"?200:135}),f=s.length-1),y=!0,E(),v(o.name+" \u5DF2\u6DFB\u52A0","success")},c.readAsDataURL(u)},r.readAsArrayBuffer(o)}function T(){let e=document.getElementById("deviceSelect");return D(e.value)}function F(){if(!d)return;let e=T(),t=document.getElementById("showCamera").checked;document.getElementById("deviceLabel").textContent=e.label;let o=document.getElementById("previewCamera");o.style.width=t?"30%":"0",o.className="preview-camera"+(t?"":" hidden");let i=new k(e,t),n=document.getElementById("previewContent"),a="";switch(d.id){case"clock":a=i.renderClock(p);break;case"quote":a=i.renderQuote(p);break;case"battery":a=i.renderBattery(p);break;case"status":a=i.renderStatus(p);break;case"countdown":a=i.renderCountdown(p);break;case"music":a=i.renderMusic(p);break;case"gradient":a=i.renderGradient(p);break;case"custom":a=i.renderCustom(p);break}a+=i.renderElements(s,x,f),n.innerHTML=a;let l=d.gen?d.gen(p):V(e),r=S({cardName:p.cardName||d.name,device:e,innerXml:l,updater:d.updater,extraElements:s,uploadedFiles:x});document.getElementById("codeContent").textContent=r,y=!1}function V(e){let o=['  <Var name="marginL" type="number" expression="(#view_width * 0.30)" />',`  <Rectangle w="#view_width" h="#view_height" fillColor="${p.bgColor}" />`,'  <Group x="#marginL" y="0">'];for(let i of s)switch(i.type){case"text":{let n=i.textAlign&&i.textAlign!=="left"?` textAlign="${i.textAlign}"`:"",a=i.multiLine?' multiLine="true"':"",l=i.multiLine||i.textAlign&&i.textAlign!=="left"?` w="${i.w||200}"`:"",r=i.bold?' bold="true"':"";o.push(`    <Text text="${ne(i.text||"")}" x="${i.x}" y="${i.y}" size="${i.size}" color="${i.color}"${l}${n}${a}${r} />`);break}case"rectangle":o.push(`    <Rectangle x="${i.x}" y="${i.y}" w="${i.w}" h="${i.h}" fillColor="${i.color}"${i.radius?` cornerRadius="${i.radius}"`:""} />`);break;case"circle":o.push(`    <Circle x="${i.x}" y="${i.y}" r="${i.r}" fillColor="${i.color}" />`);break;case"image":{let n=i.src&&x[i.src]?.mimeType?.startsWith("video/")?"videos":"images";o.push(`    <Image src="${n}/${i.src||""}" x="${i.x}" y="${i.y}" w="${i.w||100}" h="${i.h||100}" />`);break}case"video":o.push(`    <Video src="videos/${i.src||""}" x="${i.x}" y="${i.y}" w="${i.w||240}" h="${i.h||135}" autoPlay="true" loop="true" />`);break}return o.push("  </Group>"),o.join(`
+`)}async function oe(){if(!d){v("\u8BF7\u5148\u9009\u62E9\u6A21\u677F","error");return}let e=T(),t=d.gen?d.gen(p):V(e),o=S({cardName:p.cardName||d.name,device:e,innerXml:t,updater:d.updater,extraElements:s,uploadedFiles:x});try{await A(o,p.cardName||"card",s,x,d.id==="custom"),v("\u2705 ZIP \u5DF2\u5BFC\u51FA","success")}catch(i){v("\u5BFC\u51FA\u5931\u8D25: "+i.message,"error")}}function G(e,t){let o=t.width*t.cameraZoneRatio,i=e.w||(e.r?e.r*2:0)||(e.size?(e.text||"").length*e.size*.6:50),n=e.x+i;return e.x<o&&n<=o*1.5}function C(e){return String(e).replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;").replace(/>/g,"&gt;")}function ne(e){return String(e).replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/'/g,"&apos;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/\n/g,"&#10;")}function ae(e){return e<1024?e+" B":e<1048576?(e/1024).toFixed(1)+" KB":(e/1048576).toFixed(1)+" MB"}function v(e,t="success"){let o=document.getElementById("toast");o.textContent=e,o.className="toast "+t,requestAnimationFrame(()=>o.classList.add("show")),setTimeout(()=>o.classList.remove("show"),2500)}function j(){I(),document.getElementById("fileImagePick").addEventListener("change",B),document.getElementById("fileVideoPick").addEventListener("change",B),window.__app={goStep:L,nextStep:U,prevStep:Z,selectTemplate:q,setCfg:O,addElement:J,selectElement:Q,removeElement:K,setElProp:ee,pickMedia:te,pickMediaReplace:ie,renderPreview:F,handleExport:oe}}document.addEventListener("DOMContentLoaded",j);})();
 </script>
 </body>
 </html>
