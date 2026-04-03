@@ -10,3 +10,5 @@ gradle/wrapper/gradle-wrapper.jar
 *.pem
 janus-key.pem
 janus-cert.pem
+gradle/wrapper/gradle-wrapper.jar
+gradlew

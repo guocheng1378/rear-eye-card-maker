@@ -19,12 +19,11 @@ jobs:
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
-
-      - name: Grant execute permission
-        run: chmod +x gradlew
+        with:
+          gradle-version: '8.5'
 
       - name: Build Debug APK
-        run: ./gradlew assembleDebug
+        run: gradle assembleDebug
 
       - name: Rename APK
         run: |
