@@ -284,6 +284,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC',sans-
   flex-shrink:0;
 }
 .theme-toggle:hover{border-color:var(--accent);color:var(--accent)}
+a.theme-toggle{text-decoration:none}
 
 /* ─── CDN Fallback ─── */
 #cdnFallback{
