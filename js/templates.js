@@ -245,6 +245,115 @@ JCM.TEMPLATES = [
     },
   },
 
+  // ─── 天气 ───
+  {
+    id: 'weather', icon: '🌤️', name: '天气卡片', desc: '显示当前天气和温度',
+    updater: 'Weather',
+    config: [
+      { group: '基本', fields: [
+        { key: 'cardName', label: '卡片名称', type: 'text', default: '天气卡片' },
+        { key: 'bgColor', label: '背景颜色', type: 'color', default: '#0a1628' },
+      ]},
+      { group: '天气', fields: [
+        { key: 'city', label: '城市', type: 'text', default: '北京' },
+        { key: 'tempColor', label: '温度颜色', type: 'color', default: '#ffffff' },
+        { key: 'tempSize', label: '温度字号', type: 'range', min: 36, max: 96, default: 64 },
+        { key: 'descColor', label: '描述颜色', type: 'color', default: '#88aacc' },
+        { key: 'accentColor', label: '强调色', type: 'color', default: '#4ecdc4' },
+      ]},
+    ],
+    gen: function (c) {
+      return [
+        '  <Var name="marginL" type="number" expression="(#view_width * 0.30)" />',
+        '  <Rectangle w="#view_width" h="#view_height" fillColor="' + c.bgColor + '" />',
+        '  <Group x="#marginL" y="0">',
+        '    <Text text="' + JCM.escXml(c.city) + '" x="0" y="30" size="14" color="' + c.descColor + '" alpha="0.7" />',
+        '    <Text textExp="(#weather_temp + \'°\')" x="0" y="60" size="' + c.tempSize + '" color="' + c.tempColor + '" />',
+        '    <Text textExp="#weather_desc" x="0" y="140" size="18" color="' + c.descColor + '" />',
+        '    <Text textExp="(\'湿度 \' + #weather_humidity + \'%\')" x="0" y="170" size="14" color="' + c.descColor + '" alpha="0.5" />',
+        '    <Text textExp="(\'体感 \' + #weather_feels_like + \'°\')" x="100" y="170" size="14" color="' + c.descColor + '" alpha="0.5" />',
+        '  </Group>',
+      ].join('\n');
+    },
+  },
+
+  // ─── 步数 ───
+  {
+    id: 'steps', icon: '🏃', name: '步数卡片', desc: '显示今日步数和运动数据',
+    updater: 'Step',
+    config: [
+      { group: '基本', fields: [
+        { key: 'cardName', label: '卡片名称', type: 'text', default: '步数卡片' },
+        { key: 'bgColor', label: '背景颜色', type: 'color', default: '#0a0a1a' },
+      ]},
+      { group: '样式', fields: [
+        { key: 'goal', label: '目标步数', type: 'text', default: '10000' },
+        { key: 'barColor', label: '进度条颜色', type: 'color', default: '#ff6b6b' },
+        { key: 'textColor', label: '文字颜色', type: 'color', default: '#ffffff' },
+        { key: 'accentColor', label: '强调色', type: 'color', default: '#ff6b6b' },
+      ]},
+    ],
+    gen: function (c) {
+      return [
+        '  <Var name="marginL" type="number" expression="(#view_width * 0.30)" />',
+        '  <Var name="safeW" type="number" expression="(#view_width - #marginL - 40)" />',
+        '  <Var name="goalN" type="number" expression="' + (parseInt(c.goal) || 10000) + '" />',
+        '  <Var name="pct" type="number" expression="ifelse((#step_count > #goalN), 100, (#step_count * 100 / #goalN))" />',
+        '  <Var name="barW" type="number" expression="(#safeW * #pct / 100)" />',
+        '  <Rectangle w="#view_width" h="#view_height" fillColor="' + c.bgColor + '" />',
+        '  <Group x="#marginL" y="0">',
+        '    <Text text="今日步数" x="0" y="30" size="14" color="' + c.textColor + '" alpha="0.5" />',
+        '    <Text textExp="#step_count" x="0" y="50" size="52" color="' + c.textColor + '" />',
+        '    <Text text="步" x="0" y="112" size="16" color="' + c.textColor + '" alpha="0.5" />',
+        '    <Rectangle x="0" y="140" w="#safeW" h="8" fillColor="#222222" cornerRadius="4" />',
+        '    <Rectangle x="0" y="140" w="#barW" h="8" fillColor="' + c.barColor + '" cornerRadius="4" />',
+        '    <Text textExp="(\'目标 \' + #goalN + \' · \' + #pct + \'%\')" x="0" y="160" size="12" color="' + c.textColor + '" alpha="0.4" />',
+        '    <Text textExp="(\'距离 \' + #step_distance + \' km\')" x="0" y="190" size="14" color="' + c.accentColor + '" alpha="0.7" />',
+        '    <Text textExp="(\'消耗 \' + #step_calorie + \' kcal\')" x="120" y="190" size="14" color="' + c.accentColor + '" alpha="0.7" />',
+        '  </Group>',
+      ].join('\n');
+    },
+  },
+
+  // ─── 日历 ───
+  {
+    id: 'calendar', icon: '📅', name: '日历卡片', desc: '显示日期和简要日程',
+    updater: 'DateTime.Day',
+    config: [
+      { group: '基本', fields: [
+        { key: 'cardName', label: '卡片名称', type: 'text', default: '日历卡片' },
+        { key: 'bgColor', label: '背景颜色', type: 'color', default: '#0f0f1a' },
+      ]},
+      { group: '样式', fields: [
+        { key: 'dayColor', label: '日期颜色', type: 'color', default: '#ffffff' },
+        { key: 'daySize', label: '日期字号', type: 'range', min: 36, max: 96, default: 72 },
+        { key: 'accentColor', label: '强调色', type: 'color', default: '#6c5ce7' },
+        { key: 'textColor', label: '文字颜色', type: 'color', default: '#aaaaaa' },
+      ]},
+      { group: '内容', fields: [
+        { key: 'event1', label: '日程1', type: 'text', default: '09:00 团队会议' },
+        { key: 'event2', label: '日程2', type: 'text', default: '14:30 代码评审' },
+        { key: 'event3', label: '日程3', type: 'text', default: '' },
+      ]},
+    ],
+    gen: function (c) {
+      var events = [c.event1, c.event2, c.event3].filter(Boolean);
+      var lines = [
+        '  <Var name="marginL" type="number" expression="(#view_width * 0.30)" />',
+        '  <Rectangle w="#view_width" h="#view_height" fillColor="' + c.bgColor + '" />',
+        '  <Group x="#marginL" y="0">',
+        '    <Text textExp="formatDate(\'MM/dd\', #time_sys)" x="0" y="20" size="14" color="' + c.textColor + '" alpha="0.5" />',
+        '    <Text textExp="formatDate(\'EEEE\', #time_sys)" x="0" y="40" size="18" color="' + c.accentColor + '" />',
+        '    <Text textExp="formatDate(\'dd\', #time_sys)" x="0" y="55" size="' + c.daySize + '" color="' + c.dayColor + '" />',
+      ];
+      events.forEach(function (e, i) {
+        lines.push('    <Text text="' + JCM.escXml(e) + '" x="0" y="' + (150 + i * 28) + '" size="14" color="' + c.textColor + '" />');
+      });
+      lines.push('  </Group>');
+      return lines.join('\n');
+    },
+  },
+
   // ─── 自定义 ───
   {
     id: 'custom', icon: '🛠️', name: '自定义', desc: '从零开始，手动添加文字、形状、图片、视频',

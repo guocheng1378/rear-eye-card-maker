@@ -1,4 +1,4 @@
-// ─── UI: 页面导航 + 配置渲染 + 状态管理 ──────────────────────────
+// ─── UI: 页面导航 + 配置渲染 + 拖拽 + 撤销 + 所有新功能 ───────────
 
 // ─── State ────────────────────────────────────────────────────────
 var _step = 0;
@@ -10,6 +10,39 @@ var _dirty = true;
 JCM.uploadedFiles = {};
 var _pendingAdd = null;
 var _pendingReplace = -1;
+var SNAP_GRID = 10;
+
+// ─── Undo/Redo ────────────────────────────────────────────────────
+var _history = [];
+var _redoStack = [];
+
+function captureState() {
+  _history.push({ cfg: JSON.parse(JSON.stringify(_cfg)), elements: JSON.parse(JSON.stringify(_elements)) });
+  _redoStack = [];
+  if (_history.length > 50) _history.shift();
+}
+
+function undo() {
+  if (_history.length === 0) return;
+  _redoStack.push({ cfg: JSON.parse(JSON.stringify(_cfg)), elements: JSON.parse(JSON.stringify(_elements)) });
+  var state = _history.pop();
+  _cfg = state.cfg;
+  _elements = state.elements;
+  _dirty = true;
+  renderConfig();
+  toast('↩ 已撤销', 'success');
+}
+
+function redo() {
+  if (_redoStack.length === 0) return;
+  _history.push({ cfg: JSON.parse(JSON.stringify(_cfg)), elements: JSON.parse(JSON.stringify(_elements)) });
+  var state = _redoStack.pop();
+  _cfg = state.cfg;
+  _elements = state.elements;
+  _dirty = true;
+  renderConfig();
+  toast('↪ 已重做', 'success');
+}
 
 // ─── Step Navigation ──────────────────────────────────────────────
 JCM.goStep = function (n) {
@@ -25,13 +58,10 @@ JCM.goStep = function (n) {
   });
   document.querySelectorAll('.step-line').forEach(function (l, i) { l.classList.toggle('done', i < n); });
 
-  var btnBack = document.getElementById('btnBack');
-  btnBack.style.display = n > 0 ? '' : 'none';
-
+  document.getElementById('btnBack').style.display = n > 0 ? '' : 'none';
   var btnNext = document.getElementById('btnNext');
-  if (n === 2) {
-    btnNext.style.display = 'none';
-  } else {
+  if (n === 2) { btnNext.style.display = 'none'; }
+  else {
     btnNext.style.display = '';
     btnNext.innerHTML = n === 0 ? '下一步 <span class="btn-icon">→</span>' : '预览 & 导出 <span class="btn-icon">→</span>';
   }
@@ -56,6 +86,8 @@ JCM.selectTemplate = function (id) {
     : [];
   _selIdx = -1;
   _dirty = true;
+  _history = [];
+  _redoStack = [];
   JCM.uploadedFiles = {};
 
   renderTplGrid();
@@ -64,8 +96,7 @@ JCM.selectTemplate = function (id) {
 
 // ─── Template Grid ────────────────────────────────────────────────
 function renderTplGrid() {
-  var grid = document.getElementById('tplGrid');
-  grid.innerHTML = JCM.TEMPLATES.map(function (t) {
+  document.getElementById('tplGrid').innerHTML = JCM.TEMPLATES.map(function (t) {
     return '<div class="tpl-card' + (_tpl && _tpl.id === t.id ? ' active' : '') + '" data-tpl="' + t.id + '">' +
       '<span class="tpl-icon">' + t.icon + '</span>' +
       '<div class="tpl-card-name">' + t.name + '</div>' +
@@ -84,14 +115,13 @@ function renderConfig() {
 
   var html = '';
 
-  // Config groups
   _tpl.config.forEach(function (group) {
     html += '<div class="config-section"><div class="config-section-title"><span>▸</span> ' + group.group + '</div><div class="config-grid">';
     group.fields.forEach(function (f) { html += renderField(f); });
     html += '</div></div>';
   });
 
-  // Custom elements
+  // Custom elements section
   html += '<div class="config-section"><div class="config-section-title"><span>▸</span> 额外元素</div>' +
     '<div class="el-toolbar">' +
     '<button class="el-btn" data-add="text"><span class="el-btn-icon">T</span> 文字</button>' +
@@ -99,7 +129,16 @@ function renderConfig() {
     '<button class="el-btn" data-add="circle"><span class="el-btn-icon">○</span> 圆形</button>' +
     '<button class="el-btn" data-pick="image"><span class="el-btn-icon">🖼</span> 图片</button>' +
     '<button class="el-btn" data-pick="video"><span class="el-btn-icon">🎬</span> 视频</button>' +
-    '</div><div class="el-list">';
+    '<button class="el-btn" data-action="importZip" title="导入 MAML ZIP"><span class="el-btn-icon">📦</span> 导入ZIP</button>' +
+    '</div>';
+
+  // Snap toggle
+  html += '<div style="display:flex;gap:12px;margin-bottom:12px;align-items:center">' +
+    '<label class="check-label"><input type="checkbox" id="snapToggle" checked> 吸附网格 (' + SNAP_GRID + 'px)</label>' +
+    '</div>';
+
+  // Element list
+  html += '<div class="el-list">';
 
   _elements.forEach(function (el, i) {
     var label = el.type === 'text' ? (el.text || '')
@@ -111,6 +150,10 @@ function renderConfig() {
       '<span class="el-badge">' + el.type + '</span>' +
       '<span class="el-item-name">' + escH(label) + '</span>' +
       (inCam ? '<span title="在摄像头遮挡区内" style="color:#e17055;font-size:14px">⚠️</span>' : '') +
+      '<span class="el-z-btns">' +
+      '<button class="el-z-btn" data-z="up" data-zi="' + i + '" title="上移一层">↑</button>' +
+      '<button class="el-z-btn" data-z="down" data-zi="' + i + '" title="下移一层">↓</button>' +
+      '</span>' +
       '<button class="el-item-del" data-del="' + i + '">✕</button></div>';
   });
 
@@ -124,9 +167,15 @@ function renderConfig() {
   }
   html += '</div>';
 
+  // Template share buttons
+  html += '<div class="config-section"><div class="config-section-title"><span>▸</span> 模板分享</div>' +
+    '<div class="el-toolbar">' +
+    '<button class="el-btn" data-action="exportTemplate"><span class="el-btn-icon">💾</span> 导出配置</button>' +
+    '<button class="el-btn" data-action="importTemplate"><span class="el-btn-icon">📂</span> 导入配置</button>' +
+    '</div></div>';
+
   document.getElementById('cfgContent').innerHTML = html;
 
-  // Restore color values
   document.querySelectorAll('.color-val').forEach(function (el) {
     var input = el.previousElementSibling;
     if (input) el.textContent = input.value;
@@ -154,6 +203,7 @@ function renderField(f) {
 
 // ─── Config Actions ───────────────────────────────────────────────
 JCM.addElement = function (type) {
+  captureState();
   var defs = JCM.ElementDefaults;
   if (defs[type]) {
     _elements.push(JSON.parse(JSON.stringify(defs[type]())));
@@ -169,6 +219,7 @@ JCM.selectElement = function (idx) {
 };
 
 JCM.removeElement = function (idx) {
+  captureState();
   var el = _elements[idx];
   if (el && el.fileName) {
     var stillUsed = _elements.some(function (e, i) { return i !== idx && e.fileName === el.fileName; });
@@ -176,6 +227,18 @@ JCM.removeElement = function (idx) {
   }
   _elements.splice(idx, 1);
   if (_selIdx >= _elements.length) _selIdx = _elements.length - 1;
+  _dirty = true;
+  renderConfig();
+};
+
+JCM.moveElementZ = function (idx, dir) {
+  captureState();
+  var newIdx = dir === 'up' ? idx + 1 : idx - 1;
+  if (newIdx < 0 || newIdx >= _elements.length) return;
+  var tmp = _elements[idx];
+  _elements[idx] = _elements[newIdx];
+  _elements[newIdx] = tmp;
+  _selIdx = newIdx;
   _dirty = true;
   renderConfig();
 };
@@ -217,12 +280,14 @@ function renderPreview() {
     case 'countdown': html = r.renderCountdown(_cfg); break;
     case 'music':     html = r.renderMusic(_cfg); break;
     case 'gradient':  html = r.renderGradient(_cfg); break;
+    case 'weather':   html = r.renderCustom(_cfg); break;
+    case 'steps':     html = r.renderCustom(_cfg); break;
+    case 'calendar':  html = r.renderCustom(_cfg); break;
     case 'custom':    html = r.renderCustom(_cfg); break;
   }
   html += r.renderElements(_elements, JCM.uploadedFiles, _selIdx);
   document.getElementById('previewContent').innerHTML = html;
 
-  // Generate MAML
   var innerXml = _tpl.gen ? _tpl.gen(_cfg) : generateCustomMAML(device);
   var maml = JCM.generateMAML({
     cardName: _cfg.cardName || _tpl.name,
@@ -291,6 +356,70 @@ JCM.handleExport = function () {
     .catch(function (e) { toast('导出失败: ' + e.message, 'error'); });
 };
 
+JCM.handleExportPNG = function () {
+  JCM.exportPNG(_cfg.cardName || 'card')
+    .then(function () { toast('✅ PNG 已导出', 'success'); })
+    .catch(function (e) { toast('导出失败: ' + e.message, 'error'); });
+};
+
+// ─── Import ───────────────────────────────────────────────────────
+JCM.handleImportZip = function () {
+  var input = document.createElement('input');
+  input.type = 'file';
+  input.accept = '.zip';
+  input.onchange = function () {
+    var file = input.files[0];
+    if (!file) return;
+    JCM.importZip(file).then(function (data) {
+      // Switch to custom template
+      _tpl = JCM.TEMPLATES.find(function (t) { return t.id === 'custom'; });
+      _cfg = { cardName: data.cardName, bgColor: data.bgColor };
+      _elements = data.elements;
+      JCM.uploadedFiles = data.files;
+      _selIdx = -1;
+      _dirty = true;
+      _history = [];
+      _redoStack = [];
+      renderTplGrid();
+      JCM.goStep(1);
+      toast('✅ ZIP 已导入', 'success');
+    }).catch(function (e) { toast('导入失败: ' + e.message, 'error'); });
+  };
+  input.click();
+};
+
+JCM.handleExportTemplate = function () {
+  JCM.exportTemplateJSON(_tpl ? _tpl.id : 'custom', _cfg);
+  toast('✅ 配置已导出', 'success');
+};
+
+JCM.handleImportTemplate = function () {
+  var input = document.createElement('input');
+  input.type = 'file';
+  input.accept = '.json';
+  input.onchange = function () {
+    var file = input.files[0];
+    if (!file) return;
+    JCM.importTemplateJSON(file).then(function (data) {
+      var tpl = JCM.TEMPLATES.find(function (t) { return t.id === data.templateId; });
+      if (!tpl) return toast('找不到对应模板', 'error');
+      _tpl = tpl;
+      // Merge config values
+      tpl.config.forEach(function (g) {
+        g.fields.forEach(function (f) {
+          if (data.config[f.key] !== undefined) _cfg[f.key] = data.config[f.key];
+          else _cfg[f.key] = f.default;
+        });
+      });
+      _dirty = true;
+      renderTplGrid();
+      renderConfig();
+      toast('✅ 配置已导入', 'success');
+    }).catch(function (e) { toast('导入失败: ' + e.message, 'error'); });
+  };
+  input.click();
+};
+
 // ─── File Handling ────────────────────────────────────────────────
 function handleFilePicked(e) {
   var input = e.target;
@@ -315,6 +444,7 @@ function handleFilePicked(e) {
 
     JCM.uploadedFiles[safeName] = { data: arr.buffer, mimeType: file.type, dataUrl: dataUrl, originalName: file.name };
 
+    captureState();
     if (replaceIdx >= 0 && replaceIdx < _elements.length) {
       _elements[replaceIdx].fileName = safeName;
       _elements[replaceIdx].src = safeName;
@@ -330,19 +460,78 @@ function handleFilePicked(e) {
   reader.readAsDataURL(file);
 }
 
+// ─── Drag & Drop in Preview ───────────────────────────────────────
+var _dragging = null;
+
+function onPreviewMouseDown(e) {
+  var el = e.target.closest('[data-el-idx]');
+  if (!el) return;
+  var idx = parseInt(el.dataset.elIdx, 10);
+  if (isNaN(idx) || idx >= _elements.length) return;
+
+  e.preventDefault();
+  var device = getSelectedDevice();
+  var screen = document.querySelector('.preview-screen');
+  var rect = screen.getBoundingClientRect();
+  var scale = rect.width / device.width;
+
+  _dragging = {
+    idx: idx,
+    startX: e.clientX,
+    startY: e.clientY,
+    origX: _elements[idx].x,
+    origY: _elements[idx].y,
+    scale: scale,
+    device: device
+  };
+
+  captureState();
+  _selIdx = idx;
+  _dirty = true;
+  renderConfig();
+
+  document.addEventListener('mousemove', onPreviewMouseMove);
+  document.addEventListener('mouseup', onPreviewMouseUp);
+}
+
+function onPreviewMouseMove(e) {
+  if (!_dragging) return;
+  var dx = (e.clientX - _dragging.startX) / _dragging.scale;
+  var dy = (e.clientY - _dragging.startY) / _dragging.scale;
+
+  var nx = Math.round(_dragging.origX + dx);
+  var ny = Math.round(_dragging.origY + dy);
+
+  // Snap to grid
+  var snap = document.getElementById('snapToggle');
+  if (snap && snap.checked) {
+    nx = Math.round(nx / SNAP_GRID) * SNAP_GRID;
+    ny = Math.round(ny / SNAP_GRID) * SNAP_GRID;
+  }
+
+  _elements[_dragging.idx].x = Math.max(0, Math.min(nx, _dragging.device.width - 10));
+  _elements[_dragging.idx].y = Math.max(0, Math.min(ny, _dragging.device.height - 10));
+
+  renderPreview();
+}
+
+function onPreviewMouseUp() {
+  _dragging = null;
+  document.removeEventListener('mousemove', onPreviewMouseMove);
+  document.removeEventListener('mouseup', onPreviewMouseUp);
+}
+
 // ─── Event Delegation ─────────────────────────────────────────────
 function setupEvents() {
-  // Template grid clicks
+  // Template grid
   document.getElementById('tplGrid').addEventListener('click', function (e) {
     var card = e.target.closest('.tpl-card');
     if (card) JCM.selectTemplate(card.dataset.tpl);
   });
 
-  // Config content delegation
+  // Config content
   document.getElementById('cfgContent').addEventListener('input', function (e) {
     var t = e.target;
-
-    // Config field
     if (t.dataset.cfg) {
       var key = t.dataset.cfg;
       if (t.type === 'range') {
@@ -352,13 +541,9 @@ function setupEvents() {
         _cfg[key] = t.value;
         var cv = t.nextElementSibling;
         if (cv && cv.classList.contains('color-val')) cv.textContent = t.value;
-      } else {
-        _cfg[key] = t.value;
-      }
+      } else { _cfg[key] = t.value; }
       _dirty = true;
     }
-
-    // Element prop
     if (t.dataset.prop) {
       var idx = Number(t.dataset.idx);
       var prop = t.dataset.prop;
@@ -375,14 +560,7 @@ function setupEvents() {
 
   document.getElementById('cfgContent').addEventListener('change', function (e) {
     var t = e.target;
-
-    // Config field
-    if (t.dataset.cfg && t.tagName === 'SELECT') {
-      _cfg[t.dataset.cfg] = t.value;
-      _dirty = true;
-    }
-
-    // Element prop
+    if (t.dataset.cfg && t.tagName === 'SELECT') { _cfg[t.dataset.cfg] = t.value; _dirty = true; }
     if (t.dataset.prop && t.tagName === 'SELECT') {
       var idx = Number(t.dataset.idx);
       var val = t.value;
@@ -395,35 +573,41 @@ function setupEvents() {
   });
 
   document.getElementById('cfgContent').addEventListener('click', function (e) {
-    // Element select
     var item = e.target.closest('.el-item');
-    if (item && !e.target.closest('.el-item-del')) {
+    if (item && !e.target.closest('.el-item-del') && !e.target.closest('.el-z-btn')) {
       JCM.selectElement(Number(item.dataset.sel));
       return;
     }
-    // Element delete
     var del = e.target.closest('.el-item-del');
-    if (del) {
-      e.stopPropagation();
-      JCM.removeElement(Number(del.dataset.del));
-      return;
-    }
-    // Add element
+    if (del) { e.stopPropagation(); JCM.removeElement(Number(del.dataset.del)); return; }
+    var zBtn = e.target.closest('.el-z-btn');
+    if (zBtn) { e.stopPropagation(); JCM.moveElementZ(Number(zBtn.dataset.zi), zBtn.dataset.z); return; }
     var addBtn = e.target.closest('[data-add]');
-    if (addBtn) {
-      JCM.addElement(addBtn.dataset.add);
-      return;
-    }
-    // Pick media
+    if (addBtn) { JCM.addElement(addBtn.dataset.add); return; }
     var pickBtn = e.target.closest('[data-pick]');
-    if (pickBtn) {
-      JCM.pickMedia(pickBtn.dataset.pick);
+    if (pickBtn) { JCM.pickMedia(pickBtn.dataset.pick); return; }
+    var actionBtn = e.target.closest('[data-action]');
+    if (actionBtn) {
+      var a = actionBtn.dataset.action;
+      if (a === 'importZip') JCM.handleImportZip();
+      else if (a === 'exportTemplate') JCM.handleExportTemplate();
+      else if (a === 'importTemplate') JCM.handleImportTemplate();
+      return;
     }
   });
 
   // File inputs
   document.getElementById('fileImagePick').addEventListener('change', handleFilePicked);
   document.getElementById('fileVideoPick').addEventListener('change', handleFilePicked);
+
+  // Preview drag
+  document.getElementById('previewContent').addEventListener('mousedown', onPreviewMouseDown);
+
+  // Keyboard shortcuts
+  document.addEventListener('keydown', function (e) {
+    if (e.ctrlKey && e.key === 'z' && !e.shiftKey) { e.preventDefault(); undo(); }
+    if (e.ctrlKey && (e.key === 'y' || (e.key === 'z' && e.shiftKey))) { e.preventDefault(); redo(); }
+  });
 }
 
 // ─── Toast ────────────────────────────────────────────────────────
