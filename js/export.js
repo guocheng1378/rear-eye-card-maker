@@ -25,27 +25,13 @@ JCM.exportZip = function (maml, cardName, elements, files, isCustom) {
 
   var keys = Object.keys(usedFiles);
 
-  // Read File objects as ArrayBuffer via FileReader (reliable for any size)
-  function readFileAsBuffer(fileOrData) {
-    return new Promise(function (resolve, reject) {
-      if (fileOrData instanceof Blob) {
-        var reader = new FileReader();
-        reader.onload = function () { resolve(reader.result); };
-        reader.onerror = function () { reject(new Error('文件读取失败')); };
-        reader.readAsArrayBuffer(fileOrData);
-      } else {
-        resolve(fileOrData);
-      }
-    });
-  }
-
   function buildZipWithData() {
     if (keys.length > 0) {
       var imgFolder = zip.folder('images');
       var vidFolder = zip.folder('videos');
       keys.forEach(function (fname) {
         var info = usedFiles[fname];
-        var data = info._exportData || info.data;
+        var data = info.data;
         if (info.mimeType.indexOf('video/') === 0) {
           vidFolder.file(fname, data);
         } else {
@@ -74,18 +60,7 @@ JCM.exportZip = function (maml, cardName, elements, files, isCustom) {
     });
   }
 
-  // Read all File objects (blob URL videos) into ArrayBuffer before zipping
-  var readPromises = keys.map(function (fname) {
-    var info = usedFiles[fname];
-    if (info.data instanceof Blob) {
-      return readFileAsBuffer(info.data).then(function (buf) {
-        info._exportData = buf;
-      });
-    }
-    return Promise.resolve();
-  });
-
-  return Promise.all(readPromises).then(buildZipWithData);
+  return buildZipWithData();
 };
 
 // ─── Import ZIP ────────────────────────────────────────────────────
