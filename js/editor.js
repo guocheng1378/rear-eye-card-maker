@@ -1,8 +1,8 @@
 // ─── Editor: 自定义元素编辑 ──────────────────────────────────────
 
 JCM.ElementDefaults = {
-  text: function () { return { type: 'text', text: '新文字', x: 10, y: 60, size: 24, color: '#ffffff', textAlign: 'left', bold: false, multiLine: false, w: 200, shadow: 'none', opacity: 100 }; },
-  rectangle: function () { return { type: 'rectangle', x: 10, y: 60, w: 100, h: 40, color: '#333333', radius: 0, opacity: 100 }; },
+  text: function () { return { type: 'text', text: '新文字', x: 10, y: 60, size: 24, color: '#ffffff', textAlign: 'left', bold: false, multiLine: false, w: 200, shadow: 'none', opacity: 100, textGradient: 'none', textStroke: 0, textStrokeColor: '#000000' }; },
+  rectangle: function () { return { type: 'rectangle', x: 10, y: 60, w: 100, h: 40, color: '#333333', radius: 0, opacity: 100, fillColor2: '' }; },
   circle: function () { return { type: 'circle', x: 50, y: 100, r: 30, color: '#6c5ce7', opacity: 100 }; },
   line: function () { return { type: 'rectangle', x: 10, y: 100, w: 200, h: 2, color: '#555555', radius: 1, opacity: 60, _isLine: true }; },
 };
@@ -49,6 +49,18 @@ JCM.renderElementEditor = function (el, idx, device) {
       field('文字', '<input type="text" value="' + esc(el.text || '') + '" data-prop="text" data-idx="' + idx + '">', true) +
       field('字号', '<input type="number" value="' + el.size + '" data-prop="size" data-idx="' + idx + '">') +
       colorField('颜色', el.color || '#ffffff', 'color', idx) +
+      field('渐变', '<select data-prop="textGradient" data-idx="' + idx + '">' +
+        '<option value="none"' + (!el.textGradient || el.textGradient === 'none' ? ' selected' : '') + '>无</option>' +
+        '<option value="sunset"' + (el.textGradient === 'sunset' ? ' selected' : '') + '>日落</option>' +
+        '<option value="ocean"' + (el.textGradient === 'ocean' ? ' selected' : '') + '>海洋</option>' +
+        '<option value="neon"' + (el.textGradient === 'neon' ? ' selected' : '') + '>霓虹</option>' +
+        '<option value="gold"' + (el.textGradient === 'gold' ? ' selected' : '') + '>金色</option>' +
+        '<option value="aurora"' + (el.textGradient === 'aurora' ? ' selected' : '') + '>极光</option>' +
+        '<option value="custom"' + (el.textGradient === 'custom' ? ' selected' : '') + '>自定义</option></select>') +
+      (el.textGradient === 'custom' ?
+        field('渐变色2', '<input type="color" value="' + (el.gradientColor2 || '#ff6b6b') + '" data-prop="gradientColor2" data-idx="' + idx + '">') : '') +
+      field('描边', '<input type="number" min="0" max="10" value="' + (el.textStroke || 0) + '" data-prop="textStroke" data-idx="' + idx + '">') +
+      ((el.textStroke || 0) > 0 ? colorField('描边色', el.textStrokeColor || '#000000', 'textStrokeColor', idx) : '') +
       field('对齐', '<select data-prop="textAlign" data-idx="' + idx + '">' +
         '<option value="left"' + (el.textAlign === 'left' ? ' selected' : '') + '>左对齐</option>' +
         '<option value="center"' + (el.textAlign === 'center' ? ' selected' : '') + '>居中</option>' +
@@ -76,6 +88,7 @@ JCM.renderElementEditor = function (el, idx, device) {
       field('宽', '<input type="number" value="' + el.w + '" data-prop="w" data-idx="' + idx + '">') +
       field('高', '<input type="number" value="' + el.h + '" data-prop="h" data-idx="' + idx + '">') +
       colorField('颜色', el.color || '#333333', 'color', idx) +
+      field('渐变色2', '<input type="color" value="' + (el.fillColor2 || '') + '" data-prop="fillColor2" data-idx="' + idx + '"><span class="hint">留空则纯色</span>') +
       field('圆角', '<input type="number" value="' + (el.radius || 0) + '" data-prop="radius" data-idx="' + idx + '">') +
       field('透明度', '<input type="range" min="0" max="100" value="' + (el.opacity !== undefined ? el.opacity : 100) + '" data-prop="opacity" data-idx="' + idx + '">') +
       '</div>';
@@ -122,12 +135,34 @@ JCM.COLOR_PRESETS = [
   '#6c5ce7', '#a29bfe', '#fd79a8', '#e84393', '#d63031',
 ];
 
+JCM.THEME_PRESETS = [
+  { name: '赛博朋克', colors: ['#ff00ff', '#00ffff', '#ff6600', '#0d0221', '#f706cf'] },
+  { name: '莫兰迪',   colors: ['#b0a084', '#c9b8a8', '#8b7d6b', '#d5c4a1', '#a0522d'] },
+  { name: '霓虹',     colors: ['#39ff14', '#ff073a', '#bc13fe', '#01ffff', '#ffff33'] },
+  { name: '暗夜蓝',   colors: ['#0f1b2d', '#1a3a5c', '#2e86de', '#48dbfb', '#c8d6e5'] },
+  { name: '日落',     colors: ['#e55039', '#f39c12', '#f8c291', '#78e08f', '#3d3d3d'] },
+  { name: '极简',     colors: ['#2d3436', '#636e72', '#b2bec3', '#dfe6e9', '#ffffff'] },
+  { name: '糖果',     colors: ['#ff9ff3', '#feca57', '#ff6b6b', '#48dbfb', '#1dd1a1'] },
+  { name: '森林',     colors: ['#2d5016', '#4a7c23', '#6ab04c', '#badc58', '#f9ca24'] },
+];
+
 JCM.renderColorPresets = function (prop, idx) {
-  return '<div class="color-presets">' +
+  var html = '<div class="color-presets">' +
     JCM.COLOR_PRESETS.map(function (c) {
       return '<div class="color-swatch" style="background:' + c + '" data-color="' + c + '" data-cprop="' + prop + '" data-cidx="' + idx + '" title="' + c + '"></div>';
     }).join('') +
     '</div>';
+  // Theme presets
+  html += '<div class="theme-presets">';
+  JCM.THEME_PRESETS.forEach(function (theme) {
+    html += '<div class="theme-preset" data-theme-cprop="' + prop + '" data-theme-cidx="' + idx + '" title="' + theme.name + '">' +
+      theme.colors.map(function (c) {
+        return '<div class="theme-dot" style="background:' + c + '"></div>';
+      }).join('') +
+      '<span class="theme-name">' + theme.name + '</span></div>';
+  });
+  html += '</div>';
+  return html;
 };
 
 // ─── Quick Alignment ──────────────────────────────────────────────

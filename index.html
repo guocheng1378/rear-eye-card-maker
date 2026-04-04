@@ -154,6 +154,12 @@
         <label class="check-label">
           <input type="checkbox" id="showCamera" checked> 摄像头遮挡区
         </label>
+        <div class="zoom-controls">
+          <button onclick="JCM.zoomOut()" title="缩小">−</button>
+          <span class="zoom-label" id="zoomLabel">100%</span>
+          <button onclick="JCM.zoomIn()" title="放大">+</button>
+          <button onclick="JCM.zoomReset()" title="重置" style="font-size:11px">↺</button>
+        </div>
       </div>
       <div class="preview-layout">
         <div class="preview-phone-wrap">
@@ -177,6 +183,10 @@
             <button class="btn btn-secondary" onclick="JCM.renderPreview()"><span class="btn-icon">🔄</span> 生成预览</button>
             <button class="btn btn-export" onclick="JCM.handleExport()"><span class="btn-icon">📦</span> 导出 ZIP</button>
             <button class="btn btn-secondary" onclick="JCM.handleExportPNG()"><span class="btn-icon">🖼</span> 导出 PNG</button>
+          </div>
+          <div class="batch-export-bar">
+            <span style="font-size:11px;color:var(--text2)">批量导出：</span>
+            <button class="btn btn-secondary" onclick="JCM.handleBatchExport()"><span class="btn-icon">📦</span> 全部机型 ZIP</button>
           </div>
         </div>
       </div>

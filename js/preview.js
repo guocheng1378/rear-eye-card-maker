@@ -135,11 +135,28 @@ PreviewRenderer.prototype.renderCustom = function (c) {
   if (pat === 'dots') {
     return '<div style="position:absolute;inset:0;background:' + c.bgColor + ';background-image:radial-gradient(circle,rgba(255,255,255,0.08) 1px,transparent 1px);background-size:20px 20px"></div>';
   }
+  if (pat === 'dots-large') {
+    return '<div style="position:absolute;inset:0;background:' + c.bgColor + ';background-image:radial-gradient(circle,rgba(255,255,255,0.06) 4px,transparent 4px);background-size:32px 32px"></div>';
+  }
   if (pat === 'grid') {
     return '<div style="position:absolute;inset:0;background:' + c.bgColor + ';background-image:linear-gradient(rgba(255,255,255,0.05) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.05) 1px,transparent 1px);background-size:20px 20px"></div>';
   }
+  if (pat === 'diagonal') {
+    return '<div style="position:absolute;inset:0;background:' + c.bgColor + ';background-image:repeating-linear-gradient(45deg,transparent,transparent 10px,rgba(255,255,255,0.04) 10px,rgba(255,255,255,0.04) 11px)"></div>';
+  }
+  if (pat === 'wave') {
+    return '<div style="position:absolute;inset:0;background:' + c.bgColor + '"></div>' +
+      '<svg style="position:absolute;bottom:0;left:0;width:100%;height:40%;opacity:0.08" viewBox="0 0 400 120" preserveAspectRatio="none"><path d="M0,60 C100,100 200,20 300,60 C350,80 400,40 400,60 L400,120 L0,120Z" fill="' + (c.bgColor2 || '#fff') + '"/></svg>';
+  }
+  if (pat === 'noise') {
+    return '<div style="position:absolute;inset:0;background:' + c.bgColor + '"></div>' +
+      '<div style="position:absolute;inset:0;opacity:0.03;background-image:url("data:image/svg+xml,%3Csvg viewBox=%270 0 256 256%27 xmlns=%27http://www.w3.org/2000/svg%27%3E%3Cfilter id=%27n%27%3E%3CfeTurbulence type=%27fractalNoise%27 baseFrequency=%270.9%27 numOctaves=%274%27 stitchTiles=%27stitch%27/%3E%3C/filter%3E%3Crect width=%27100%25%27 height=%27100%25%27 filter=%27url(%23n)%27/%3E%3C/svg%3E")"></div>';
+  }
   if (pat === 'gradient') {
     return '<div style="position:absolute;inset:0;background:linear-gradient(135deg,' + c.bgColor + ',' + (c.bgColor2 || '#1a1a2e') + ')"></div>';
+  }
+  if (pat === 'gradient-radial') {
+    return '<div style="position:absolute;inset:0;background:radial-gradient(circle at 30% 40%,' + c.bgColor + ',' + (c.bgColor2 || '#1a1a2e') + ')"></div>';
   }
   return this.bg(c.bgColor, '');
 };
@@ -315,10 +332,25 @@ PreviewRenderer.prototype.renderElements = function (elements, files, selIdx) {
         var fw = el.bold ? 'font-weight:700;' : '';
         var w = el.multiLine || (el.textAlign && el.textAlign !== 'left') ? 'width:' + ((el.w || 200) * self.scale) + 'px;' : '';
         var lh = el.multiLine ? 'white-space:pre-wrap;line-height:1.4;' : '';
-        return '<div data-el-idx="' + i + '" style="position:absolute;left:' + px + 'px;top:' + py + 'px;font-size:' + el.size * self.scale + 'px;color:' + el.color + ';' + w + ta + fw + lh + sh + op + dc + '">' + self.esc(el.text || '') + '</div>';
+        // Text gradient
+        var gradStyle = '';
+        if (el.textGradient && el.textGradient !== 'none') {
+          var gradColors = { sunset: '#ff6b6b,#feca57', ocean: '#0984e3,#00cec9', neon: '#ff00ff,#00ffff', gold: '#f39c12,#fdcb6e', aurora: '#6c5ce7,#00b894' };
+          var gc = el.textGradient === 'custom' ? (el.color || '#ffffff') + ',' + (el.gradientColor2 || '#ff6b6b') : gradColors[el.textGradient] || gradColors.sunset;
+          gradStyle = 'background:linear-gradient(135deg,' + gc + ');-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;';
+        }
+        // Text stroke
+        var strokeStyle = '';
+        if (el.textStroke && el.textStroke > 0) {
+          var sw = el.textStroke * self.scale;
+          var sc = el.textStrokeColor || '#000000';
+          strokeStyle = '-webkit-text-stroke:' + sw + 'px ' + sc + ';';
+        }
+        return '<div data-el-idx="' + i + '" style="position:absolute;left:' + px + 'px;top:' + py + 'px;font-size:' + el.size * self.scale + 'px;color:' + el.color + ';' + w + ta + fw + lh + sh + op + gradStyle + strokeStyle + dc + '">' + self.esc(el.text || '') + '</div>';
       }
       case 'rectangle':
-        return '<div data-el-idx="' + i + '" style="position:absolute;left:' + px + 'px;top:' + py + 'px;width:' + el.w * self.scale + 'px;height:' + el.h * self.scale + 'px;background:' + el.color + ';border-radius:' + (el.radius || 0) * self.scale + 'px;' + op + dc + '"></div>' + rh;
+        var rectBg = el.fillColor2 ? 'background:linear-gradient(135deg,' + el.color + ',' + el.fillColor2 + ')' : 'background:' + el.color;
+        return '<div data-el-idx="' + i + '" style="position:absolute;left:' + px + 'px;top:' + py + 'px;width:' + el.w * self.scale + 'px;height:' + el.h * self.scale + 'px;' + rectBg + ';border-radius:' + (el.radius || 0) * self.scale + 'px;' + op + dc + '"></div>' + rh;
       case 'circle':
         return '<div data-el-idx="' + i + '" style="position:absolute;left:' + (self.camW + (el.x - el.r) * self.scale) + 'px;top:' + (el.y - el.r) * self.scale + 'px;width:' + el.r * 2 * self.scale + 'px;height:' + el.r * 2 * self.scale + 'px;background:' + el.color + ';border-radius:50%;' + op + dc + '"></div>';
       case 'image': {

@@ -574,6 +574,67 @@ JCM.handleExportPNG = function () {
     .catch(function (e) { toast('导出失败: ' + e.message, 'error'); });
 };
 
+// ─── Zoom Controls ────────────────────────────────────────────────
+var _zoomLevel = 100;
+
+JCM.zoomIn = function () {
+  _zoomLevel = Math.min(_zoomLevel + 25, 200);
+  applyZoom();
+};
+JCM.zoomOut = function () {
+  _zoomLevel = Math.max(_zoomLevel - 25, 50);
+  applyZoom();
+};
+JCM.zoomReset = function () {
+  _zoomLevel = 100;
+  applyZoom();
+};
+
+function applyZoom() {
+  var phone = document.querySelector('#page2 .preview-phone');
+  if (phone) phone.style.transform = 'scale(' + (_zoomLevel / 100) + ')';
+  var label = document.getElementById('zoomLabel');
+  if (label) label.textContent = _zoomLevel + '%';
+}
+
+// ─── Batch Export ─────────────────────────────────────────────────
+JCM.handleBatchExport = function () {
+  if (!_tpl) return toast('请先选择模板', 'error');
+  var deviceKeys = ['p2', 'q200', 'q100', 'ultra'];
+  var count = 0;
+  var errors = [];
+
+  function exportNext() {
+    if (count >= deviceKeys.length) {
+      if (errors.length > 0) toast('部分导出失败: ' + errors.join(', '), 'error');
+      else toast('✅ 全部 ' + count + ' 个机型已导出', 'success');
+      return;
+    }
+    var dk = deviceKeys[count];
+    var device = JCM.getDevice(dk);
+    var innerXml = _tpl.gen ? _tpl.gen(_cfg) : generateCustomMAML(device);
+    var maml = JCM.generateMAML({
+      cardName: (_cfg.cardName || _tpl.name) + '_' + dk,
+      device: device,
+      innerXml: innerXml,
+      updater: _tpl.updater,
+      extraElements: _elements,
+      uploadedFiles: JCM.uploadedFiles,
+    });
+    var validation = JCM.validateMAML(maml);
+    if (!validation.valid) {
+      errors.push(device.label);
+      count++;
+      exportNext();
+      return;
+    }
+    JCM.exportZip(maml, (_cfg.cardName || 'card') + '_' + dk, _elements, JCM.uploadedFiles, _tpl.id === 'custom')
+      .then(function () { count++; setTimeout(exportNext, 500); })
+      .catch(function () { errors.push(device.label); count++; setTimeout(exportNext, 500); });
+  }
+  exportNext();
+};
+
 // ─── Import ───────────────────────────────────────────────────────
 JCM.handleImportZip = function () {
   var input = document.createElement('input');
@@ -820,6 +881,39 @@ function onPreviewMouseMove(e) {
     ny = Math.round(ny / SNAP_GRID) * SNAP_GRID;
   }
 
+  // Smart alignment guides
+  var el = _elements[_dragging.idx];
+  var elW = el.w || (el.r ? el.r * 2 : 0) || 50;
+  var elH = el.h || (el.r ? el.r * 2 : 0) || 30;
+  var elCX = nx + elW / 2;
+  var elCY = ny + elH / 2;
+  var snapThreshold = 6;
+  var device = _dragging.device;
+
+  // Check against device center
+  if (Math.abs(elCX - device.width / 2) < snapThreshold) { nx = Math.round(device.width / 2 - elW / 2); }
+  if (Math.abs(elCY - device.height / 2) < snapThreshold) { ny = Math.round(device.height / 2 - elH / 2); }
+
+  // Check against other elements
+  for (var i = 0; i < _elements.length; i++) {
+    if (i === _dragging.idx) continue;
+    var other = _elements[i];
+    var oW = other.w || (other.r ? other.r * 2 : 0) || 50;
+    var oH = other.h || (other.r ? other.r * 2 : 0) || 30;
+    var oCX = other.x + oW / 2;
+    var oCY = other.y + oH / 2;
+
+    // Horizontal alignment (left, center, right)
+    if (Math.abs(nx - other.x) < snapThreshold) nx = other.x;
+    if (Math.abs(nx + elW - (other.x + oW)) < snapThreshold) nx = other.x + oW - elW;
+    if (Math.abs(elCX - oCX) < snapThreshold) nx = Math.round(oCX - elW / 2);
+
+    // Vertical alignment (top, center, bottom)
+    if (Math.abs(ny - other.y) < snapThreshold) ny = other.y;
+    if (Math.abs(ny + elH - (other.y + oH)) < snapThreshold) ny = other.y + oH - elH;
+    if (Math.abs(elCY - oCY) < snapThreshold) ny = Math.round(oCY - elH / 2);
+  }
+
   _elements[_dragging.idx].x = Math.max(0, Math.min(nx, _dragging.device.width - 10));
   _elements[_dragging.idx].y = Math.max(0, Math.min(ny, _dragging.device.height - 10));
 
@@ -929,6 +1023,23 @@ function setupEvents() {
         _elements[cidx][cprop] = swatch.dataset.color;
         _dirty = true;
         renderConfig();
+      }
+      return;
+    }
+    // Theme preset (click first dot to apply as element color)
+    var themeBtn = e.target.closest('.theme-preset');
+    if (themeBtn) {
+      var tcidx = Number(themeBtn.dataset.themeCidx);
+      var tcprop = themeBtn.dataset.themeCprop;
+      if (tcidx >= 0 && tcidx < _elements.length) {
+        var dots = themeBtn.querySelectorAll('.theme-dot');
+        if (dots.length > 0) {
+          captureState();
+          _elements[tcidx][tcprop] = dots[0].style.background || dots[0].style.backgroundColor;
+          _dirty = true;
+          renderConfig();
+          toast('🎨 已应用主题色', 'success');
+        }
       }
       return;
     }

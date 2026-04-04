@@ -384,6 +384,49 @@ kbd{
 }
 .config-live-export-row .btn{font-size:12px;padding:8px 14px}
 
+/* ─── Theme Presets ─── */
+.theme-presets{
+  display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;padding:8px;
+  background:var(--surface);border-radius:8px;
+}
+.theme-preset{
+  display:flex;align-items:center;gap:3px;padding:4px 8px;
+  border-radius:6px;cursor:pointer;border:1px solid transparent;
+  transition:var(--transition);background:var(--surface2);
+}
+.theme-preset:hover{border-color:var(--accent);background:var(--accent-glow)}
+.theme-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.theme-name{font-size:10px;color:var(--text2);margin-left:4px;white-space:nowrap}
+
+/* ─── Smart Guides ─── */
+.smart-guide{
+  position:absolute;z-index:50;pointer-events:none;
+  background:var(--accent);opacity:0.7;
+}
+.smart-guide-h{height:1px;left:0;right:0}
+.smart-guide-v{width:1px;top:0;bottom:0}
+
+/* ─── Zoom Controls ─── */
+.zoom-controls{
+  display:flex;align-items:center;gap:8px;
+  padding:4px 10px;background:var(--surface2);border:1px solid var(--border);
+  border-radius:8px;font-size:12px;
+}
+.zoom-controls button{
+  width:24px;height:24px;border-radius:6px;border:1px solid var(--border);
+  background:var(--surface);color:var(--text);font-size:14px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;transition:var(--transition);
+}
+.zoom-controls button:hover{border-color:var(--accent);color:var(--accent)}
+.zoom-controls .zoom-label{color:var(--text2);min-width:36px;text-align:center}
+
+/* ─── Batch Export ─── */
+.batch-export-bar{
+  display:flex;gap:8px;margin-top:12px;padding:10px 14px;
+  background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);
+}
+.batch-export-bar .btn{font-size:11px;padding:6px 12px}
+
 /* ─── Desktop ─── */
 @media(min-width:1200px){
   .tpl-grid{grid-template-columns:repeat(auto-fill,minmax(220px,1fr));max-width:1200px;margin:0 auto}
