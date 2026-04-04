@@ -111,11 +111,17 @@ JCM._validateMAMLRegex = function (xml) {
   var errors = [];
   if (!xml.match(/<Widget[\s>]/)) errors.push('缺少 <Widget> 根标签');
   if (!xml.match(/<\/Widget>\s*$/)) errors.push('缺少 </Widget> 闭合标签');
-  // FIX: use [^/>]* instead of [^/]* to prevent greedy matching across tags
-  var openTags = xml.match(/<[A-Z][a-zA-Z]*\s[^/>]*>/g) || [];
-  var closeTags = xml.match(/<\/[A-Z][a-zA-Z]*>/g) || [];
+
+  // FIX: 1) use [^/>]* to prevent cross-tag greedy matching
+  //      2) filter out self-closing tags from open count, change formula to open === close
+  var allOpenLike = xml.match(/<[A-Z][a-zA-Z]*\s[^/>]*>/g) || [];
   var selfClose = xml.match(/<[A-Z][a-zA-Z]*\s[^>]*\/>/g) || [];
-  if (openTags.length !== closeTags.length + selfClose.length) {
+  var closeTags = xml.match(/<\/[A-Z][a-zA-Z]*>/g) || [];
+
+  // True open tags = all open-like matches that are NOT self-closing
+  var openTags = allOpenLike.filter(function (t) { return !/\/\s*>$/.test(t); });
+
+  if (openTags.length !== closeTags.length) {
     errors.push('标签开闭不匹配 (开:' + openTags.length + ' 闭:' + closeTags.length + ' 自闭:' + selfClose.length + ')');
   }
   if (!xml.match(/name="/)) errors.push('缺少 name 属性');
