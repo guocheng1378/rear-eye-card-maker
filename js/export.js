@@ -24,37 +24,53 @@ JCM.exportZip = function (maml, cardName, elements, files, isCustom) {
   });
 
   var keys = Object.keys(usedFiles);
-  if (keys.length > 0) {
-    var imgFolder = zip.folder('images');
-    var vidFolder = zip.folder('videos');
-    keys.forEach(function (fname) {
-      var info = usedFiles[fname];
-      if (info.mimeType.indexOf('video/') === 0) {
-        vidFolder.file(fname, info.data);
-      } else {
-        imgFolder.file(fname, info.data);
+
+  function buildZipWithData() {
+    if (keys.length > 0) {
+      var imgFolder = zip.folder('images');
+      var vidFolder = zip.folder('videos');
+      keys.forEach(function (fname) {
+        var info = usedFiles[fname];
+        var data = info._exportData || info.data;
+        if (info.mimeType.indexOf('video/') === 0) {
+          vidFolder.file(fname, data);
+        } else {
+          imgFolder.file(fname, data);
+        }
+      });
+    }
+
+    var fileName = (cardName || 'card') + '.zip';
+
+    return zip.generateAsync({ type: 'blob' }).then(function (blob) {
+      if (typeof AndroidBridge !== 'undefined') {
+        var reader = new FileReader();
+        reader.onload = function () {
+          AndroidBridge.saveZip(reader.result.split(',')[1], fileName);
+        };
+        reader.readAsDataURL(blob);
+        return;
       }
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement('a');
+      a.href = url;
+      a.download = fileName;
+      a.click();
+      URL.revokeObjectURL(url);
     });
   }
 
-  var fileName = (cardName || 'card') + '.zip';
-
-  return zip.generateAsync({ type: 'blob' }).then(function (blob) {
-    if (typeof AndroidBridge !== 'undefined') {
-      var reader = new FileReader();
-      reader.onload = function () {
-        AndroidBridge.saveZip(reader.result.split(',')[1], fileName);
-      };
-      reader.readAsDataURL(blob);
-      return;
-    }
-    var url = URL.createObjectURL(blob);
-    var a = document.createElement('a');
-    a.href = url;
-    a.download = fileName;
-    a.click();
-    URL.revokeObjectURL(url);
+  // For blob URL files (videos), fetch binary data first
+  var fetchPromises = keys.filter(function (fname) {
+    return usedFiles[fname].isBlobUrl;
+  }).map(function (fname) {
+    var info = usedFiles[fname];
+    return fetch(info.dataUrl).then(function (r) { return r.arrayBuffer(); }).then(function (buf) {
+      info._exportData = buf;
+    });
   });
+
+  return Promise.all(fetchPromises).then(buildZipWithData);
 };
 
 // ─── Import ZIP ────────────────────────────────────────────────────
