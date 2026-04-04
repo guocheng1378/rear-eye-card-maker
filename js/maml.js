@@ -111,7 +111,8 @@ JCM._validateMAMLRegex = function (xml) {
   var errors = [];
   if (!xml.match(/<Widget[\s>]/)) errors.push('缺少 <Widget> 根标签');
   if (!xml.match(/<\/Widget>\s*$/)) errors.push('缺少 </Widget> 闭合标签');
-  var openTags = xml.match(/<[A-Z][a-zA-Z]*\s[^/]*>/g) || [];
+  // FIX: use [^/>]* instead of [^/]* to prevent greedy matching across tags
+  var openTags = xml.match(/<[A-Z][a-zA-Z]*\s[^/>]*>/g) || [];
   var closeTags = xml.match(/<\/[A-Z][a-zA-Z]*>/g) || [];
   var selfClose = xml.match(/<[A-Z][a-zA-Z]*\s[^>]*\/>/g) || [];
   if (openTags.length !== closeTags.length + selfClose.length) {
