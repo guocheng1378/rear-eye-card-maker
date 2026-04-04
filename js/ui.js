@@ -761,16 +761,20 @@ JCM.replaceAssetPrompt = function (fname) {
     }
 
     var isGifReplace = file.type === 'image/gif';
-    if (isVideo || isGifReplace) {
-      var reader2 = new FileReader();
-      reader2.onload = function (ev) {
-        var buf = ev.target.result;
-        var storeMime = isGifReplace ? 'video/gif' : file.type;
-        var blobUrl = URL.createObjectURL(new Blob([buf], { type: file.type }));
-        replaceDone({ data: buf, mimeType: storeMime, dataUrl: blobUrl, originalName: file.name });
-      };
-      reader2.readAsArrayBuffer(file);
-    } else {
+    var needTranscodeReplace = (isVideo || isGifReplace) && JCM.needsTranscode && JCM.needsTranscode(file);
+
+    function doReplace(workingFile) {
+      var finalIsVideo = workingFile.type.indexOf('video/') === 0 || isGifReplace;
+      if (finalIsVideo) {
+        var reader2 = new FileReader();
+        reader2.onload = function (ev) {
+          var buf = ev.target.result;
+          var storeMime = isGifReplace ? 'video/gif' : workingFile.type;
+          var blobUrl = URL.createObjectURL(new Blob([buf], { type: workingFile.type }));
+          replaceDone({ data: buf, mimeType: storeMime, dataUrl: blobUrl, originalName: workingFile.name });
+        };
+        reader2.readAsArrayBuffer(workingFile);
+      } else {
       var reader = new FileReader();
       reader.onload = function (ev) {
         var dataUrl = ev.target.result;
@@ -781,6 +785,20 @@ JCM.replaceAssetPrompt = function (fname) {
         replaceDone({ data: arr.buffer, mimeType: file.type, dataUrl: dataUrl, originalName: file.name });
       };
       reader.readAsDataURL(file);
+      }
+    }
+
+    if (needTranscodeReplace) {
+      toast('🔄 正在转码为 MP4 (H.264)...', 'info');
+      JCM.transcodeToH264(file).then(function (transcodedFile) {
+        toast('✅ 转码完成', 'success');
+        doReplace(transcodedFile);
+      }).catch(function (err) {
+        toast('⚠️ 转码失败，使用原始文件: ' + err.message, 'warning');
+        doReplace(file);
+      });
+    } else {
+      doReplace(file);
     }
   };
   input.click();
@@ -803,59 +821,78 @@ function handleFilePicked(e) {
 
   var isVideo = file.type.indexOf('video/') === 0 || isGif;
 
-  // 视频格式提示：仅 MP4 (H.264) 可在背屏播放
+  // 视频格式提示
   if (isVideo && !isGif && file.type !== 'video/mp4') {
-    toast('⚠️ 背屏仅支持 MP4 (H.264) 格式，' + file.type + ' 可能无法播放', 'warning');
+    toast('⚠️ 正在检测视频格式...', 'info');
   }
 
-  var ext = file.name.split('.').pop() || (type === 'image' ? 'png' : 'mp4');
-  var safeName = 'media_' + Date.now() + '.' + ext;
+  // 需要转码的视频/GIF：先转码再存储
+  var needTranscode = isVideo && JCM.needsTranscode && JCM.needsTranscode(file);
 
-  if (isVideo) {
-    // Video / GIF: read as ArrayBuffer for export, blob URL for preview
-    var reader = new FileReader();
-    reader.onload = function (ev) {
-      var buf = ev.target.result;
-      // GIF 伪装为 video/gif，确保导出到 videos/ 目录
-      var storeMime = isGif ? 'video/gif' : file.type;
-      var blobUrl = URL.createObjectURL(new Blob([buf], { type: file.type }));
-      JCM.uploadedFiles[safeName] = { data: buf, mimeType: storeMime, dataUrl: blobUrl, originalName: file.name };
-      captureState();
-      if (replaceIdx >= 0 && replaceIdx < _elements.length) {
-        _elements[replaceIdx].fileName = safeName;
-        _elements[replaceIdx].src = safeName;
-      } else {
-        _elements.push({ type: 'video', fileName: safeName, src: safeName, x: 10, y: 60, w: 240, h: 135 });
-        _selIdx = _elements.length - 1;
-      }
-      _dirty = true;
-      renderConfig();
-      toast(file.name + (isGif ? ' 已添加（动图→视频）' : ' 已添加'), 'success');
-    };
-    reader.onerror = function () { toast('文件读取失败', 'error'); };
-    reader.readAsArrayBuffer(file);
+  function doStore(workingFile) {
+    var finalIsVideo = workingFile.type.indexOf('video/') === 0 || isGif;
+    var ext = workingFile.name.split('.').pop() || (type === 'image' ? 'png' : 'mp4');
+    var safeName = 'media_' + Date.now() + '.' + ext;
+
+    if (finalIsVideo || type === 'video') {
+      var reader = new FileReader();
+      reader.onload = function (ev) {
+        var buf = ev.target.result;
+        var storeMime = isGif ? 'video/gif' : workingFile.type;
+        var blobUrl = URL.createObjectURL(new Blob([buf], { type: workingFile.type }));
+        JCM.uploadedFiles[safeName] = { data: buf, mimeType: storeMime, dataUrl: blobUrl, originalName: workingFile.name };
+        captureState();
+        if (replaceIdx >= 0 && replaceIdx < _elements.length) {
+          _elements[replaceIdx].fileName = safeName;
+          _elements[replaceIdx].src = safeName;
+        } else {
+          _elements.push({ type: 'video', fileName: safeName, src: safeName, x: 10, y: 60, w: 240, h: 135 });
+          _selIdx = _elements.length - 1;
+        }
+        _dirty = true;
+        renderConfig();
+        toast(workingFile.name + ' 已添加', 'success');
+      };
+      reader.onerror = function () { toast('文件读取失败', 'error'); };
+      reader.readAsArrayBuffer(workingFile);
+    } else {
+      var reader2 = new FileReader();
+      reader2.onload = function (ev) {
+        var dataUrl = ev.target.result;
+        var base64 = dataUrl.split(',')[1];
+        var bin = atob(base64);
+        var arr = new Uint8Array(bin.length);
+        for (var i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
+        JCM.uploadedFiles[safeName] = { data: arr.buffer, mimeType: workingFile.type, dataUrl: dataUrl, originalName: workingFile.name };
+        captureState();
+        if (replaceIdx >= 0 && replaceIdx < _elements.length) {
+          _elements[replaceIdx].fileName = safeName;
+          _elements[replaceIdx].src = safeName;
+        } else {
+          _elements.push({ type: type, fileName: safeName, src: safeName, x: 10, y: 60, w: 200, h: 200 });
+          _selIdx = _elements.length - 1;
+        }
+        _dirty = true;
+        renderConfig();
+        toast(workingFile.name + ' 已添加', 'success');
+      };
+      reader2.readAsDataURL(workingFile);
+    }
+  }
+
+  if (needTranscode) {
+    toast('🔄 正在转码为 MP4 (H.264)...', 'info');
+    JCM.transcodeToH264(file, function (pct) {
+      toast('🔄 转码中 ' + pct + '%...', 'info');
+    }).then(function (transcodedFile) {
+      toast('✅ 转码完成', 'success');
+      doStore(transcodedFile);
+    }).catch(function (err) {
+      toast('⚠️ 转码失败，使用原始文件: ' + err.message, 'warning');
+      doStore(file);
+    });
   } else {
-    var reader = new FileReader();
-    reader.onload = function (ev) {
-      var dataUrl = ev.target.result;
-      var base64 = dataUrl.split(',')[1];
-      var bin = atob(base64);
-      var arr = new Uint8Array(bin.length);
-      for (var i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
-      JCM.uploadedFiles[safeName] = { data: arr.buffer, mimeType: file.type, dataUrl: dataUrl, originalName: file.name };
-      captureState();
-      if (replaceIdx >= 0 && replaceIdx < _elements.length) {
-        _elements[replaceIdx].fileName = safeName;
-        _elements[replaceIdx].src = safeName;
-      } else {
-        _elements.push({ type: type, fileName: safeName, src: safeName, x: 10, y: 60, w: 200, h: 200 });
-        _selIdx = _elements.length - 1;
-      }
-      _dirty = true;
-      renderConfig();
-      toast(file.name + ' 已添加', 'success');
-    };
-    reader.readAsDataURL(file);
+    doStore(file);
   }
 }
 
