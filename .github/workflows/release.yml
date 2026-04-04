@@ -18,8 +18,8 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Build release APK
-        run: chmod +x gradlew && ./gradlew assembleRelease
+      - name: Build debug APK
+        run: chmod +x gradlew && ./gradlew assembleDebug
 
       - name: Get version name
         id: version
@@ -30,4 +30,4 @@ jobs:
         with:
           name: ${{ steps.version.outputs.VERSION }}
           generate_release_notes: true
-          files: app/build/outputs/apk/release/*.apk
+          files: app/build/outputs/apk/debug/*.apk
