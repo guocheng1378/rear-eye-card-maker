@@ -92,8 +92,8 @@ const html = `<!DOCTYPE html>
       <div class="device-row">
         <label>机型</label>
         <select id="deviceSelect">
-          <option value="q200">Pro — 904×572</option>
           <option value="p2">Pro Max — 976×596</option>
+          <option value="q200">Pro — 904×572</option>
           <option value="q100">标准版 — 840×520</option>
           <option value="ultra">Ultra — 1020×620</option>
         </select>
@@ -114,7 +114,7 @@ const html = `<!DOCTYPE html>
               </div>
             </div>
           </div>
-          <div class="preview-device-label" id="deviceLabel">Pro — 904 × 572</div>
+          <div class="preview-device-label" id="deviceLabel">Pro Max — 976 × 596</div>
         </div>
         <div class="preview-side">
           <h3>📄 MAML XML</h3>

@@ -8,7 +8,7 @@ JCM.DEVICES = {
 };
 
 JCM.getDevice = function (id) {
-  return JCM.DEVICES[id] || JCM.DEVICES.q200;
+  return JCM.DEVICES[id] || JCM.DEVICES.p2;
 };
 
 JCM.cameraZoneWidth = function (device) {
