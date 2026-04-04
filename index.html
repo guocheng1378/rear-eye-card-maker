@@ -16,28 +16,28 @@
 <script>
 (function(){
   function setSafeArea(){
-    var s=getComputedStyle(document.documentElement);
-    var top=parseInt(s.getPropertyValue('--safe-top'))||0;
-    var bottom=parseInt(s.getPropertyValue('--safe-bottom'))||0;
+    var top=0, bottom=0;
+    try{
+      top=parseFloat(getComputedStyle(document.documentElement).getPropertyValue('env(safe-area-inset-top)'))||0;
+      bottom=parseFloat(getComputedStyle(document.documentElement).getPropertyValue('env(safe-area-inset-bottom)'))||0;
+    }catch(e){}
     if(!top){
-      var t=parseInt(s.getPropertyValue('env(safe-area-inset-top)'))||0;
-      if(!t&&CSS&&CSS.supports&&CSS.supports('padding-top','env(safe-area-inset-top)')){
-        var d=document.createElement('div');
-        d.style.cssText='position:fixed;top:0;left:0;right:0;padding-top:env(safe-area-inset-top);pointer-events:none;z-index:-1';
-        document.body.appendChild(d);
-        t=d.getBoundingClientRect().height||0;
-        document.body.removeChild(d);
-      }
-      if(!t&&/iPhone|iPad|iPod/.test(navigator.userAgent)) t=44;
-      if(t) document.documentElement.style.setProperty('--safe-top',t+'px');
+      var d=document.createElement('div');
+      d.style.cssText='position:fixed;top:0;left:0;right:0;padding-top:env(safe-area-inset-top);pointer-events:none;z-index:-1;height:0';
+      document.body.appendChild(d);
+      top=d.getBoundingClientRect().height||0;
+      document.body.removeChild(d);
     }
-    if(!bottom){
-      var b=parseInt(s.getPropertyValue('env(safe-area-inset-bottom)'))||0;
-      if(!b&&/iPhone/.test(navigator.userAgent)&&window.screen.height>=812) b=34;
-      if(b) document.documentElement.style.setProperty('--safe-bottom',b+'px');
-    }
+    if(!top&&/iPhone|iPad|iPod/.test(navigator.userAgent)) top=44;
+    if(!bottom&&/iPhone/.test(navigator.userAgent)&&window.screen.height>=812) bottom=34;
+    if(top) document.documentElement.style.setProperty('--safe-top',top+'px');
+    if(bottom) document.documentElement.style.setProperty('--safe-bottom',bottom+'px');
   }
-  setSafeArea();
+  if(document.readyState==='loading'){
+    document.addEventListener('DOMContentLoaded',setSafeArea);
+  }else{
+    setSafeArea();
+  }
   window.addEventListener('orientationchange',function(){setTimeout(setSafeArea,300)});
 })();
 </script>
