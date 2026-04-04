@@ -33,20 +33,19 @@
       </a>
     </div>
     <div class="steps" id="stepIndicator">
-      <div class="step-dot active" onclick="JCM.goStep(0)">
+      <div class="step-tab active" data-step="0" onclick="JCM.goStep(0)">
         <span class="step-num">1</span>
         <span class="step-label">选择模板</span>
       </div>
-      <div class="step-line"></div>
-      <div class="step-dot" onclick="JCM.goStep(1)">
+      <div class="step-tab" data-step="1" onclick="JCM.goStep(1)">
         <span class="step-num">2</span>
         <span class="step-label">配置参数</span>
       </div>
-      <div class="step-line"></div>
-      <div class="step-dot" onclick="JCM.goStep(2)">
+      <div class="step-tab" data-step="2" onclick="JCM.goStep(2)">
         <span class="step-num">3</span>
         <span class="step-label">预览导出</span>
       </div>
+      <div class="step-slider" id="stepSlider"></div>
     </div>
   </div>
 

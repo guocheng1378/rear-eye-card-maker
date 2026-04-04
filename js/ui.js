@@ -64,13 +64,19 @@ JCM.goStep = function (n) {
   if (n === 2 && !_tpl) return toast('请先选择模板并配置', 'error');
   _step = n;
 
+  // Update pages
   document.querySelectorAll('.page').forEach(function (p, i) { p.classList.toggle('active', i === n); });
-  document.querySelectorAll('.step-dot').forEach(function (d, i) {
-    d.classList.remove('active', 'done');
-    if (i === n) d.classList.add('active');
-    else if (i < n) d.classList.add('done');
+
+  // Update tab states
+  document.querySelectorAll('.step-tab').forEach(function (tab) {
+    var s = Number(tab.dataset.step);
+    tab.classList.remove('active', 'done');
+    if (s === n) tab.classList.add('active');
+    else if (s < n) tab.classList.add('done');
   });
-  document.querySelectorAll('.step-line').forEach(function (l, i) { l.classList.toggle('done', i < n); });
+
+  // Move slider
+  moveStepSlider(n);
 
   document.getElementById('btnBack').style.display = n > 0 ? '' : 'none';
   var btnNext = document.getElementById('btnNext');
@@ -88,6 +94,18 @@ JCM.goStep = function (n) {
     _previewTimer = setInterval(renderPreview, 1000);
   }
 };
+
+function moveStepSlider(n) {
+  var slider = document.getElementById('stepSlider');
+  var indicator = document.getElementById('stepIndicator');
+  var tabs = indicator.querySelectorAll('.step-tab');
+  if (!slider || !tabs[n]) return;
+  var tab = tabs[n];
+  var iRect = indicator.getBoundingClientRect();
+  var tRect = tab.getBoundingClientRect();
+  slider.style.left = (tRect.left - iRect.left) + 'px';
+  slider.style.width = tRect.width + 'px';
+}
 
 JCM.nextStep = function () { JCM.goStep(_step + 1); };
 JCM.prevStep = function () { JCM.goStep(_step - 1); };
@@ -947,6 +965,9 @@ JCM.initUI = function () {
   initTheme();
   renderTplGrid();
   setupEvents();
+  // Init slider position after layout
+  requestAnimationFrame(function () { moveStepSlider(0); });
+  window.addEventListener('resize', function () { moveStepSlider(_step); });
 };
 
 // Expose internal helpers for inline use
