@@ -462,8 +462,7 @@ JCM.TEMPLATES = [
         return '(ifelse((#dayIdx == ' + i + '), \'' + JCM.escXml(q).replace(/\n/g, '\\\\n') + '\', \'';
       }).join('') + '\'\')' + ')'.repeat(quotes.length);
       lines.length = 4; // reset, rebuild simpler
-      lines.push('  <Var name="marginL" type="number" expression="(#view_width * 0.30)" />');
-      lines.push('  <Var name="safeW" type="number" expression="(#view_width - #marginL - 30)" />');
+      lines.push(JCM.generateAutoDetectMAML());
       lines.push('  <Var name="dayIdx" type="number" expression="((#year * 366 + #month * 31 + #date) % ' + quotes.length + ')" />');
       lines.push('  <Rectangle w="#view_width" h="#view_height" fillColor="' + c.bgColor + '" />');
       lines.push('  <Group x="#marginL" y="0" w="#safeW">');
