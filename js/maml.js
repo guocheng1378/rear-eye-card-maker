@@ -79,31 +79,24 @@ JCM.validateMAML = function (xml) {
   // Use DOMParser for reliable parsing when available
   if (typeof DOMParser !== 'undefined') {
     var parser = new DOMParser();
-    var doc = parser.parseFromString(xml, 'application/xml');
+    // Wrap with xlink namespace to avoid false errors (Janus MAML uses xlink but doesn't declare it)
+    var wrappedXml = xml.replace('<Widget ', '<Widget xmlns:xlink="http://www.w3.org/1999/xlink" ');
+    var doc = parser.parseFromString(wrappedXml, 'application/xml');
     var parseError = doc.querySelector('parsererror');
     if (parseError) {
-      errors.push('XML 解析错误: ' + parseError.textContent.substring(0, 100));
-    } else {
-      // Check root Widget tag exists
-      if (!doc.documentElement || doc.documentElement.nodeName !== 'Widget') {
-        errors.push('缺少 <Widget> 根标签');
-      }
-      // Check name attribute
-      if (!doc.documentElement.getAttribute('name')) {
-        errors.push('缺少 name 属性');
-      }
+      // Fall back to regex checks — MAML is not strict XML
+      return JCM._validateMAMLRegex(xml);
+    }
+    // Check root Widget tag exists
+    if (!doc.documentElement || doc.documentElement.nodeName !== 'Widget') {
+      errors.push('缺少 <Widget> 根标签');
+    }
+    // Check name attribute
+    if (!doc.documentElement.getAttribute('name')) {
+      errors.push('缺少 name 属性');
     }
   } else {
-    // Fallback: regex-based checks
-    if (!xml.match(/<Widget[\s>]/)) errors.push('缺少 <Widget> 根标签');
-    if (!xml.match(/<\/Widget>\s*$/)) errors.push('缺少 </Widget> 闭合标签');
-    var openTags = xml.match(/<[A-Z][a-zA-Z]*\s[^/]*>/g) || [];
-    var closeTags = xml.match(/<\/[A-Z][a-zA-Z]*>/g) || [];
-    var selfClose = xml.match(/<[A-Z][a-zA-Z]*\s[^>]*\/>/g) || [];
-    if (openTags.length !== closeTags.length + selfClose.length) {
-      errors.push('标签开闭不匹配 (开:' + openTags.length + ' 闭:' + closeTags.length + ' 自闭:' + selfClose.length + ')');
-    }
-    if (!xml.match(/name="/)) errors.push('缺少 name 属性');
+    return JCM._validateMAMLRegex(xml);
   }
 
   // Common checks
@@ -111,5 +104,22 @@ JCM.validateMAML = function (xml) {
     errors.push('属性值中存在未转义的 & 或 < 字符');
   }
 
+  return { valid: errors.length === 0, errors: errors };
+};
+
+JCM._validateMAMLRegex = function (xml) {
+  var errors = [];
+  if (!xml.match(/<Widget[\s>]/)) errors.push('缺少 <Widget> 根标签');
+  if (!xml.match(/<\/Widget>\s*$/)) errors.push('缺少 </Widget> 闭合标签');
+  var openTags = xml.match(/<[A-Z][a-zA-Z]*\s[^/]*>/g) || [];
+  var closeTags = xml.match(/<\/[A-Z][a-zA-Z]*>/g) || [];
+  var selfClose = xml.match(/<[A-Z][a-zA-Z]*\s[^>]*\/>/g) || [];
+  if (openTags.length !== closeTags.length + selfClose.length) {
+    errors.push('标签开闭不匹配 (开:' + openTags.length + ' 闭:' + closeTags.length + ' 自闭:' + selfClose.length + ')');
+  }
+  if (!xml.match(/name="/)) errors.push('缺少 name 属性');
+  if (xml.match(/="[^"]*[&<][^"]*"/)) {
+    errors.push('属性值中存在未转义的 & 或 < 字符');
+  }
   return { valid: errors.length === 0, errors: errors };
 };
