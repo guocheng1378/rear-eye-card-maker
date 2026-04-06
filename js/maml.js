@@ -117,31 +117,8 @@ export function generateMAML(opts) {
 }
 
 export function validateMAML(xml) {
-  var errors = [];
-
-  if (typeof DOMParser !== 'undefined') {
-    var parser = new DOMParser();
-    var wrappedXml = xml.replace('<Widget ', '<Widget xmlns:xlink="http://www.w3.org/1999/xlink" ');
-    var doc = parser.parseFromString(wrappedXml, 'application/xml');
-    var parseError = doc.querySelector('parsererror');
-    if (parseError) {
-      return validateMAMLRegex(xml);
-    }
-    if (!doc.documentElement || doc.documentElement.nodeName !== 'Widget') {
-      errors.push('缺少 <Widget> 根标签');
-    }
-    if (!doc.documentElement.getAttribute('name')) {
-      errors.push('缺少 name 属性');
-    }
-  } else {
-    return validateMAMLRegex(xml);
-  }
-
-  if (xml.match(/="[^"]*[&<][^"]*"/)) {
-    errors.push('属性值中存在未转义的 & 或 < 字符');
-  }
-
-  return { valid: errors.length === 0, errors: errors };
+  // MAML 不是严格 XML（表达式含 <=, >= 等），只用正则校验
+  return validateMAMLRegex(xml);
 }
 
 function validateMAMLRegex(xml) {
@@ -149,13 +126,26 @@ function validateMAMLRegex(xml) {
   if (!xml.match(/<Widget[\s>]/)) errors.push('缺少 <Widget> 根标签');
   if (!xml.match(/<\/Widget>\s*$/)) errors.push('缺少 </Widget> 闭合标签');
 
-  var allOpenLike = xml.match(/<[A-Z][a-zA-Z]*\s[^/>]*>/g) || [];
-  var selfClose = xml.match(/<[A-Z][a-zA-Z]*\s[^>]*\/>/g) || [];
+  // 正确处理属性值中的 > 字符（如 expression="(#x > 5)"）
+  var openCount = 0, selfCloseCount = 0;
+  var inQuote = false, quoteChar = '';
+  for (var i = 0; i < xml.length; i++) {
+    var c = xml[i];
+    if (inQuote) { if (c === quoteChar) inQuote = false; continue; }
+    if (c === '"' || c === "'") { inQuote = true; quoteChar = c; continue; }
+    if (c === '<' && i + 1 < xml.length && xml[i + 1].match(/[A-Z]/)) {
+      // 找到标签的结束 >
+      var end = xml.indexOf('>', i + 1);
+      if (end < 0) continue;
+      var tagContent = xml.substring(i, end + 1);
+      if (tagContent.match(/\/\s*>$/)) selfCloseCount++;
+      else openCount++;
+    }
+  }
   var closeTags = xml.match(/<\/[A-Z][a-zA-Z]*>/g) || [];
-  var openTags = allOpenLike.filter(function (t) { return !/\/\s*>$/.test(t); });
 
-  if (openTags.length !== closeTags.length) {
-    errors.push('标签开闭不匹配 (开:' + openTags.length + ' 闭:' + closeTags.length + ' 自闭:' + selfClose.length + ')');
+  if (openCount !== closeTags.length) {
+    errors.push('标签开闭不匹配 (开:' + openCount + ' 闭:' + closeTags.length + ' 自闭:' + selfCloseCount + ')');
   }
   if (!xml.match(/name="/)) errors.push('缺少 name 属性');
   if (xml.match(/="[^"]*[&<][^"]*"/)) {
