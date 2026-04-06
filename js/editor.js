@@ -2,7 +2,7 @@
 
 JCM.ElementDefaults = {
   text: function () { return { type: 'text', text: '新文字', x: 10, y: 60, size: 24, color: '#ffffff', fontFamily: 'default', textAlign: 'left', bold: false, multiLine: false, w: 200, shadow: 'none', opacity: 100, textGradient: 'none', gradientColor2: '#ff6b6b', textStroke: 0, textStrokeColor: '#000000' }; },
-  rectangle: function () { return { type: 'rectangle', x: 10, y: 60, w: 100, h: 40, color: '#333333', radius: 0, opacity: 100, fillColor2: '' }; },
+  rectangle: function () { return { type: 'rectangle', x: 10, y: 60, w: 100, h: 40, color: '#333333', radius: 0, opacity: 100, fillColor2: '', blur: 0 }; },
   circle: function () { return { type: 'circle', x: 50, y: 100, r: 30, color: '#6c5ce7', opacity: 100 }; },
   line: function () { return { type: 'rectangle', x: 10, y: 100, w: 200, h: 2, color: '#555555', radius: 1, opacity: 60, _isLine: true }; },
 };
@@ -99,6 +99,7 @@ JCM.renderElementEditor = function (el, idx, device) {
       field('高', '<input type="number" value="' + el.h + '" data-prop="h" data-idx="' + idx + '">') +
       colorField('颜色', el.color || '#333333', 'color', idx) +
       field('渐变色2', '<input type="color" value="' + (el.fillColor2 || '') + '" data-prop="fillColor2" data-idx="' + idx + '"><span class="hint">留空则纯色</span>') +
+      field('模糊', '<input type="number" min="0" max="40" value="' + (el.blur || 0) + '" data-prop="blur" data-idx="' + idx + '"><span class="hint">0=无模糊 (px)</span>') +
       field('圆角', '<input type="number" value="' + (el.radius || 0) + '" data-prop="radius" data-idx="' + idx + '">') +
       field('透明度', '<input type="range" min="0" max="100" value="' + (el.opacity !== undefined ? el.opacity : 100) + '" data-prop="opacity" data-idx="' + idx + '">') +
       '</div>';
