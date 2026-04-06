@@ -6,13 +6,53 @@ JCM._ffmpeg = null;
 
 // 检测是否需要转码
 JCM.needsTranscode = function (file) {
-  // MP4 文件跳过（假定 H.264）
-  if (file.type === 'video/mp4') return false;
-  // GIF 也要转（作为视频处理时需要标准 MP4）
+  // GIF 要转（作为视频处理时需要标准 MP4）
   if (file.type === 'image/gif') return true;
-  // 其他视频格式需要转码
+  // MP4 容器跳过（假定 H.264，用户可手动强制转码）
+  if (file.type === 'video/mp4') return false;
+  // 其他视频格式（mov, webm, avi, mkv 等）必须转码
   if (file.type.indexOf('video/') === 0) return true;
   return false;
+};
+
+// 强制转码指定素材（用于 MP4 编码不兼容的情况）
+JCM.forceTranscodeAsset = function (fname) {
+  var fi = JCM.uploadedFiles[fname];
+  if (!fi) return Promise.reject(new Error('素材不存在'));
+
+  var isVideo = fi.mimeType && fi.mimeType.indexOf('video/') === 0;
+  if (!isVideo) return Promise.reject(new Error('不是视频文件'));
+
+  // 从 ArrayBuffer 重建 File 对象
+  var ext = fname.split('.').pop().toLowerCase() || 'mp4';
+  var mime = fi.mimeType || ('video/' + ext);
+  var blob = new Blob([fi.data], { type: mime });
+  var file = new File([blob], fi.originalName || fname, { type: mime });
+
+  toast('🔄 正在强制转码为 H.264...', 'info');
+
+  return JCM.transcodeToH264(file, function (pct) {
+    toast('🔄 转码中 ' + pct + '%...', 'info');
+  }).then(function (transcoded) {
+    return new Promise(function (resolve) {
+      var reader = new FileReader();
+      reader.onload = function (ev) {
+        var buf = ev.target.result;
+        var blobUrl = URL.createObjectURL(new Blob([buf], { type: 'video/mp4' }));
+        JCM.uploadedFiles[fname] = {
+          data: buf,
+          mimeType: 'video/mp4',
+          dataUrl: blobUrl,
+          originalName: transcoded.name
+        };
+        toast('✅ 转码完成: ' + transcoded.name, 'success');
+        resolve();
+      };
+      reader.readAsArrayBuffer(transcoded);
+    });
+  }).catch(function (e) {
+    toast('❌ 转码失败: ' + e.message, 'error');
+  });
 };
 
 // 加载 FFmpeg.wasm（按需加载，首次约 25MB）
@@ -107,6 +147,7 @@ JCM.transcodeToH264 = function (file, onProgress) {
     if (data.length < 1024) throw new Error('转码输出异常');
 
     var blob = new Blob([data.buffer], { type: 'video/mp4' });
+    // 强制使用 .mp4 扩展名（不管原始格式是什么）
     var baseName = file.name.replace(/\.[^.]+$/, '');
     return new File([blob], baseName + '.mp4', { type: 'video/mp4' });
   }).catch(function (e) {
