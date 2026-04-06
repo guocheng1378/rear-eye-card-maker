@@ -417,10 +417,10 @@ JCM.exportPNG = function (cardName, cfg, elements, tpl, uploadedFiles) {
         var a = document.createElement('a');
         a.href = url;
         a.download = (cardName || 'card') + '.png';
+        a.style.display = 'none';
         document.body.appendChild(a);
         a.click();
-        document.body.removeChild(a);
-        setTimeout(function () { URL.revokeObjectURL(url); }, 5000);
+        setTimeout(function () { URL.revokeObjectURL(url); a.remove(); }, 10000);
         resolve();
       }, 'image/png');
     });
