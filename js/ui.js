@@ -488,7 +488,17 @@ JCM.addElement = function (type) {
   captureState('添加 ' + type);
   var defs = JCM.ElementDefaults;
   if (defs[type]) {
-    _elements.push(JSON.parse(JSON.stringify(defs[type]())));
+    var newEl = JSON.parse(JSON.stringify(defs[type]()));
+    // 标记不支持 MAML 的元素类型
+    if (type === 'lottie') {
+      newEl._browserOnly = true;
+      toast('⚠️ Lottie 仅浏览器预览可用，MAML 不支持此格式', 'warning');
+    }
+    if (type === 'arc') {
+      newEl._approximate = true;
+      toast('⚠️ 弧形在 MAML 中用圆形模拟，效果可能与预览不完全一致', 'info');
+    }
+    _elements.push(newEl);
     _selIdx = _elements.length - 1;
     _dirty = true;
     renderConfig();
@@ -696,14 +706,17 @@ function generateCustomMAML(device) {
         lines.push('    <Video src="videos/' + JCM.escXml(el.src || el.fileName || '') + '" x="' + el.x + '" y="' + el.y + '" w="' + (el.w || 240) + '" h="' + (el.h || 135) + '" autoPlay="true" loop="true" />');
         break;
       case 'arc':
-        lines.push('    <Arc x="' + el.x + '" y="' + el.y + '" r="' + (el.r || 40) + '" startAngle="' + (el.startAngle || 0) + '" endAngle="' + (el.endAngle || 270) + '" color="' + el.color + '" strokeWidth="' + (el.strokeWidth || 6) + '" />');
+        // MAML 不支持 <Arc>，用 Circle 模拟（完整圆形，颜色匹配）
+        lines.push('    <!-- Arc: MAML 不原生支持弧形，用圆形近似 -->');
+        lines.push('    <Circle x="' + el.x + '" y="' + el.y + '" r="' + (el.r || 40) + '" fillColor="' + el.color + '" />');
         break;
       case 'progress':
         lines.push('    <Rectangle x="' + el.x + '" y="' + el.y + '" w="' + (el.w || 200) + '" h="' + (el.h || 8) + '" fillColor="' + (el.bgColor || '#333333') + '" cornerRadius="' + (el.radius || 4) + '" />');
         lines.push('    <Rectangle x="' + el.x + '" y="' + el.y + '" w="' + Math.round((el.w || 200) * (el.value || 60) / 100) + '" h="' + (el.h || 8) + '" fillColor="' + el.color + '" cornerRadius="' + (el.radius || 4) + '" />');
         break;
       case 'lottie':
-        lines.push('    <Lottie src="lottie/' + JCM.escXml(el.src || el.fileName || '') + '" x="' + el.x + '" y="' + el.y + '" w="' + (el.w || 120) + '" h="' + (el.h || 120) + '" speed="' + (el.speed || 1) + '" />');
+        // MAML 不支持 Lottie，导出为注释
+        lines.push('    <!-- Lottie 动画: MAML 引擎不支持，请替换为 Image 或 Video 元素 -->');
         break;
     }
     // 动画属性追加到当前元素（修改最后push的行）
@@ -908,13 +921,18 @@ JCM.toggleFullscreen = function () {
   }
 };
 
+// ─── Token 编码/解码（避免明文存储）───────────────────────────────
+function _encodeToken(t) { try { return btoa(unescape(encodeURIComponent(t))); } catch (e) { return ''; } }
+function _decodeToken(t) { try { return decodeURIComponent(escape(atob(t))); } catch (e) { return ''; } }
+
 // ─── Build APK via GitHub Actions ─────────────────────────────────
 JCM.triggerBuild = function () {
-  var token = localStorage.getItem('jcm-gh-token');
+  var raw = localStorage.getItem('jcm-gh-token');
+  var token = raw ? _decodeToken(raw) : '';
   if (!token) {
     token = prompt('输入 GitHub Personal Access Token（需 repo 权限，仅保存在本地）：');
     if (!token) return;
-    localStorage.setItem('jcm-gh-token', token);
+    localStorage.setItem('jcm-gh-token', _encodeToken(token));
   }
 
   toast('🚀 正在触发 APK 构建...', 'info');
@@ -1050,16 +1068,11 @@ function applyCfgZoom() {
 JCM.handleBatchExport = function () {
   if (!_tpl) return toast('请先选择模板', 'error');
   var deviceKeys = ['p2', 'q200', 'q100', 'ultra'];
-  var count = 0;
   var errors = [];
 
-  function exportNext() {
-    if (count >= deviceKeys.length) {
-      if (errors.length > 0) toast('部分导出失败: ' + errors.join(', '), 'error');
-      else toast('✅ 全部 ' + count + ' 个机型已导出', 'success');
-      return;
-    }
-    var dk = deviceKeys[count];
+  toast('📦 正在批量导出 4 个机型...', 'info');
+
+  var promises = deviceKeys.map(function (dk) {
     var device = JCM.getDevice(dk);
     var innerXml = getTemplateMAML(_tpl, _cfg, device);
     var maml = _tpl.rawXml ? innerXml : JCM.generateMAML({
@@ -1073,16 +1086,17 @@ JCM.handleBatchExport = function () {
     });
     var validation = JCM.validateMAML(maml);
     if (!validation.valid) {
-      errors.push(device.label);
-      count++;
-      exportNext();
-      return;
+      errors.push(device.label + ': ' + validation.errors[0]);
+      return Promise.resolve();
     }
-    JCM.exportZip(maml, (_cfg.cardName || 'card') + '_' + dk, _elements, JCM.uploadedFiles, _tpl.id === 'custom', _cfg.bgImage || '')
-      .then(function () { count++; setTimeout(exportNext, 500); })
-      .catch(function () { errors.push(device.label); count++; setTimeout(exportNext, 500); });
-  }
-  exportNext();
+    return JCM.exportZip(maml, (_cfg.cardName || 'card') + '_' + dk, _elements, JCM.uploadedFiles, _tpl.id === 'custom', _cfg.bgImage || '')
+      .catch(function (e) { errors.push(device.label + ': ' + e.message); });
+  });
+
+  Promise.all(promises).then(function () {
+    if (errors.length > 0) toast('部分导出失败: ' + errors.join(', '), 'error');
+    else toast('✅ 全部 4 个机型已导出', 'success');
+  });
 };
 
 // ─── Universal Export (one card fits all) ─────────────────────────
@@ -1132,6 +1146,7 @@ JCM.handleImportZip = function () {
       // Switch to custom template
       _tpl = JCM.TEMPLATES.find(function (t) { return t.id === 'custom'; });
       _cfg = { cardName: data.cardName, bgColor: data.bgColor };
+      if (data.bgImage) _cfg.bgImage = data.bgImage;
       // GIF 动图转视频元素
       _elements = data.elements.map(function(el) {
         if (el.type === 'image' && el.fileName) {
@@ -1968,18 +1983,32 @@ var _autoSaveTimer = null;
 function autoSave() {
   clearTimeout(_autoSaveTimer);
   _autoSaveTimer = setTimeout(function () {
-    try {
-      var draft = {
-        tplId: _tpl ? _tpl.id : null,
-        cfg: _cfg,
-        elements: _elements,
-        timestamp: Date.now()
-      };
-      localStorage.setItem('jcm-draft', JSON.stringify(draft));
-      // Show save indicator
-      var el = document.getElementById('autosaveIndicator');
-      if (el) { el.classList.add('show'); setTimeout(function () { el.classList.remove('show'); }, 1500); }
-    } catch (e) { }
+    var el = document.getElementById('autosaveIndicator');
+
+    // 优先使用 IndexedDB（支持大容量素材）
+    if (JCM.Storage) {
+      JCM.Storage.saveDraft(
+        _tpl ? _tpl.id : null,
+        _cfg,
+        _elements,
+        JCM.uploadedFiles
+      ).then(function () {
+        if (el) { el.classList.add('show'); setTimeout(function () { el.classList.remove('show'); }, 1500); }
+      }).catch(function () {
+        // IndexedDB 失败，降级到 localStorage（不含素材）
+        try {
+          var draft = { tplId: _tpl ? _tpl.id : null, cfg: _cfg, elements: _elements, timestamp: Date.now() };
+          localStorage.setItem('jcm-draft', JSON.stringify(draft));
+          if (el) { el.classList.add('show'); setTimeout(function () { el.classList.remove('show'); }, 1500); }
+        } catch (e) {}
+      });
+    } else {
+      try {
+        var draft = { tplId: _tpl ? _tpl.id : null, cfg: _cfg, elements: _elements, timestamp: Date.now() };
+        localStorage.setItem('jcm-draft', JSON.stringify(draft));
+        if (el) { el.classList.add('show'); setTimeout(function () { el.classList.remove('show'); }, 1500); }
+      } catch (e) {}
+    }
   }, 2000);
 }
 
@@ -2005,6 +2034,10 @@ function showDraftRecovery(d) {
     _tpl = _tpl2;
     _cfg = d.cfg || {};
     _elements = d.elements || [];
+    // 恢复 uploadedFiles（来自 IndexedDB）
+    if (d.uploadedFiles) {
+      JCM.uploadedFiles = d.uploadedFiles;
+    }
     _dirty = true;
     _history = [];
     _redoStack = [];
@@ -2015,6 +2048,7 @@ function showDraftRecovery(d) {
   };
   document.getElementById('draftDiscardBtn').onclick = function () {
     localStorage.removeItem('jcm-draft');
+    if (JCM.Storage) JCM.Storage.clearDraft().catch(function () {});
     div.remove();
   };
 }
@@ -2349,6 +2383,7 @@ JCM.initUI = function () {
   window.addEventListener('beforeunload', function () {
     // 暂停所有视频
     document.querySelectorAll('video').forEach(function (v) { v.pause(); v.src = ''; });
+    // 同步保存到 localStorage（IndexedDB 在 beforeunload 中来不及）
     try {
       var draft = {
         tplId: _tpl ? _tpl.id : null,
@@ -2359,14 +2394,29 @@ JCM.initUI = function () {
       localStorage.setItem('jcm-draft', JSON.stringify(draft));
     } catch (e) { }
   });
-  // Check for unsaved draft
-  try {
-    var draft = localStorage.getItem('jcm-draft');
-    if (draft) {
-      var d = JSON.parse(draft);
-      if (d.tplId) showDraftRecovery(d);
-    }
-  } catch (e) { }
+  // Check for unsaved draft (优先 IndexedDB)
+  if (JCM.Storage) {
+    JCM.Storage.loadDraft().then(function (d) {
+      if (d && d.tplId) showDraftRecovery(d);
+    }).catch(function () {
+      // 降级检查 localStorage
+      try {
+        var draft = localStorage.getItem('jcm-draft');
+        if (draft) {
+          var d = JSON.parse(draft);
+          if (d.tplId) showDraftRecovery(d);
+        }
+      } catch (e) {}
+    });
+  } else {
+    try {
+      var draft = localStorage.getItem('jcm-draft');
+      if (draft) {
+        var d = JSON.parse(draft);
+        if (d.tplId) showDraftRecovery(d);
+      }
+    } catch (e) {}
+  }
 };
 
 // Expose internal helpers for inline use

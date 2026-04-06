@@ -160,6 +160,13 @@ JCM.importZip = function (file) {
         }
       }
 
+      // 背景图检测：查找第一个全屏 Image 元素
+      var bgImgMatch = xml.match(/<Image\s+[^>]*x="0"[^>]*y="0"[^>]*w="#view_width"[^>]*h="#view_height"[^>]*src="([^"]*)"[^>]*\/?>/i) ||
+                        xml.match(/<Image\s+[^>]*src="([^"]*)"[^>]*x="0"[^>]*y="0"[^>]*w="#view_width"[^>]*h="#view_height"[^>]*\/?>/i);
+      if (bgImgMatch) {
+        result.bgImageSrc = bgImgMatch[1];
+      }
+
       // Load media files
       var promises = [];
       zip.forEach(function (path, entry) {
@@ -192,7 +199,19 @@ JCM.importZip = function (file) {
         }
       });
 
-      return Promise.all(promises).then(function () { return result; });
+      return Promise.all(promises).then(function () {
+        // 背景图：如果是本地文件引用，从已加载的 files 中取
+        if (result.bgImageSrc) {
+          var bgSrc = result.bgImageSrc;
+          var bgFile = bgSrc.replace(/^(images|videos)\//, '');
+          if (result.files[bgFile]) {
+            result.bgImage = result.files[bgFile].dataUrl;
+          } else if (bgSrc.indexOf('http') === 0 || bgSrc.indexOf('data:') === 0) {
+            result.bgImage = bgSrc;
+          }
+        }
+        return result;
+      });
     });
   });
 };

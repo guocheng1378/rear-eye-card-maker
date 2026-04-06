@@ -49,61 +49,63 @@
 <link rel="stylesheet" href="css/style.css">
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#6c5ce7">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' blob: data:; script-src 'self' 'unsafe-inline' https://unpkg.com; style-src 'self' 'unsafe-inline'; img-src 'self' blob: data: https:; media-src 'self' blob: data:; connect-src 'self' https://api.github.com https://unpkg.com;">
 </head>
 <body>
 
 <input type="file" id="fileImagePick" accept="image/*" style="display:none">
 <input type="file" id="fileVideoPick" accept="video/*" style="display:none">
 
-<div class="app">
+<div class="app" role="application" aria-label="Janus 卡片制作器">
   <!-- Top Bar -->
-  <div class="topbar">
+  <header class="topbar" role="banner">
     <div class="topbar-left">
-      <h1><span>🃏</span> Janus 卡片制作器</h1>
-      <span class="badge">MAML</span>
+      <h1><span aria-hidden="true">🃏</span> Janus 卡片制作器</h1>
+      <span class="badge" aria-label="MAML 格式">MAML</span>
     </div>
-    <div class="topbar-right">
-      <button class="theme-toggle" id="themeToggle" onclick="JCM.toggleTheme()" title="切换主题">🌙</button>
-      <button class="theme-toggle" id="helpBtn" onclick="JCM.toggleHelp()" title="快捷键帮助">⌨️</button>
-      <button class="theme-toggle" id="historyBtn" onclick="JCM.toggleHistory()" title="操作历史">📜</button>
-      <button class="theme-toggle" id="changelogBtn" onclick="JCM.toggleChangelog()" title="更新日志">📝</button>
+    <nav class="topbar-right" aria-label="工具栏">
+      <button class="theme-toggle" id="themeToggle" onclick="JCM.toggleTheme()" title="切换主题" aria-label="切换亮色/暗色主题">🌙</button>
+      <button class="theme-toggle" id="helpBtn" onclick="JCM.toggleHelp()" title="快捷键帮助" aria-label="快捷键帮助">⌨️</button>
+      <button class="theme-toggle" id="historyBtn" onclick="JCM.toggleHistory()" title="操作历史" aria-label="操作历史">📜</button>
+      <button class="theme-toggle" id="changelogBtn" onclick="JCM.toggleChangelog()" title="更新日志" aria-label="更新日志">📝</button>
       <a class="theme-toggle github-link" href="https://github.com/guocheng1378/janus-card-maker" target="_blank" title="GitHub">
         <svg viewBox="0 0 16 16" width="18" height="18" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
       </a>
-    </div>
-  </div>
+    </nav>
+  </header>
   <!-- Step Tabs -->
-  <div class="stepper">
-    <div class="steps" id="stepIndicator">
-      <div class="step-tab active" data-step="0" onclick="JCM.goStep(0)">
-        <span class="step-num">1</span>
+  <nav class="stepper" aria-label="制作步骤">
+    <div class="steps" id="stepIndicator" role="tablist">
+      <div class="step-tab active" data-step="0" onclick="JCM.goStep(0)" role="tab" aria-selected="true" aria-controls="page0" tabindex="0">
+        <span class="step-num" aria-hidden="true">1</span>
         <span class="step-label">选择模板</span>
       </div>
-      <div class="step-tab" data-step="1" onclick="JCM.goStep(1)">
-        <span class="step-num">2</span>
+      <div class="step-tab" data-step="1" onclick="JCM.goStep(1)" role="tab" aria-selected="false" aria-controls="page1" tabindex="0">
+        <span class="step-num" aria-hidden="true">2</span>
         <span class="step-label">配置参数</span>
       </div>
-      <div class="step-tab" data-step="2" onclick="JCM.goStep(2)">
-        <span class="step-num">3</span>
+      <div class="step-tab" data-step="2" onclick="JCM.goStep(2)" role="tab" aria-selected="false" aria-controls="page2" tabindex="0">
+        <span class="step-num" aria-hidden="true">3</span>
         <span class="step-label">预览导出</span>
       </div>
       <div class="step-slider" id="stepSlider"></div>
     </div>
-  </div>
+    </div>
+  </nav>
 
   <!-- Content -->
-  <div class="content">
+  <main class="content" role="main">
     <!-- Page 1: Template Selection -->
-    <div class="page page-tpl active" id="page0">
+    <section class="page page-tpl active" id="page0" role="tabpanel" aria-label="选择模板">
       <div class="page-title">选择卡片模板</div>
       <div class="page-subtitle">从预设模板开始，或选择自定义从零创建</div>
       <div class="tpl-categories" id="tplCategories"></div>
       <div class="tpl-search"><input type="text" id="tplSearch" placeholder="🔍 搜索模板..." oninput="JCM.filterTemplates(this.value)"></div>
-      <div class="tpl-grid" id="tplGrid"></div>
-    </div>
+      <div class="tpl-grid" id="tplGrid" role="list" aria-label="模板列表"></div>
+    </section>
 
     <!-- Page 2: Configuration with Live Preview -->
-    <div class="page page-config-live" id="page1">
+    <section class="page page-config-live" id="page1" role="tabpanel" aria-label="配置参数">
       <div class="config-live-left">
         <div class="config-header">
           <span class="tpl-icon" id="cfgIcon"></span>
@@ -151,10 +153,10 @@
           <button class="btn btn-export" onclick="JCM.handleExport()"><span class="btn-icon">📦</span> 导出 ZIP</button>
         </div>
       </div>
-    </div>
+    </section>
 
     <!-- Page 3: Preview & Export -->
-    <div class="page page-preview" id="page2">
+    <section class="page page-preview" id="page2" role="tabpanel" aria-label="预览导出">
       <div class="device-row">
         <label>机型</label>
         <select id="deviceSelect">
@@ -204,7 +206,7 @@
             <div class="code-body">
               <div class="code-gutter" id="codeGutter"></div>
               <div class="code-highlight" id="codeHighlight"></div>
-              <textarea id="codeContent" spellcheck="false" wrap="off">选择模板并配置后，点击「生成预览」查看 XML</textarea>
+              <textarea id="codeContent" spellcheck="false" wrap="off" aria-label="MAML XML 代码编辑器">选择模板并配置后，点击「生成预览」查看 XML</textarea>
             </div>
           </div>
           <div class="preview-actions">
@@ -222,30 +224,30 @@
           </div>
         </div>
       </div>
-    </div>
-  </div>
+    </section>
+  </main>
 
   <!-- Bottom Bar -->
-  <div class="bottombar">
+  <footer class="bottombar" role="contentinfo">
     <div class="bottombar-left">
-      <button class="btn btn-back" id="btnBack" onclick="JCM.prevStep()" style="display:none">
-        <span class="btn-icon">←</span> 上一步
+      <button class="btn btn-back" id="btnBack" onclick="JCM.prevStep()" style="display:none" aria-label="返回上一步">
+        <span class="btn-icon" aria-hidden="true">←</span> 上一步
       </button>
     </div>
     <div class="bottombar-right">
-      <button class="btn btn-primary" id="btnNext" onclick="JCM.nextStep()">
-        下一步 <span class="btn-icon">→</span>
+      <button class="btn btn-primary" id="btnNext" onclick="JCM.nextStep()" aria-label="进入下一步">
+        下一步 <span class="btn-icon" aria-hidden="true">→</span>
       </button>
     </div>
-  </div>
+  </footer>
 </div>
 
 <!-- Keyboard Shortcut Help Modal -->
-<div class="modal-overlay" id="helpModal" style="display:none" onclick="JCM.toggleHelp()">
+<div class="modal-overlay" id="helpModal" style="display:none" onclick="JCM.toggleHelp()" role="dialog" aria-modal="true" aria-label="快捷键帮助">
   <div class="modal" onclick="event.stopPropagation()">
     <div class="modal-header">
       <h3>⌨️ 快捷键</h3>
-      <button class="modal-close" onclick="JCM.toggleHelp()">✕</button>
+      <button class="modal-close" onclick="JCM.toggleHelp()" aria-label="关闭">✕</button>
     </div>
     <div class="modal-body">
       <div class="shortcut-list">
@@ -261,22 +263,22 @@
   </div>
 </div>
 
-<div class="modal-overlay" id="historyModal" style="display:none" onclick="JCM.toggleHistory()">
+<div class="modal-overlay" id="historyModal" style="display:none" onclick="JCM.toggleHistory()" role="dialog" aria-modal="true" aria-label="操作历史">
   <div class="modal" onclick="event.stopPropagation()">
     <div class="modal-header">
       <h3>📜 操作历史</h3>
-      <button class="modal-close" onclick="JCM.toggleHistory()">✕</button>
+      <button class="modal-close" onclick="JCM.toggleHistory()" aria-label="关闭">✕</button>
     </div>
     <div class="modal-body" id="historyList"></div>
   </div>
 </div>
 
 <!-- Changelog Modal -->
-<div class="modal-overlay" id="changelogModal" style="display:none" onclick="JCM.toggleChangelog()">
+<div class="modal-overlay" id="changelogModal" style="display:none" onclick="JCM.toggleChangelog()" role="dialog" aria-modal="true" aria-label="更新日志">
   <div class="modal" style="max-width:560px;max-height:80vh" onclick="event.stopPropagation()">
     <div class="modal-header">
       <h3>📝 更新日志</h3>
-      <button class="modal-close" onclick="JCM.toggleChangelog()">✕</button>
+      <button class="modal-close" onclick="JCM.toggleChangelog()" aria-label="关闭">✕</button>
     </div>
     <div class="modal-body" id="changelogList" style="max-height:60vh;overflow-y:auto"></div>
   </div>
@@ -294,6 +296,7 @@
 <script src="lib/jszip.min.js"></script>
 <script src="js/export.js"></script>
 <script src="js/transcode.js"></script>
+<script src="js/storage.js"></script>
 <script src="js/ui.js"></script>
 <script src="js/app.js"></script>
 
@@ -302,7 +305,7 @@
 <div class="autosave-indicator" id="autosaveIndicator">💾 已自动保存</div>
 
 <!-- Right-click Context Menu -->
-<div class="context-menu" id="contextMenu" style="display:none">
+<div class="context-menu" id="contextMenu" style="display:none" role="menu" aria-label="元素操作">
   <div class="ctx-item" data-ctx="duplicate">📋 复制元素</div>
   <div class="ctx-item" data-ctx="delete">🗑️ 删除</div>
   <div class="ctx-divider"></div>

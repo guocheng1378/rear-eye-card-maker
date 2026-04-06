@@ -133,6 +133,7 @@ JCM.renderElementEditor = function (el, idx, device) {
       field('圆角', '<input type="number" value="' + (el.radius || 4) + '" data-prop="radius" data-idx="' + idx + '">') +
       '</div>';
   } else if (el.type === 'lottie') {
+    html += '<div style="padding:8px 12px;margin-bottom:12px;background:rgba(253,203,110,0.1);border:1px solid rgba(253,203,110,0.3);border-radius:8px;font-size:12px;color:#fdcb6e">⚠️ Lottie 动画仅在浏览器预览中可用，MAML 引擎不支持此格式。导出时将被忽略。</div>';
     html += '<div class="config-grid">' +
       field('X', '<input type="number" value="' + el.x + '" data-prop="x" data-idx="' + idx + '">') +
       field('Y', '<input type="number" value="' + el.y + '" data-prop="y" data-idx="' + idx + '">') +
