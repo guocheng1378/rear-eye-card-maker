@@ -58,17 +58,17 @@ html = html.replace(
   ''
 );
 
-// Remove SW registration
-html = html.replace(
-  /<script>\s*if\s*\(\s*'serviceWorker'[\s\S]*?<\/script>\s*\n?/,
-  ''
+// Remove SW registration from inlined JS
+let jsFinal = js.replace(
+  /\/\/\s*.*Service Worker[\s\S]*?if\s*\(\s*'serviceWorker'[\s\S]*?\}\s*\)\s*;?\s*/,
+  '// SW removed for APK build\n'
 );
 
 // Insert inline scripts before </body>
 const inlineScripts = [
   '<!-- Inlined by build.js -->',
   '<script>' + jszip + '<\/script>',
-  '<script>' + js + '<\/script>',
+  '<script>' + jsFinal + '<\/script>',
 ].join('\n');
 html = html.replace('</body>', inlineScripts + '\n</body>');
 
