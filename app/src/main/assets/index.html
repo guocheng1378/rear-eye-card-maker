@@ -4,6 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Janus 卡片制作器</title>
+<meta name="description" content="为小米背屏（SubScreen）制作 MAML 卡片模板的免费在线工具。">
+<meta property="og:title" content="Janus 卡片制作器">
+<meta property="og:description" content="为小米背屏制作 MAML 卡片模板的免费在线工具">
 <script>try{var t=localStorage.getItem('jcm-theme');if(t){document.documentElement.setAttribute('data-theme',t);window.__themeBtn=t==='dark'?'🌙':'☀️'}}catch(e){}</script>
 <style>*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 [data-theme=dark]{
@@ -38,31 +41,44 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC',sans-
 /* ─── Top Bar ─── */
 .topbar{
   display:flex;align-items:center;justify-content:space-between;
-  padding:14px 24px;background:var(--surface);border-bottom:1px solid var(--border);
+  padding:12px 24px;padding-top:calc(12px + var(--safe-top, env(safe-area-inset-top, 0px)));
+  background:var(--surface);border-bottom:1px solid var(--border);
   flex-shrink:0;z-index:100;
 }
 .topbar-left{display:flex;align-items:center;gap:12px}
-.topbar-left h1{font-size:17px;font-weight:700;display:flex;align-items:center;gap:8px}
+.topbar-right{display:flex;align-items:center;gap:8px}
+.topbar-left h1{font-size:17px;font-weight:700;display:flex;align-items:center;gap:8px;white-space:nowrap}
 .topbar-left h1 span{font-size:20px}
 .topbar-left .badge{font-size:10px;color:var(--accent2);background:var(--accent-glow);padding:2px 8px;border-radius:6px;font-weight:600}
 
+/* ─── Stepper ─── */
+.stepper{
+  display:flex;align-items:center;justify-content:center;
+  padding:8px 24px;background:var(--surface);border-bottom:1px solid var(--border);
+  flex-shrink:0;
+}
+
 /* ─── Steps ─── */
-.steps{display:flex;align-items:center;gap:0}
-.step-dot{
-  display:flex;align-items:center;gap:8px;padding:6px 14px;border-radius:20px;
-  font-size:12px;font-weight:600;color:var(--text3);cursor:pointer;transition:var(--transition);position:relative;
+.steps{display:flex;align-items:center;position:relative;gap:0}
+.step-tab{
+  display:flex;align-items:center;gap:6px;padding:8px 16px;
+  font-size:12px;font-weight:600;color:var(--text3);cursor:pointer;
+  transition:color .3s ease;position:relative;z-index:1;white-space:nowrap;
 }
-.step-dot:hover{color:var(--text2)}
-.step-dot.active{color:var(--accent2);background:var(--accent-glow)}
-.step-dot.done{color:var(--green)}
+.step-tab:hover{color:var(--text2)}
+.step-tab.active{color:var(--accent2)}
 .step-num{
-  width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;
-  font-size:11px;font-weight:700;background:var(--surface2);border:1px solid var(--border);transition:var(--transition);
+  width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-size:10px;font-weight:700;background:var(--surface2);border:1px solid var(--border);
+  transition:background .3s,border-color .3s,color .3s;
 }
-.step-dot.active .step-num{background:var(--accent);border-color:var(--accent);color:#fff}
-.step-dot.done .step-num{background:var(--green);border-color:var(--green);color:#fff}
-.step-line{width:24px;height:1px;background:var(--border);margin:0 4px}
-.step-line.done{background:var(--green)}
+.step-tab.active .step-num{background:var(--accent);border-color:var(--accent);color:#fff}
+.step-tab.done .step-num{background:var(--green);border-color:var(--green);color:#fff}
+.step-tab.done{color:var(--green)}
+.step-slider{
+  position:absolute;bottom:0;height:2.5px;background:var(--accent);
+  border-radius:2px;transition:left .35s cubic-bezier(.4,0,.2,1),width .35s cubic-bezier(.4,0,.2,1);
+}
 
 /* ─── Content ─── */
 .content{flex:1;overflow:hidden;position:relative}
@@ -258,7 +274,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC',sans-
 /* ─── Bottom Bar ─── */
 .bottombar{
   display:flex;align-items:center;justify-content:space-between;
-  padding:12px 24px;background:var(--surface);border-top:1px solid var(--border);flex-shrink:0;
+  padding:12px 24px;padding-bottom:calc(12px + var(--safe-bottom, env(safe-area-inset-bottom, 0px)));
+  background:var(--surface);border-top:1px solid var(--border);flex-shrink:0;
 }
 .bottombar-left,.bottombar-right{display:flex;gap:10px}
 .device-row{display:flex;align-items:center;gap:14px;margin-bottom:16px;flex-wrap:wrap}
@@ -271,16 +288,18 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC',sans-
   display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2);cursor:pointer;
 }
 
-/* ─── Toast ─── */
+/* ─── Toast (queue) ─── */
 .toast{
-  position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(10px);
+  position:fixed;left:50%;transform:translateX(-50%) translateY(10px);
   padding:10px 24px;border-radius:10px;font-size:13px;font-weight:600;
-  opacity:0;transition:all .3s ease;z-index:999;pointer-events:none;
-  box-shadow:0 8px 24px rgba(0,0,0,.4);
+  opacity:0;transition:opacity .3s ease,transform .3s ease,bottom .3s ease;z-index:999;pointer-events:none;
+  box-shadow:0 8px 24px rgba(0,0,0,.4);white-space:nowrap;
 }
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 .toast.success{background:var(--green);color:#fff}
 .toast.error{background:var(--red);color:#fff}
+.toast.info{background:var(--accent);color:#fff}
+.toast.warning{background:var(--orange);color:#1a1a2e}
 
 
 /* ─── Theme Toggle ─── */
@@ -340,18 +359,113 @@ kbd{
   font-size:12px;color:var(--accent2);border:1px solid rgba(108,92,231,.2);
 }
 
+/* ─── Config + Live Preview Split ─── */
+.page-config-live{
+  display:flex;flex-direction:row;overflow:hidden;
+}
+.config-live-left{
+  flex:1;overflow-y:auto;padding:28px 24px;
+  border-right:1px solid var(--border);
+  min-width:0;
+}
+.config-live-right{
+  width:420px;flex-shrink:0;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:24px 20px;gap:14px;
+  background:var(--surface2);
+}
+.config-live-preview-label{
+  font-size:13px;font-weight:700;color:var(--text2);
+  display:flex;align-items:center;gap:6px;
+}
+.config-preview-phone{
+  width:380px!important;height:228px!important;
+  border-radius:16px!important;
+  box-shadow:0 12px 40px rgba(0,0,0,.5),inset 0 0 0 1px rgba(255,255,255,.05)!important;
+}
+.config-live-device-row{
+  display:flex;align-items:center;gap:12px;margin-bottom:16px;flex-wrap:wrap;
+}
+.config-live-device-row label{font-size:12px;color:var(--text2);font-weight:500}
+.config-live-device-row select{
+  padding:5px 10px;background:var(--surface2);border:1px solid var(--border);
+  border-radius:8px;color:var(--text);font-size:12px;outline:none;
+}
+.config-live-export-row{
+  display:flex;gap:8px;margin-top:4px;
+}
+.config-live-export-row .btn{font-size:12px;padding:8px 14px}
+
+/* ─── Theme Presets ─── */
+.theme-presets{
+  display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;padding:8px;
+  background:var(--surface);border-radius:8px;
+}
+.theme-preset{
+  display:flex;align-items:center;gap:3px;padding:4px 8px;
+  border-radius:6px;cursor:pointer;border:1px solid transparent;
+  transition:var(--transition);background:var(--surface2);
+}
+.theme-preset:hover{border-color:var(--accent);background:var(--accent-glow)}
+.theme-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.theme-name{font-size:10px;color:var(--text2);margin-left:4px;white-space:nowrap}
+
+/* ─── Smart Guides ─── */
+.smart-guide{
+  position:absolute;z-index:50;pointer-events:none;
+  background:var(--accent);opacity:0.7;
+}
+.smart-guide-h{height:1px;left:0;right:0}
+.smart-guide-v{width:1px;top:0;bottom:0}
+
+/* ─── Zoom Controls ─── */
+.zoom-controls{
+  display:flex;align-items:center;gap:8px;
+  padding:4px 10px;background:var(--surface2);border:1px solid var(--border);
+  border-radius:8px;font-size:12px;
+}
+.zoom-controls button{
+  width:24px;height:24px;border-radius:6px;border:1px solid var(--border);
+  background:var(--surface);color:var(--text);font-size:14px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;transition:var(--transition);
+}
+.zoom-controls button:hover{border-color:var(--accent);color:var(--accent)}
+.zoom-controls .zoom-label{color:var(--text2);min-width:36px;text-align:center}
+
+/* ─── Batch Export ─── */
+.batch-export-bar{
+  display:flex;gap:8px;margin-top:12px;padding:10px 14px;
+  background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);
+}
+.batch-export-bar .btn{font-size:11px;padding:6px 12px}
+
+/* ─── Desktop ─── */
+@media(min-width:1200px){
+  .tpl-grid{grid-template-columns:repeat(auto-fill,minmax(220px,1fr));max-width:1200px;margin:0 auto}
+  .page-preview{max-width:1400px;margin:0 auto}
+  .config-grid{max-width:900px}
+  .config-live-right{width:480px;padding:28px 24px}
+  .config-preview-phone{width:420px!important;height:252px!important;border-radius:20px!important}
+}
+
 /* ─── Responsive ─── */
 @media(max-width:768px){
-  .topbar{padding:10px 16px}
+  .topbar{padding:10px 16px;padding-top:calc(10px + var(--safe-top, env(safe-area-inset-top, 0px)))}
   .topbar-left h1{font-size:15px}
-  .step-dot{padding:5px 8px}
-  .step-dot .step-label{display:none}
-  .page-tpl,.page-config,.page-preview{padding:20px 16px}
+  .stepper{padding:6px 12px}
+  .step-tab{padding:6px 10px}
+  .step-tab .step-label{display:none}
+  .page-tpl,.page-preview{padding:20px 16px}
   .tpl-grid{grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px}
   .config-grid{grid-template-columns:1fr}
   .preview-layout{grid-template-columns:1fr}
   .preview-phone{width:320px;height:192px}
-  .bottombar{padding:10px 16px}
+  .bottombar{padding:10px 16px;padding-bottom:calc(10px + var(--safe-bottom, env(safe-area-inset-bottom, 0px)))}
+  /* Config live preview: stack vertically on mobile */
+  .page-config-live{flex-direction:column}
+  .config-live-left{padding:16px;border-right:none;border-bottom:1px solid var(--border);max-height:55%;overflow-y:auto}
+  .config-live-right{width:100%;padding:16px;flex:1;min-height:200px}
+  .config-preview-phone{width:260px;height:156px}
 }
 </style>
 </head>
@@ -365,25 +479,28 @@ kbd{
     <div class="topbar-left">
       <h1><span>🃏</span> Janus 卡片制作器</h1>
       <span class="badge">MAML</span>
+    </div>
+    <div class="topbar-right">
       <button class="theme-toggle" id="themeToggle" onclick="JCM.toggleTheme()" title="切换主题">🌙</button>
       <button class="theme-toggle" id="helpBtn" onclick="JCM.toggleHelp()" title="快捷键帮助">⌨️</button>
       <a class="theme-toggle" href="https://github.com/guocheng1378/janus-card-maker" target="_blank" title="GitHub">⭐</a>
     </div>
+  </div>
+  <div class="stepper">
     <div class="steps" id="stepIndicator">
-      <div class="step-dot active" onclick="JCM.goStep(0)">
+      <div class="step-tab active" data-step="0" onclick="JCM.goStep(0)">
         <span class="step-num">1</span>
         <span class="step-label">选择模板</span>
       </div>
-      <div class="step-line"></div>
-      <div class="step-dot" onclick="JCM.goStep(1)">
+      <div class="step-tab" data-step="1" onclick="JCM.goStep(1)">
         <span class="step-num">2</span>
         <span class="step-label">配置参数</span>
       </div>
-      <div class="step-line"></div>
-      <div class="step-dot" onclick="JCM.goStep(2)">
+      <div class="step-tab" data-step="2" onclick="JCM.goStep(2)">
         <span class="step-num">3</span>
         <span class="step-label">预览导出</span>
       </div>
+      <div class="step-slider" id="stepSlider"></div>
     </div>
   </div>
 
@@ -408,14 +525,14 @@ kbd{
     <div class="page page-preview" id="page2">
       <div class="device-row">
         <label>机型</label>
-        <select id="deviceSelect" onchange="renderPreview()">
-          <option value="q200">Pro — 904×572</option>
+        <select id="deviceSelect">
           <option value="p2">Pro Max — 976×596</option>
+          <option value="q200">Pro — 904×572</option>
           <option value="q100">标准版 — 840×520</option>
           <option value="ultra">Ultra — 1020×620</option>
         </select>
         <label class="check-label">
-          <input type="checkbox" id="showCamera" checked onchange="renderPreview()"> 摄像头遮挡区
+          <input type="checkbox" id="showCamera" checked> 摄像头遮挡区
         </label>
       </div>
       <div class="preview-layout">
@@ -431,13 +548,13 @@ kbd{
               </div>
             </div>
           </div>
-          <div class="preview-device-label" id="deviceLabel">Pro — 904 × 572</div>
+          <div class="preview-device-label" id="deviceLabel">Pro Max — 976 × 596</div>
         </div>
         <div class="preview-side">
           <h3>📄 MAML XML</h3>
           <div class="xml-preview"><pre id="codeContent">选择模板并配置后，点击「生成预览」查看 XML</pre></div>
           <div class="preview-actions">
-            <button class="btn btn-secondary" onclick="renderPreview()"><span class="btn-icon">🔄</span> 生成预览</button>
+            <button class="btn btn-secondary" onclick="JCM.renderPreview()"><span class="btn-icon">🔄</span> 生成预览</button>
             <button class="btn btn-export" onclick="JCM.handleExport()"><span class="btn-icon">📦</span> 导出 ZIP</button>
             <button class="btn btn-secondary" onclick="JCM.handleExportPNG()"><span class="btn-icon">🖼</span> 导出 PNG</button>
           </div>
@@ -534,11 +651,32 @@ JCM.DEVICES = {
 };
 
 JCM.getDevice = function (id) {
-  return JCM.DEVICES[id] || JCM.DEVICES.q200;
+  return JCM.DEVICES[id] || JCM.DEVICES.p2;
 };
 
 JCM.cameraZoneWidth = function (device) {
   return Math.ceil(device.width * device.cameraZoneRatio);
+};
+
+// 根据屏幕宽高比自动检测设备类型，生成 MAML 自适应变量
+JCM.generateAutoDetectMAML = function () {
+  return [
+    '  <!-- 自动检测设备：通过屏幕宽高判断机型 -->',
+    '  <Var name="isQ100" type="number" expression="ifelse((#view_width <= 860), 1, 0)" />',
+    '  <Var name="isQ200" type="number" expression="ifelse(((#view_width > 860) &amp;&amp; (#view_width <= 940)), 1, 0)" />',
+    '  <Var name="isP2" type="number" expression="ifelse(((#view_width > 940) &amp;&amp; (#view_width <= 998)), 1, 0)" />',
+    '  <Var name="isUltra" type="number" expression="ifelse((#view_width > 998), 1, 0)" />',
+    '',
+    '  <!-- 摄像头避让边距（各机型比例不同） -->',
+    '  <Var name="marginL" type="number" expression="(#isQ100 * (#view_width * 0.28) + #isQ200 * (#view_width * 0.30) + #isP2 * (#view_width * 0.30) + #isUltra * (#view_width * 0.32))" />',
+    '',
+    '  <!-- 缩放比例（相对 Pro Max 基准 976×596） -->',
+    '  <Var name="scaleX" type="number" expression="(#view_width / 976.0)" />',
+    '  <Var name="scaleY" type="number" expression="(#view_height / 596.0)" />',
+    '',
+    '  <!-- 可用区域宽度 -->',
+    '  <Var name="safeW" type="number" expression="(#view_width - #marginL - 20)" />',
+  ].join("\n");
 };
 
 // ─── MAML: XML 生成 + 转义 + 校验 ──────────────────────────────────
@@ -604,11 +742,12 @@ function renderEl(el, files) {
       return p + '<Circle x="' + el.x + '" y="' + el.y + '" r="' + el.r + '" fillColor="' + el.color + '"' + alphaAttr(el) + ' />';
     }
     case 'image': {
-      var folder = el.src && files[el.src] && files[el.src].mimeType.indexOf('video/') === 0 ? 'videos' : 'images';
-      return p + '<Image src="' + folder + '/' + JCM.escXml(el.src || '') + '" x="' + el.x + '" y="' + el.y + '" w="' + (el.w || 100) + '" h="' + (el.h || 100) + '" />';
+      var srcFile = el.src || el.fileName || '';
+      var folder = srcFile && files[srcFile] && files[srcFile].mimeType.indexOf('video/') === 0 ? 'videos' : 'images';
+      return p + '<Image src="' + folder + '/' + JCM.escXml(srcFile) + '" x="' + el.x + '" y="' + el.y + '" w="' + (el.w || 100) + '" h="' + (el.h || 100) + '" />';
     }
     case 'video':
-      return p + '<Video src="videos/' + JCM.escXml(el.src || '') + '" x="' + el.x + '" y="' + el.y + '" w="' + (el.w || 240) + '" h="' + (el.h || 135) + '" autoPlay="true" loop="true" />';
+      return p + '<Video src="videos/' + JCM.escXml(el.src || el.fileName || '') + '" x="' + el.x + '" y="' + el.y + '" w="' + (el.w || 240) + '" h="' + (el.h || 135) + '" autoPlay="true" loop="true" />';
     default:
       return '';
   }
@@ -617,22 +756,59 @@ function renderEl(el, files) {
 // ─── XML 校验 ────────────────────────────────────────────────────
 JCM.validateMAML = function (xml) {
   var errors = [];
-  // Check root Widget tag
-  if (!xml.match(/<Widget[\s>]/)) errors.push('缺少 <Widget> 根标签');
-  if (!xml.match(/<\/Widget>\s*$/)) errors.push('缺少 </Widget> 闭合标签');
-  // Check balanced tags
-  var openTags = xml.match(/<[A-Z][a-zA-Z]*\s[^/]*>/g) || [];
-  var closeTags = xml.match(/<\/[A-Z][a-zA-Z]*>/g) || [];
-  var selfClose = xml.match(/<[A-Z][a-zA-Z]*\s[^>]*\/>/g) || [];
-  if (openTags.length !== closeTags.length + selfClose.length) {
-    errors.push('标签开闭不匹配 (开:' + openTags.length + ' 闭:' + closeTags.length + ' 自闭:' + selfClose.length + ')');
+
+  // Use DOMParser for reliable parsing when available
+  if (typeof DOMParser !== 'undefined') {
+    var parser = new DOMParser();
+    // Wrap with xlink namespace to avoid false errors (Janus MAML uses xlink but doesn't declare it)
+    var wrappedXml = xml.replace('<Widget ', '<Widget xmlns:xlink="http://www.w3.org/1999/xlink" ');
+    var doc = parser.parseFromString(wrappedXml, 'application/xml');
+    var parseError = doc.querySelector('parsererror');
+    if (parseError) {
+      // Fall back to regex checks — MAML is not strict XML
+      return JCM._validateMAMLRegex(xml);
+    }
+    // Check root Widget tag exists
+    if (!doc.documentElement || doc.documentElement.nodeName !== 'Widget') {
+      errors.push('缺少 <Widget> 根标签');
+    }
+    // Check name attribute
+    if (!doc.documentElement.getAttribute('name')) {
+      errors.push('缺少 name 属性');
+    }
+  } else {
+    return JCM._validateMAMLRegex(xml);
   }
-  // Check for unescaped special chars in attribute values
+
+  // Common checks
   if (xml.match(/="[^"]*[&<][^"]*"/)) {
     errors.push('属性值中存在未转义的 & 或 < 字符');
   }
-  // Check name attribute
+
+  return { valid: errors.length === 0, errors: errors };
+};
+
+JCM._validateMAMLRegex = function (xml) {
+  var errors = [];
+  if (!xml.match(/<Widget[\s>]/)) errors.push('缺少 <Widget> 根标签');
+  if (!xml.match(/<\/Widget>\s*$/)) errors.push('缺少 </Widget> 闭合标签');
+
+  // FIX: 1) use [^/>]* to prevent cross-tag greedy matching
+  //      2) filter out self-closing tags from open count, change formula to open === close
+  var allOpenLike = xml.match(/<[A-Z][a-zA-Z]*\s[^/>]*>/g) || [];
+  var selfClose = xml.match(/<[A-Z][a-zA-Z]*\s[^>]*\/>/g) || [];
+  var closeTags = xml.match(/<\/[A-Z][a-zA-Z]*>/g) || [];
+
+  // True open tags = all open-like matches that are NOT self-closing
+  var openTags = allOpenLike.filter(function (t) { return !/\/\s*>$/.test(t); });
+
+  if (openTags.length !== closeTags.length) {
+    errors.push('标签开闭不匹配 (开:' + openTags.length + ' 闭:' + closeTags.length + ' 自闭:' + selfClose.length + ')');
+  }
   if (!xml.match(/name="/)) errors.push('缺少 name 属性');
+  if (xml.match(/="[^"]*[&<][^"]*"/)) {
+    errors.push('属性值中存在未转义的 & 或 < 字符');
+  }
   return { valid: errors.length === 0, errors: errors };
 };
 
@@ -668,7 +844,7 @@ JCM.TEMPLATES = [
     gen: function (c) {
       var dateY = 80 + Number(c.timeSize) * 0.9;
       return [
-        '  <Var name="marginL" type="number" expression="(#view_width * 0.30)" />',
+        JCM.generateAutoDetectMAML(),
         '  <Rectangle w="#view_width" h="#view_height" fillColor="' + c.bgColor + '" />',
         '  <Group x="#marginL" y="0">',
         '    <Text textExp="formatDate(\'' + c.timeFormat + '\', #time_sys)" x="0" y="80" size="' + c.timeSize + '" color="' + c.timeColor + '" />',
@@ -696,7 +872,7 @@ JCM.TEMPLATES = [
     ],
     gen: function (c) {
       return [
-        '  <Var name="marginL" type="number" expression="(#view_width * 0.30)" />',
+        JCM.generateAutoDetectMAML(),
         '  <Var name="safeW" type="number" expression="(#view_width - #marginL - 20)" />',
         '  <Rectangle w="#view_width" h="#view_height" fillColor="' + c.bgColor + '" />',
         '  <Group x="#marginL" y="40" w="#safeW">',
@@ -724,7 +900,7 @@ JCM.TEMPLATES = [
     ],
     gen: function (c) {
       return [
-        '  <Var name="marginL" type="number" expression="(#view_width * 0.30)" />',
+        JCM.generateAutoDetectMAML(),
         '  <Var name="safeW" type="number" expression="(#view_width - #marginL - 40)" />',
         '  <Var name="barW" type="number" expression="(#safeW * #battery_level / 100)" />',
         '  <Rectangle w="#view_width" h="#view_height" fillColor="' + c.bgColor + '" />',
@@ -763,7 +939,7 @@ JCM.TEMPLATES = [
     gen: function (c) {
       var items = [c.item1, c.item2, c.item3, c.item4].filter(Boolean);
       var lines = [
-        '  <Var name="marginL" type="number" expression="(#view_width * 0.30)" />',
+        JCM.generateAutoDetectMAML(),
         '  <Rectangle w="#view_width" h="#view_height" fillColor="' + c.bgColor + '" />',
         '  <Group x="#marginL" y="0">',
         '    <Rectangle x="0" y="40" w="4" h="24" fillColor="' + c.accentColor + '" cornerRadius="2" />',
@@ -799,7 +975,7 @@ JCM.TEMPLATES = [
       var td = String(c.targetDate || '0101');
       var validTd = /^\d{4}$/.test(td) ? td : '0101';
       return [
-        '  <Var name="marginL" type="number" expression="(#view_width * 0.30)" />',
+        JCM.generateAutoDetectMAML(),
         '  <Var name="m" type="number" expression="#month" />',
         '  <Var name="d" type="number" expression="#date" />',
         '  <Var name="doy_base" type="number" expression="(ifelse((#m == 1), 0, ifelse((#m == 2), 31, ifelse((#m == 3), 59, ifelse((#m == 4), 90, ifelse((#m == 5), 120, ifelse((#m == 6), 151, ifelse((#m == 7), 181, ifelse((#m == 8), 212, ifelse((#m == 9), 243, ifelse((#m == 10), 273, ifelse((#m == 11), 304, 334)))))))))))" />',
@@ -843,7 +1019,7 @@ JCM.TEMPLATES = [
     ],
     gen: function (c) {
       return [
-        '  <Var name="marginL" type="number" expression="(#view_width * 0.30)" />',
+        JCM.generateAutoDetectMAML(),
         '  <Var name="safeW" type="number" expression="(#view_width - #marginL - 30)" />',
         '  <Rectangle w="#view_width" h="#view_height" fillColor="' + c.bgColor + '" />',
         '  <Group x="#marginL" y="0">',
@@ -878,7 +1054,7 @@ JCM.TEMPLATES = [
     ],
     gen: function (c) {
       return [
-        '  <Var name="marginL" type="number" expression="(#view_width * 0.30)" />',
+        JCM.generateAutoDetectMAML(),
         '  <Var name="safeW" type="number" expression="(#view_width - #marginL - 30)" />',
         '  <Rectangle w="#view_width" h="#view_height" fillColor="' + c.bgColor1 + '" />',
         '  <Rectangle x="(#view_width * 0.5)" w="(#view_width * 0.5)" h="#view_height" fillColor="' + c.bgColor2 + '" alpha="0.7" />',
@@ -908,7 +1084,7 @@ JCM.TEMPLATES = [
     ],
     gen: function (c) {
       return [
-        '  <Var name="marginL" type="number" expression="(#view_width * 0.30)" />',
+        JCM.generateAutoDetectMAML(),
         '  <Rectangle w="#view_width" h="#view_height" fillColor="' + c.bgColor + '" />',
         '  <Group x="#marginL" y="0">',
         '    <Text text="' + JCM.escXml(c.city) + '" x="0" y="30" size="14" color="' + c.descColor + '" alpha="0.7" />',
@@ -939,7 +1115,7 @@ JCM.TEMPLATES = [
     ],
     gen: function (c) {
       return [
-        '  <Var name="marginL" type="number" expression="(#view_width * 0.30)" />',
+        JCM.generateAutoDetectMAML(),
         '  <Var name="safeW" type="number" expression="(#view_width - #marginL - 40)" />',
         '  <Var name="goalN" type="number" expression="' + (parseInt(c.goal) || 10000) + '" />',
         '  <Var name="pct" type="number" expression="ifelse((#step_count > #goalN), 100, (#step_count * 100 / #goalN))" />',
@@ -983,7 +1159,7 @@ JCM.TEMPLATES = [
     gen: function (c) {
       var events = [c.event1, c.event2, c.event3].filter(Boolean);
       var lines = [
-        '  <Var name="marginL" type="number" expression="(#view_width * 0.30)" />',
+        JCM.generateAutoDetectMAML(),
         '  <Rectangle w="#view_width" h="#view_height" fillColor="' + c.bgColor + '" />',
         '  <Group x="#marginL" y="0">',
         '    <Text textExp="formatDate(\'MM/dd\', #time_sys)" x="0" y="20" size="14" color="' + c.textColor + '" alpha="0.5" />',
@@ -1035,7 +1211,7 @@ JCM.TEMPLATES = [
       var o1 = Number(c.offset1) || 0;
       var o2 = Number(c.offset2) || 0;
       return [
-        '  <Var name="marginL" type="number" expression="(#view_width * 0.30)" />',
+        JCM.generateAutoDetectMAML(),
         '  <Var name="safeW" type="number" expression="(#view_width - #marginL - 20)" />',
         '  <Var name="utcNow" type="number" expression="(#time_sys + (' + (o1 * -3600000) + '))" />',
         '  <Var name="utcNow2" type="number" expression="(#time_sys + (' + (o2 * -3600000) + '))" />',
@@ -1082,7 +1258,7 @@ JCM.TEMPLATES = [
       var quotes = [c.quote1, c.quote2, c.quote3, c.quote4, c.quote5, c.quote6, c.quote7].filter(Boolean);
       if (quotes.length === 0) quotes = ['每日一句'];
       var lines = [
-        '  <Var name="marginL" type="number" expression="(#view_width * 0.30)" />',
+        JCM.generateAutoDetectMAML(),
         '  <Var name="safeW" type="number" expression="(#view_width - #marginL - 30)" />',
         '  <Var name="dayIdx" type="number" expression="((#year * 366 + #month * 31 + #date) % ' + quotes.length + ')" />',
         '  <Rectangle w="#view_width" h="#view_height" fillColor="' + c.bgColor + '" />',
@@ -1100,8 +1276,7 @@ JCM.TEMPLATES = [
         return '(ifelse((#dayIdx == ' + i + '), \'' + JCM.escXml(q).replace(/\n/g, '\\\\n') + '\', \'';
       }).join('') + '\'\')' + ')'.repeat(quotes.length);
       lines.length = 4; // reset, rebuild simpler
-      lines.push('  <Var name="marginL" type="number" expression="(#view_width * 0.30)" />');
-      lines.push('  <Var name="safeW" type="number" expression="(#view_width - #marginL - 30)" />');
+      lines.push(JCM.generateAutoDetectMAML());
       lines.push('  <Var name="dayIdx" type="number" expression="((#year * 366 + #month * 31 + #date) % ' + quotes.length + ')" />');
       lines.push('  <Rectangle w="#view_width" h="#view_height" fillColor="' + c.bgColor + '" />');
       lines.push('  <Group x="#marginL" y="0" w="#safeW">');
@@ -1152,7 +1327,7 @@ JCM.TEMPLATES = [
       var valueExpr = isBattery ? '#battery_level' : '#step_count';
       var unit = isBattery ? '%' : '步';
       return [
-        '  <Var name="marginL" type="number" expression="(#view_width * 0.30)" />',
+        JCM.generateAutoDetectMAML(),
         '  <Var name="cx" type="number" expression="(#marginL + (#view_width - #marginL) / 2)" />',
         '  <Var name="pct" type="number" expression="' + pctExpr + '" />',
         '  <Var name="ringR" type="number" expression="80" />',
@@ -1185,7 +1360,7 @@ JCM.TEMPLATES = [
     ],
     gen: function (c) {
       return [
-        '  <Var name="marginL" type="number" expression="(#view_width * 0.30)" />',
+        JCM.generateAutoDetectMAML(),
         '  <Var name="safeW" type="number" expression="(#view_width - #marginL - 20)" />',
         '  <Var name="colW" type="number" expression="(#safeW / 2)" />',
         '  <Rectangle w="#view_width" h="#view_height" fillColor="' + c.bgColor + '" />',
@@ -1223,7 +1398,7 @@ JCM.TEMPLATES = [
     ],
     gen: function (c) {
       return [
-        '  <Var name="marginL" type="number" expression="(#view_width * 0.30)" />',
+        JCM.generateAutoDetectMAML(),
         '  <Rectangle w="#view_width" h="#view_height" fillColor="' + c.bgColor + '" />',
       ].join('\n');
     },
@@ -1239,10 +1414,15 @@ JCM.TEMPLATES = [
         { key: 'bgPattern', label: '背景图案', type: 'select', options: [
           { v: 'solid', l: '纯色' },
           { v: 'dots', l: '点阵' },
+          { v: 'dots-large', l: '大点阵' },
           { v: 'grid', l: '网格' },
-          { v: 'gradient', l: '渐变' },
+          { v: 'diagonal', l: '斜线' },
+          { v: 'wave', l: '波浪' },
+          { v: 'noise', l: '噪点' },
+          { v: 'gradient', l: '线性渐变' },
+          { v: 'gradient-radial', l: '径向渐变' },
         ], default: 'solid' },
-        { key: 'bgColor2', label: '渐变色2（仅渐变）', type: 'color', default: '#1a1a2e' },
+        { key: 'bgColor2', label: '渐变色2 / 辅助色', type: 'color', default: '#1a1a2e' },
       ]},
     ],
     gen: null,
@@ -1264,7 +1444,7 @@ PreviewRenderer.prototype.bg = function (bg, inner) {
 };
 
 PreviewRenderer.prototype.esc = function (s) {
-  return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  return JCM.escHtml(s);
 };
 
 PreviewRenderer.prototype.fmtTime = function (now, fmt) {
@@ -1386,11 +1566,28 @@ PreviewRenderer.prototype.renderCustom = function (c) {
   if (pat === 'dots') {
     return '<div style="position:absolute;inset:0;background:' + c.bgColor + ';background-image:radial-gradient(circle,rgba(255,255,255,0.08) 1px,transparent 1px);background-size:20px 20px"></div>';
   }
+  if (pat === 'dots-large') {
+    return '<div style="position:absolute;inset:0;background:' + c.bgColor + ';background-image:radial-gradient(circle,rgba(255,255,255,0.06) 4px,transparent 4px);background-size:32px 32px"></div>';
+  }
   if (pat === 'grid') {
     return '<div style="position:absolute;inset:0;background:' + c.bgColor + ';background-image:linear-gradient(rgba(255,255,255,0.05) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.05) 1px,transparent 1px);background-size:20px 20px"></div>';
   }
+  if (pat === 'diagonal') {
+    return '<div style="position:absolute;inset:0;background:' + c.bgColor + ';background-image:repeating-linear-gradient(45deg,transparent,transparent 10px,rgba(255,255,255,0.04) 10px,rgba(255,255,255,0.04) 11px)"></div>';
+  }
+  if (pat === 'wave') {
+    return '<div style="position:absolute;inset:0;background:' + c.bgColor + '"></div>' +
+      '<svg style="position:absolute;bottom:0;left:0;width:100%;height:40%;opacity:0.08" viewBox="0 0 400 120" preserveAspectRatio="none"><path d="M0,60 C100,100 200,20 300,60 C350,80 400,40 400,60 L400,120 L0,120Z" fill="' + (c.bgColor2 || '#fff') + '"/></svg>';
+  }
+  if (pat === 'noise') {
+    return '<div style="position:absolute;inset:0;background:' + c.bgColor + '"></div>' +
+      '<div style="position:absolute;inset:0;opacity:0.03;background-image:url("data:image/svg+xml,%3Csvg viewBox=%270 0 256 256%27 xmlns=%27http://www.w3.org/2000/svg%27%3E%3Cfilter id=%27n%27%3E%3CfeTurbulence type=%27fractalNoise%27 baseFrequency=%270.9%27 numOctaves=%274%27 stitchTiles=%27stitch%27/%3E%3C/filter%3E%3Crect width=%27100%25%27 height=%27100%25%27 filter=%27url(%23n)%27/%3E%3C/svg%3E")"></div>';
+  }
   if (pat === 'gradient') {
     return '<div style="position:absolute;inset:0;background:linear-gradient(135deg,' + c.bgColor + ',' + (c.bgColor2 || '#1a1a2e') + ')"></div>';
+  }
+  if (pat === 'gradient-radial') {
+    return '<div style="position:absolute;inset:0;background:radial-gradient(circle at 30% 40%,' + c.bgColor + ',' + (c.bgColor2 || '#1a1a2e') + ')"></div>';
   }
   return this.bg(c.bgColor, '');
 };
@@ -1403,7 +1600,8 @@ PreviewRenderer.prototype.renderWeather = function (c) {
     '<div style="position:absolute;left:' + (this.camW + 10) + 'px;top:32px;font-size:' + Math.round(Number(c.tempSize) * this.scale) + 'px;color:' + c.tempColor + ';font-weight:700">23°</div>' +
     '<div style="position:absolute;left:' + (this.camW + 10) + 'px;top:' + Math.round(32 + Number(c.tempSize) * this.scale + 8) + 'px;font-size:' + Math.round(18 * this.scale) + 'px;color:' + c.descColor + '">晴</div>' +
     '<div style="position:absolute;left:' + (this.camW + 10) + 'px;top:' + Math.round(32 + Number(c.tempSize) * this.scale + 40) + 'px;font-size:' + Math.round(14 * this.scale) + 'px;color:' + c.descColor + ';opacity:0.5">湿度 45%</div>' +
-    '<div style="position:absolute;left:' + (this.camW + 120) + 'px;top:' + Math.round(32 + Number(c.tempSize) * this.scale + 40) + 'px;font-size:' + Math.round(14 * this.scale) + 'px;color:' + c.descColor + ';opacity:0.5">体感 21°</div>'
+    '<div style="position:absolute;left:' + (this.camW + 120) + 'px;top:' + Math.round(32 + Number(c.tempSize) * this.scale + 40) + 'px;font-size:' + Math.round(14 * this.scale) + 'px;color:' + c.descColor + ';opacity:0.5">体感 21°</div>' +
+    '<div style="position:absolute;right:8px;bottom:6px;font-size:' + Math.round(10 * this.scale) + 'px;color:' + c.descColor + ';opacity:0.3">预览数据</div>'
   );
 };
 
@@ -1420,7 +1618,8 @@ PreviewRenderer.prototype.renderSteps = function (c) {
       '<div style="width:' + barW + 'px;height:100%;background:' + c.barColor + ';border-radius:3px"></div></div>' +
     '<div style="position:absolute;left:' + (this.camW + 10) + 'px;top:' + Math.round(30 + 52 * this.scale + 44) + 'px;font-size:' + Math.round(12 * this.scale) + 'px;color:' + c.textColor + ';opacity:0.4">目标 ' + goal.toLocaleString() + ' · ' + pct + '%</div>' +
     '<div style="position:absolute;left:' + (this.camW + 10) + 'px;top:' + Math.round(30 + 52 * this.scale + 70) + 'px;font-size:' + Math.round(14 * this.scale) + 'px;color:' + c.accentColor + ';opacity:0.7">距离 4.2 km</div>' +
-    '<div style="position:absolute;left:' + (this.camW + 130) + 'px;top:' + Math.round(30 + 52 * this.scale + 70) + 'px;font-size:' + Math.round(14 * this.scale) + 'px;color:' + c.accentColor + ';opacity:0.7">消耗 186 kcal</div>'
+    '<div style="position:absolute;left:' + (this.camW + 130) + 'px;top:' + Math.round(30 + 52 * this.scale + 70) + 'px;font-size:' + Math.round(14 * this.scale) + 'px;color:' + c.accentColor + ';opacity:0.7">消耗 186 kcal</div>' +
+    '<div style="position:absolute;right:8px;bottom:6px;font-size:' + Math.round(10 * this.scale) + 'px;color:' + c.textColor + ';opacity:0.15">预览数据</div>'
   );
 };
 
@@ -1564,10 +1763,25 @@ PreviewRenderer.prototype.renderElements = function (elements, files, selIdx) {
         var fw = el.bold ? 'font-weight:700;' : '';
         var w = el.multiLine || (el.textAlign && el.textAlign !== 'left') ? 'width:' + ((el.w || 200) * self.scale) + 'px;' : '';
         var lh = el.multiLine ? 'white-space:pre-wrap;line-height:1.4;' : '';
-        return '<div data-el-idx="' + i + '" style="position:absolute;left:' + px + 'px;top:' + py + 'px;font-size:' + el.size * self.scale + 'px;color:' + el.color + ';' + w + ta + fw + lh + sh + op + dc + '">' + self.esc(el.text || '') + '</div>';
+        // Text gradient
+        var gradStyle = '';
+        if (el.textGradient && el.textGradient !== 'none') {
+          var gradColors = { sunset: '#ff6b6b,#feca57', ocean: '#0984e3,#00cec9', neon: '#ff00ff,#00ffff', gold: '#f39c12,#fdcb6e', aurora: '#6c5ce7,#00b894' };
+          var gc = el.textGradient === 'custom' ? (el.color || '#ffffff') + ',' + (el.gradientColor2 || '#ff6b6b') : gradColors[el.textGradient] || gradColors.sunset;
+          gradStyle = 'background:linear-gradient(135deg,' + gc + ');-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;';
+        }
+        // Text stroke
+        var strokeStyle = '';
+        if (el.textStroke && el.textStroke > 0) {
+          var sw = el.textStroke * self.scale;
+          var sc = el.textStrokeColor || '#000000';
+          strokeStyle = '-webkit-text-stroke:' + sw + 'px ' + sc + ';';
+        }
+        return '<div data-el-idx="' + i + '" style="position:absolute;left:' + px + 'px;top:' + py + 'px;font-size:' + el.size * self.scale + 'px;color:' + el.color + ';' + w + ta + fw + lh + sh + op + gradStyle + strokeStyle + dc + '">' + self.esc(el.text || '') + '</div>';
       }
       case 'rectangle':
-        return '<div data-el-idx="' + i + '" style="position:absolute;left:' + px + 'px;top:' + py + 'px;width:' + el.w * self.scale + 'px;height:' + el.h * self.scale + 'px;background:' + el.color + ';border-radius:' + (el.radius || 0) * self.scale + 'px;' + op + dc + '"></div>' + rh;
+        var rectBg = el.fillColor2 ? 'background:linear-gradient(135deg,' + el.color + ',' + el.fillColor2 + ')' : 'background:' + el.color;
+        return '<div data-el-idx="' + i + '" style="position:absolute;left:' + px + 'px;top:' + py + 'px;width:' + el.w * self.scale + 'px;height:' + el.h * self.scale + 'px;' + rectBg + ';border-radius:' + (el.radius || 0) * self.scale + 'px;' + op + dc + '"></div>' + rh;
       case 'circle':
         return '<div data-el-idx="' + i + '" style="position:absolute;left:' + (self.camW + (el.x - el.r) * self.scale) + 'px;top:' + (el.y - el.r) * self.scale + 'px;width:' + el.r * 2 * self.scale + 'px;height:' + el.r * 2 * self.scale + 'px;background:' + el.color + ';border-radius:50%;' + op + dc + '"></div>';
       case 'image': {
@@ -1590,8 +1804,8 @@ JCM.PreviewRenderer = PreviewRenderer;
 // ─── Editor: 自定义元素编辑 ──────────────────────────────────────
 
 JCM.ElementDefaults = {
-  text: function () { return { type: 'text', text: '新文字', x: 10, y: 60, size: 24, color: '#ffffff', textAlign: 'left', bold: false, multiLine: false, w: 200, shadow: 'none', opacity: 100 }; },
-  rectangle: function () { return { type: 'rectangle', x: 10, y: 60, w: 100, h: 40, color: '#333333', radius: 0, opacity: 100 }; },
+  text: function () { return { type: 'text', text: '新文字', x: 10, y: 60, size: 24, color: '#ffffff', textAlign: 'left', bold: false, multiLine: false, w: 200, shadow: 'none', opacity: 100, textGradient: 'none', textStroke: 0, textStrokeColor: '#000000' }; },
+  rectangle: function () { return { type: 'rectangle', x: 10, y: 60, w: 100, h: 40, color: '#333333', radius: 0, opacity: 100, fillColor2: '' }; },
   circle: function () { return { type: 'circle', x: 50, y: 100, r: 30, color: '#6c5ce7', opacity: 100 }; },
   line: function () { return { type: 'rectangle', x: 10, y: 100, w: 200, h: 2, color: '#555555', radius: 1, opacity: 60, _isLine: true }; },
 };
@@ -1623,7 +1837,7 @@ JCM.renderElementEditor = function (el, idx, device) {
       html += '<span class="media-picker-icon">' + (isImg ? '🖼' : '🎬') + '</span>';
     }
     html += '<div class="media-picker-info"><div class="media-picker-name">' + (has ? esc(fi.originalName) : (isImg ? '点击选择图片' : '点击选择视频')) + '</div>' +
-      '<div class="media-picker-hint">' + (has ? fmtSize(fi.data.byteLength) + ' · 点击更换' : (isImg ? '支持 JPG / PNG / GIF / WebP' : '支持 MP4 / WebM / 3GP')) + '</div></div>';
+      '<div class="media-picker-hint">' + (has ? fmtSize(fi.data.byteLength) + ' · 点击更换' : (isImg ? '支持 JPG / PNG / WebP（GIF 动图会自动转为视频）' : '推荐 MP4 (H.264)，背屏仅支持此格式')) + '</div></div>';
     if (has) html += '<button class="media-picker-change" onclick="event.stopPropagation();JCM.pickMediaReplace(' + idx + ')">更换</button>';
     html += '</div>';
 
@@ -1638,6 +1852,18 @@ JCM.renderElementEditor = function (el, idx, device) {
       field('文字', '<input type="text" value="' + esc(el.text || '') + '" data-prop="text" data-idx="' + idx + '">', true) +
       field('字号', '<input type="number" value="' + el.size + '" data-prop="size" data-idx="' + idx + '">') +
       colorField('颜色', el.color || '#ffffff', 'color', idx) +
+      field('渐变', '<select data-prop="textGradient" data-idx="' + idx + '">' +
+        '<option value="none"' + (!el.textGradient || el.textGradient === 'none' ? ' selected' : '') + '>无</option>' +
+        '<option value="sunset"' + (el.textGradient === 'sunset' ? ' selected' : '') + '>日落</option>' +
+        '<option value="ocean"' + (el.textGradient === 'ocean' ? ' selected' : '') + '>海洋</option>' +
+        '<option value="neon"' + (el.textGradient === 'neon' ? ' selected' : '') + '>霓虹</option>' +
+        '<option value="gold"' + (el.textGradient === 'gold' ? ' selected' : '') + '>金色</option>' +
+        '<option value="aurora"' + (el.textGradient === 'aurora' ? ' selected' : '') + '>极光</option>' +
+        '<option value="custom"' + (el.textGradient === 'custom' ? ' selected' : '') + '>自定义</option></select>') +
+      (el.textGradient === 'custom' ?
+        field('渐变色2', '<input type="color" value="' + (el.gradientColor2 || '#ff6b6b') + '" data-prop="gradientColor2" data-idx="' + idx + '">') : '') +
+      field('描边', '<input type="number" min="0" max="10" value="' + (el.textStroke || 0) + '" data-prop="textStroke" data-idx="' + idx + '">') +
+      ((el.textStroke || 0) > 0 ? colorField('描边色', el.textStrokeColor || '#000000', 'textStrokeColor', idx) : '') +
       field('对齐', '<select data-prop="textAlign" data-idx="' + idx + '">' +
         '<option value="left"' + (el.textAlign === 'left' ? ' selected' : '') + '>左对齐</option>' +
         '<option value="center"' + (el.textAlign === 'center' ? ' selected' : '') + '>居中</option>' +
@@ -1665,6 +1891,7 @@ JCM.renderElementEditor = function (el, idx, device) {
       field('宽', '<input type="number" value="' + el.w + '" data-prop="w" data-idx="' + idx + '">') +
       field('高', '<input type="number" value="' + el.h + '" data-prop="h" data-idx="' + idx + '">') +
       colorField('颜色', el.color || '#333333', 'color', idx) +
+      field('渐变色2', '<input type="color" value="' + (el.fillColor2 || '') + '" data-prop="fillColor2" data-idx="' + idx + '"><span class="hint">留空则纯色</span>') +
       field('圆角', '<input type="number" value="' + (el.radius || 0) + '" data-prop="radius" data-idx="' + idx + '">') +
       field('透明度', '<input type="range" min="0" max="100" value="' + (el.opacity !== undefined ? el.opacity : 100) + '" data-prop="opacity" data-idx="' + idx + '">') +
       '</div>';
@@ -1711,12 +1938,34 @@ JCM.COLOR_PRESETS = [
   '#6c5ce7', '#a29bfe', '#fd79a8', '#e84393', '#d63031',
 ];
 
+JCM.THEME_PRESETS = [
+  { name: '赛博朋克', colors: ['#ff00ff', '#00ffff', '#ff6600', '#0d0221', '#f706cf'] },
+  { name: '莫兰迪',   colors: ['#b0a084', '#c9b8a8', '#8b7d6b', '#d5c4a1', '#a0522d'] },
+  { name: '霓虹',     colors: ['#39ff14', '#ff073a', '#bc13fe', '#01ffff', '#ffff33'] },
+  { name: '暗夜蓝',   colors: ['#0f1b2d', '#1a3a5c', '#2e86de', '#48dbfb', '#c8d6e5'] },
+  { name: '日落',     colors: ['#e55039', '#f39c12', '#f8c291', '#78e08f', '#3d3d3d'] },
+  { name: '极简',     colors: ['#2d3436', '#636e72', '#b2bec3', '#dfe6e9', '#ffffff'] },
+  { name: '糖果',     colors: ['#ff9ff3', '#feca57', '#ff6b6b', '#48dbfb', '#1dd1a1'] },
+  { name: '森林',     colors: ['#2d5016', '#4a7c23', '#6ab04c', '#badc58', '#f9ca24'] },
+];
+
 JCM.renderColorPresets = function (prop, idx) {
-  return '<div class="color-presets">' +
+  var html = '<div class="color-presets">' +
     JCM.COLOR_PRESETS.map(function (c) {
       return '<div class="color-swatch" style="background:' + c + '" data-color="' + c + '" data-cprop="' + prop + '" data-cidx="' + idx + '" title="' + c + '"></div>';
     }).join('') +
     '</div>';
+  // Theme presets
+  html += '<div class="theme-presets">';
+  JCM.THEME_PRESETS.forEach(function (theme) {
+    html += '<div class="theme-preset" data-theme-cprop="' + prop + '" data-theme-cidx="' + idx + '" title="' + theme.name + '">' +
+      theme.colors.map(function (c) {
+        return '<div class="theme-dot" style="background:' + c + '"></div>';
+      }).join('') +
+      '<span class="theme-name">' + theme.name + '</span></div>';
+  });
+  html += '</div>';
+  return html;
 };
 
 // ─── Quick Alignment ──────────────────────────────────────────────
@@ -1742,43 +1991,50 @@ JCM.exportZip = function (maml, cardName, elements, files, isCustom) {
 
   var usedFiles = {};
   elements.forEach(function (el) {
-    if ((el.type === 'image' || el.type === 'video') && el.fileName && files[el.fileName]) {
-      usedFiles[el.fileName] = files[el.fileName];
+    var fname = el.fileName || el.src;
+    if ((el.type === 'image' || el.type === 'video') && fname && files[fname]) {
+      usedFiles[fname] = files[fname];
     }
   });
 
   var keys = Object.keys(usedFiles);
-  if (keys.length > 0) {
-    var imgFolder = zip.folder('images');
-    var vidFolder = zip.folder('videos');
-    keys.forEach(function (fname) {
-      var info = usedFiles[fname];
-      if (info.mimeType.indexOf('video/') === 0) {
-        vidFolder.file(fname, info.data);
-      } else {
-        imgFolder.file(fname, info.data);
+
+  function buildZipWithData() {
+    if (keys.length > 0) {
+      var imgFolder = zip.folder('images');
+      var vidFolder = zip.folder('videos');
+      keys.forEach(function (fname) {
+        var info = usedFiles[fname];
+        var data = info.data;
+        if (info.mimeType.indexOf('video/') === 0) {
+          vidFolder.file(fname, data);
+        } else {
+          imgFolder.file(fname, data);
+        }
+      });
+    }
+
+    var fileName = (cardName || 'card') + '.zip';
+
+    return zip.generateAsync({ type: 'blob' }).then(function (blob) {
+      if (typeof AndroidBridge !== 'undefined') {
+        var reader = new FileReader();
+        reader.onload = function () {
+          AndroidBridge.saveZip(reader.result.split(',')[1], fileName);
+        };
+        reader.readAsDataURL(blob);
+        return;
       }
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement('a');
+      a.href = url;
+      a.download = fileName;
+      a.click();
+      URL.revokeObjectURL(url);
     });
   }
 
-  var fileName = (cardName || 'card') + '.zip';
-
-  return zip.generateAsync({ type: 'blob' }).then(function (blob) {
-    if (typeof AndroidBridge !== 'undefined') {
-      var reader = new FileReader();
-      reader.onload = function () {
-        AndroidBridge.saveZip(reader.result.split(',')[1], fileName);
-      };
-      reader.readAsDataURL(blob);
-      return;
-    }
-    var url = URL.createObjectURL(blob);
-    var a = document.createElement('a');
-    a.href = url;
-    a.download = fileName;
-    a.click();
-    URL.revokeObjectURL(url);
-  });
+  return buildZipWithData();
 };
 
 // ─── Import ZIP ────────────────────────────────────────────────────
@@ -1878,44 +2134,135 @@ function parseXmlAttrs(str) {
   return attrs;
 }
 
-// ─── Export PNG ────────────────────────────────────────────────────
+// ─── Export PNG (Canvas-based, no external CSS dependency) ─────────
 JCM.exportPNG = function (cardName) {
-  var el = document.querySelector('.preview-phone');
+  var el = document.querySelector('.preview-screen');
   if (!el) return Promise.reject(new Error('预览区域不存在'));
 
-  var w = el.offsetWidth, h = el.offsetHeight;
-  var html = el.innerHTML;
-  var svg = '<svg xmlns="http://www.w3.org/2000/svg" width="' + w + '" height="' + h + '">' +
-    '<foreignObject width="100%" height="100%">' +
-    '<div xmlns="http://www.w3.org/1999/xhtml" style="width:' + w + 'px;height:' + h + 'px;position:relative;overflow:hidden;background:#000">' +
-    html + '</div></foreignObject></svg>';
-
+  var device = getSelectedDevice ? getSelectedDevice() : { width: 420, height: 252 };
+  var scale = 2;
   var canvas = document.createElement('canvas');
-  canvas.width = w * 2;
-  canvas.height = h * 2;
+  canvas.width = device.width * scale;
+  canvas.height = device.height * scale;
   var ctx = canvas.getContext('2d');
-  ctx.scale(2, 2);
+  ctx.scale(scale, scale);
 
-  var blob = new Blob([svg], { type: 'image/svg+xml;charset=utf-8' });
-  var url = URL.createObjectURL(blob);
+  // Draw background
+  var bgColor = _cfg.bgColor || '#000000';
+  ctx.fillStyle = bgColor;
+  ctx.fillRect(0, 0, device.width, device.height);
+
+  // Draw background patterns for custom template
+  if (_tpl && _tpl.id === 'custom') {
+    var pat = _cfg.bgPattern || 'solid';
+    if (pat === 'dots') {
+      ctx.fillStyle = 'rgba(255,255,255,0.08)';
+      for (var dx = 10; dx < device.width; dx += 20) {
+        for (var dy = 10; dy < device.height; dy += 20) {
+          ctx.beginPath(); ctx.arc(dx, dy, 1, 0, Math.PI * 2); ctx.fill();
+        }
+      }
+    } else if (pat === 'grid') {
+      ctx.strokeStyle = 'rgba(255,255,255,0.05)';
+      ctx.lineWidth = 0.5;
+      for (var gx = 0; gx < device.width; gx += 20) { ctx.beginPath(); ctx.moveTo(gx, 0); ctx.lineTo(gx, device.height); ctx.stroke(); }
+      for (var gy = 0; gy < device.height; gy += 20) { ctx.beginPath(); ctx.moveTo(0, gy); ctx.lineTo(device.width, gy); ctx.stroke(); }
+    } else if (pat === 'gradient') {
+      var grd = ctx.createLinearGradient(0, 0, device.width, device.height);
+      grd.addColorStop(0, bgColor);
+      grd.addColorStop(1, _cfg.bgColor2 || '#1a1a2e');
+      ctx.fillStyle = grd;
+      ctx.fillRect(0, 0, device.width, device.height);
+    }
+  }
+
+  // Draw template-specific backgrounds
+  if (_tpl && _tpl.id === 'gradient') {
+    ctx.fillStyle = _cfg.bgColor1 || '#667eea';
+    ctx.fillRect(0, 0, device.width / 2, device.height);
+    ctx.globalAlpha = 0.7;
+    ctx.fillStyle = _cfg.bgColor2 || '#764ba2';
+    ctx.fillRect(device.width / 2, 0, device.width / 2, device.height);
+    ctx.globalAlpha = 1;
+  }
+
+  // Draw elements
+  var camW = device.width * device.cameraZoneRatio;
+  if (_elements) {
+    _elements.forEach(function (el) {
+      ctx.save();
+      var opacity = (el.opacity !== undefined ? el.opacity : 100) / 100;
+      ctx.globalAlpha = opacity;
+
+      switch (el.type) {
+        case 'text':
+          var weight = el.bold ? '700' : '400';
+          ctx.font = weight + ' ' + el.size + 'px -apple-system, sans-serif';
+          ctx.fillStyle = el.color || '#ffffff';
+          if (el.shadow === 'light') { ctx.shadowColor = 'rgba(0,0,0,0.4)'; ctx.shadowBlur = 3; ctx.shadowOffsetY = 1; }
+          else if (el.shadow === 'dark') { ctx.shadowColor = 'rgba(0,0,0,0.8)'; ctx.shadowBlur = 6; ctx.shadowOffsetY = 2; }
+          else if (el.shadow === 'glow') { ctx.shadowColor = el.color; ctx.shadowBlur = 16; }
+          if (el.multiLine) {
+            var textLines = String(el.text || '').split('\n');
+            textLines.forEach(function (line, li) { ctx.fillText(line, el.x, el.y + el.size + li * el.size * 1.4, el.w || 9999); });
+          } else {
+            var align = el.textAlign || 'left';
+            if (align === 'center') { ctx.textAlign = 'center'; ctx.fillText(el.text || '', el.x + (el.w || 200) / 2, el.y + el.size); }
+            else if (align === 'right') { ctx.textAlign = 'right'; ctx.fillText(el.text || '', el.x + (el.w || 200), el.y + el.size); }
+            else { ctx.fillText(el.text || '', el.x, el.y + el.size); }
+          }
+          ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0; ctx.shadowOffsetY = 0;
+          break;
+        case 'rectangle':
+          var rr = el.radius || 0;
+          ctx.fillStyle = el.color || '#333333';
+          drawRoundRect(ctx, el.x, el.y, el.w, el.h, rr);
+          ctx.fill();
+          break;
+        case 'circle':
+          ctx.fillStyle = el.color || '#6c5ce7';
+          ctx.beginPath(); ctx.arc(el.x, el.y, el.r || 30, 0, Math.PI * 2); ctx.fill();
+          break;
+        case 'image':
+          var fi = el.fileName ? JCM.uploadedFiles[el.fileName] : null;
+          if (fi && fi.dataUrl) {
+            try {
+              var img = new Image();
+              img.src = fi.dataUrl;
+              ctx.drawImage(img, el.x, el.y, el.w || 100, el.h || 100);
+            } catch (e) { /* image load failed in export */ }
+          }
+          break;
+      }
+      ctx.restore();
+    });
+  }
 
   return new Promise(function (resolve, reject) {
-    var img = new Image();
-    img.onload = function () {
-      ctx.drawImage(img, 0, 0);
-      URL.revokeObjectURL(url);
-      canvas.toBlob(function (pngBlob) {
-        var a = document.createElement('a');
-        a.href = URL.createObjectURL(pngBlob);
-        a.download = (cardName || 'card') + '.png';
-        a.click();
-        resolve();
-      }, 'image/png');
-    };
-    img.onerror = function () { reject(new Error('PNG 导出失败')); };
-    img.src = url;
+    canvas.toBlob(function (pngBlob) {
+      if (!pngBlob) return reject(new Error('PNG 导出失败'));
+      var a = document.createElement('a');
+      a.href = URL.createObjectURL(pngBlob);
+      a.download = (cardName || 'card') + '.png';
+      a.click();
+      resolve();
+    }, 'image/png');
   });
 };
+
+function drawRoundRect(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.lineTo(x + w - r, y);
+  ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+  ctx.lineTo(x + w, y + h - r);
+  ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+  ctx.lineTo(x + r, y + h);
+  ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+  ctx.lineTo(x, y + r);
+  ctx.quadraticCurveTo(x, y, x + r, y);
+  ctx.closePath();
+}
 
 // ─── Export Template Config JSON ───────────────────────────────────
 JCM.exportTemplateJSON = function (tplId, cfg, elements) {
@@ -1963,6 +2310,31 @@ function debounce(fn, ms) {
   };
 }
 
+// ─── Template Preview Helper ──────────────────────────────────────
+// 消除 renderPreview / renderLivePreview 的 switch-case 重复
+function renderTemplatePreview(device, showCam, tpl, cfg) {
+  var r = new JCM.PreviewRenderer(device, showCam);
+  switch (tpl.id) {
+    case 'clock':      return r.renderClock(cfg);
+    case 'quote':      return r.renderQuote(cfg);
+    case 'battery':    return r.renderBattery(cfg);
+    case 'status':     return r.renderStatus(cfg);
+    case 'countdown':  return r.renderCountdown(cfg);
+    case 'music':      return r.renderMusic(cfg);
+    case 'gradient':   return r.renderGradient(cfg);
+    case 'weather':    return r.renderWeather(cfg);
+    case 'steps':      return r.renderSteps(cfg);
+    case 'calendar':   return r.renderCalendar(cfg);
+    case 'dualclock':  return r.renderDualclock(cfg);
+    case 'dailyquote': return r.renderDailyquote(cfg);
+    case 'ring':       return r.renderRing(cfg);
+    case 'dashboard':  return r.renderDashboard(cfg);
+    case 'image':      return r.renderImage(cfg);
+    case 'custom':     return r.renderCustom(cfg);
+    default:           return '';
+  }
+}
+
 // ─── Undo/Redo ────────────────────────────────────────────────────
 var _history = [];
 var _redoStack = [];
@@ -1971,7 +2343,13 @@ var _deepClone = typeof structuredClone === 'function'
   : function (v) { return JSON.parse(JSON.stringify(v)); };
 
 function captureState() {
-  _history.push({ cfg: _deepClone(_cfg), elements: _deepClone(_elements) });
+  // 深拷贝时排除文件数据（ArrayBuffer 太大，撤销不需要还原文件）
+  var filesSnapshot = {};
+  Object.keys(JCM.uploadedFiles).forEach(function (k) {
+    var f = JCM.uploadedFiles[k];
+    filesSnapshot[k] = { mimeType: f.mimeType, originalName: f.originalName, fileName: f.fileName };
+  });
+  _history.push({ cfg: _deepClone(_cfg), elements: _deepClone(_elements), files: filesSnapshot });
   _redoStack = [];
   if (_history.length > 50) _history.shift();
 }
@@ -2004,13 +2382,19 @@ JCM.goStep = function (n) {
   if (n === 2 && !_tpl) return toast('请先选择模板并配置', 'error');
   _step = n;
 
+  // Update pages
   document.querySelectorAll('.page').forEach(function (p, i) { p.classList.toggle('active', i === n); });
-  document.querySelectorAll('.step-dot').forEach(function (d, i) {
-    d.classList.remove('active', 'done');
-    if (i === n) d.classList.add('active');
-    else if (i < n) d.classList.add('done');
+
+  // Update tab states
+  document.querySelectorAll('.step-tab').forEach(function (tab) {
+    var s = Number(tab.dataset.step);
+    tab.classList.remove('active', 'done');
+    if (s === n) tab.classList.add('active');
+    else if (s < n) tab.classList.add('done');
   });
-  document.querySelectorAll('.step-line').forEach(function (l, i) { l.classList.toggle('done', i < n); });
+
+  // Move slider
+  moveStepSlider(n);
 
   document.getElementById('btnBack').style.display = n > 0 ? '' : 'none';
   var btnNext = document.getElementById('btnNext');
@@ -2020,14 +2404,48 @@ JCM.goStep = function (n) {
     btnNext.innerHTML = n === 0 ? '下一步 <span class="btn-icon">→</span>' : '预览 & 导出 <span class="btn-icon">→</span>';
   }
 
-  if (n === 1) renderConfig();
-  if (n === 2) renderPreview();
+  if (n === 1) {
+    renderConfig();
+    // Sync device select from preview page to config page
+    var devSel = document.getElementById('deviceSelect');
+    var cfgDevSel = document.getElementById('cfgDeviceSelect');
+    if (devSel && cfgDevSel) cfgDevSel.value = devSel.value;
+    var showCam = document.getElementById('showCamera');
+    var cfgShowCam = document.getElementById('cfgShowCamera');
+    if (showCam && cfgShowCam) cfgShowCam.checked = showCam.checked;
+    renderLivePreview();
+  }
+  if (n === 2) {
+    // Sync device select from config page to preview page
+    var cfgDevSel2 = document.getElementById('cfgDeviceSelect');
+    var devSel2 = document.getElementById('deviceSelect');
+    if (cfgDevSel2 && devSel2) devSel2.value = cfgDevSel2.value;
+    var cfgShowCam2 = document.getElementById('cfgShowCamera');
+    var showCam2 = document.getElementById('showCamera');
+    if (cfgShowCam2 && showCam2) showCam2.checked = cfgShowCam2.checked;
+    renderPreview();
+  }
   // Auto-refresh for time-based templates
   clearInterval(_previewTimer);
-  if (n === 2 && _tpl && (_tpl.updater === 'DateTime.Minute' || _tpl.updater === 'DateTime.Day')) {
-    _previewTimer = setInterval(renderPreview, 1000);
+  if (n >= 1 && _tpl && (_tpl.updater === 'DateTime.Minute' || _tpl.updater === 'DateTime.Day')) {
+    _previewTimer = setInterval(function () {
+      if (_step === 1) renderLivePreview();
+      if (_step === 2) renderPreview();
+    }, 1000);
   }
 };
+
+function moveStepSlider(n) {
+  var slider = document.getElementById('stepSlider');
+  var indicator = document.getElementById('stepIndicator');
+  var tabs = indicator.querySelectorAll('.step-tab');
+  if (!slider || !tabs[n]) return;
+  var tab = tabs[n];
+  var iRect = indicator.getBoundingClientRect();
+  var tRect = tab.getBoundingClientRect();
+  slider.style.left = (tRect.left - iRect.left) + 'px';
+  slider.style.width = tRect.width + 'px';
+}
 
 JCM.nextStep = function () { JCM.goStep(_step + 1); };
 JCM.prevStep = function () { JCM.goStep(_step - 1); };
@@ -2177,7 +2595,7 @@ function renderConfig() {
       } else {
         thumb = '<div style="width:48px;height:48px;border-radius:8px;background:var(--surface3);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">🖼</div>';
       }
-      var sz = fi.data ? (fi.data.byteLength || fi.data.size || 0) : 0;
+      var sz = fi.data ? (fi.data.size || fi.data.byteLength || 0) : 0;
       var sizeStr = fmtSize(sz);
       var useCount = _elements.filter(function (e) { return e.fileName === fname; }).length;
       html += '<div class="media-picker has-file" data-replace-asset="' + fname + '">' +
@@ -2198,6 +2616,9 @@ function renderConfig() {
     var input = el.previousElementSibling;
     if (input) el.textContent = input.value;
   });
+
+  // Trigger live preview update after config rebuild
+  if (_step === 1) renderLivePreview();
 }
 
 function renderField(f) {
@@ -2324,27 +2745,8 @@ function renderPreview() {
   document.getElementById('deviceLabel').textContent = device.label;
   document.getElementById('previewCamera').style.width = showCam ? (device.cameraZoneRatio * 100) + '%' : '0';
 
-  var r = new JCM.PreviewRenderer(device, showCam);
-  var html = '';
-  switch (_tpl.id) {
-    case 'clock':     html = r.renderClock(_cfg); break;
-    case 'quote':     html = r.renderQuote(_cfg); break;
-    case 'battery':   html = r.renderBattery(_cfg); break;
-    case 'status':    html = r.renderStatus(_cfg); break;
-    case 'countdown': html = r.renderCountdown(_cfg); break;
-    case 'music':     html = r.renderMusic(_cfg); break;
-    case 'gradient':  html = r.renderGradient(_cfg); break;
-    case 'weather':   html = r.renderWeather(_cfg); break;
-    case 'steps':     html = r.renderSteps(_cfg); break;
-    case 'calendar':  html = r.renderCalendar(_cfg); break;
-    case 'dualclock': html = r.renderDualclock(_cfg); break;
-    case 'dailyquote':html = r.renderDailyquote(_cfg); break;
-    case 'ring':      html = r.renderRing(_cfg); break;
-    case 'dashboard': html = r.renderDashboard(_cfg); break;
-    case 'image':     html = r.renderImage(_cfg); break;
-    case 'custom':    html = r.renderCustom(_cfg); break;
-  }
-  html += r.renderElements(_elements, JCM.uploadedFiles, _selIdx);
+  var html = renderTemplatePreview(device, showCam, _tpl, _cfg);
+  html += new JCM.PreviewRenderer(device, showCam).renderElements(_elements, JCM.uploadedFiles, _selIdx);
   document.getElementById('previewContent').innerHTML = html;
 
   var innerXml = _tpl.gen ? _tpl.gen(_cfg) : generateCustomMAML(device);
@@ -2360,10 +2762,37 @@ function renderPreview() {
   _dirty = false;
 }
 
+// ─── Live Preview (on config page) ────────────────────────────────
+function getCfgDevice() {
+  var sel = document.getElementById('cfgDeviceSelect');
+  return sel ? JCM.getDevice(sel.value) : JCM.getDevice('p2');
+}
+
+function getCfgShowCamera() {
+  var cb = document.getElementById('cfgShowCamera');
+  return cb ? cb.checked : true;
+}
+
+function renderLivePreview() {
+  if (!_tpl) return;
+  var device = getCfgDevice();
+  var showCam = getCfgShowCamera();
+
+  var labelEl = document.getElementById('cfgDeviceLabel');
+  if (labelEl) labelEl.textContent = device.label;
+  var camEl = document.getElementById('cfgPreviewCamera');
+  if (camEl) camEl.style.width = showCam ? (device.cameraZoneRatio * 100) + '%' : '0';
+
+  var html = renderTemplatePreview(device, showCam, _tpl, _cfg);
+  html += new JCM.PreviewRenderer(device, showCam).renderElements(_elements, JCM.uploadedFiles, _selIdx);
+  var contentEl = document.getElementById('cfgPreviewContent');
+  if (contentEl) contentEl.innerHTML = html;
+}
+
 function generateCustomMAML(device) {
-  var lines = [
-    '  <Rectangle w="#view_width" h="#view_height" fillColor="' + _cfg.bgColor + '" />',
-  ];
+  var lines = [];
+  lines.push(JCM.generateAutoDetectMAML());
+  lines.push('  <Rectangle w="#view_width" h="#view_height" fillColor="' + _cfg.bgColor + '" />');
   _elements.forEach(function (el) {
     switch (el.type) {
       case 'text': {
@@ -2381,12 +2810,13 @@ function generateCustomMAML(device) {
         lines.push('    <Circle x="' + el.x + '" y="' + el.y + '" r="' + el.r + '" fillColor="' + el.color + '" />');
         break;
       case 'image': {
-        var folder = el.src && JCM.uploadedFiles[el.src] && JCM.uploadedFiles[el.src].mimeType.indexOf('video/') === 0 ? 'videos' : 'images';
-        lines.push('    <Image src="' + folder + '/' + (el.src || '') + '" x="' + el.x + '" y="' + el.y + '" w="' + (el.w || 100) + '" h="' + (el.h || 100) + '" />');
+        var imgSrc = el.src || el.fileName || '';
+        var folder = imgSrc && JCM.uploadedFiles[imgSrc] && JCM.uploadedFiles[imgSrc].mimeType.indexOf('video/') === 0 ? 'videos' : 'images';
+        lines.push('    <Image src="' + folder + '/' + JCM.escXml(imgSrc) + '" x="' + el.x + '" y="' + el.y + '" w="' + (el.w || 100) + '" h="' + (el.h || 100) + '" />');
         break;
       }
       case 'video':
-        lines.push('    <Video src="videos/' + (el.src || '') + '" x="' + el.x + '" y="' + el.y + '" w="' + (el.w || 240) + '" h="' + (el.h || 135) + '" autoPlay="true" loop="true" />');
+        lines.push('    <Video src="videos/' + JCM.escXml(el.src || el.fileName || '') + '" x="' + el.x + '" y="' + el.y + '" w="' + (el.w || 240) + '" h="' + (el.h || 135) + '" autoPlay="true" loop="true" />');
         break;
     }
   });
@@ -2424,6 +2854,94 @@ JCM.handleExportPNG = function () {
     .catch(function (e) { toast('导出失败: ' + e.message, 'error'); });
 };
 
+// ─── Zoom Controls ────────────────────────────────────────────────
+var _zoomLevel = 100;
+
+JCM.zoomIn = function () {
+  _zoomLevel = Math.min(_zoomLevel + 25, 200);
+  applyZoom();
+};
+JCM.zoomOut = function () {
+  _zoomLevel = Math.max(_zoomLevel - 25, 50);
+  applyZoom();
+};
+JCM.zoomReset = function () {
+  _zoomLevel = 100;
+  applyZoom();
+};
+
+function applyZoom() {
+  var phone = document.querySelector('#page2 .preview-phone');
+  if (phone) phone.style.transform = 'scale(' + (_zoomLevel / 100) + ')';
+  var label = document.getElementById('zoomLabel');
+  if (label) label.textContent = _zoomLevel + '%';
+}
+
+// ─── Batch Export ─────────────────────────────────────────────────
+JCM.handleBatchExport = function () {
+  if (!_tpl) return toast('请先选择模板', 'error');
+  var deviceKeys = ['p2', 'q200', 'q100', 'ultra'];
+  var count = 0;
+  var errors = [];
+
+  function exportNext() {
+    if (count >= deviceKeys.length) {
+      if (errors.length > 0) toast('部分导出失败: ' + errors.join(', '), 'error');
+      else toast('✅ 全部 ' + count + ' 个机型已导出', 'success');
+      return;
+    }
+    var dk = deviceKeys[count];
+    var device = JCM.getDevice(dk);
+    var innerXml = _tpl.gen ? _tpl.gen(_cfg) : generateCustomMAML(device);
+    var maml = JCM.generateMAML({
+      cardName: (_cfg.cardName || _tpl.name) + '_' + dk,
+      device: device,
+      innerXml: innerXml,
+      updater: _tpl.updater,
+      extraElements: _elements,
+      uploadedFiles: JCM.uploadedFiles,
+    });
+    var validation = JCM.validateMAML(maml);
+    if (!validation.valid) {
+      errors.push(device.label);
+      count++;
+      exportNext();
+      return;
+    }
+    JCM.exportZip(maml, (_cfg.cardName || 'card') + '_' + dk, _elements, JCM.uploadedFiles, _tpl.id === 'custom')
+      .then(function () { count++; setTimeout(exportNext, 500); })
+      .catch(function () { errors.push(device.label); count++; setTimeout(exportNext, 500); });
+  }
+  exportNext();
+};
+
+// ─── Universal Export (one card fits all) ─────────────────────────
+JCM.handleUniversalExport = function () {
+  if (!_tpl) return toast('请先选择模板', 'error');
+
+  // Use Pro Max as base, auto-detect handles the rest
+  var baseDevice = JCM.getDevice('p2');
+  var innerXml = _tpl.gen ? _tpl.gen(_cfg) : generateCustomMAML(baseDevice);
+
+  var maml = JCM.generateMAML({
+    cardName: _cfg.cardName || _tpl.name,
+    device: baseDevice,
+    innerXml: innerXml,
+    updater: _tpl.updater,
+    extraElements: _elements,
+    uploadedFiles: JCM.uploadedFiles,
+  });
+
+  var validation = JCM.validateMAML(maml);
+  if (!validation.valid) {
+    return toast('XML 校验失败: ' + validation.errors[0], 'error');
+  }
+
+  JCM.exportZip(maml, (_cfg.cardName || 'card') + '_all', _elements, JCM.uploadedFiles, _tpl.id === 'custom')
+    .then(function () { toast('✅ 通用卡片已导出（适配所有机型）', 'success'); })
+    .catch(function (e) { toast('导出失败: ' + e.message, 'error'); });
+};
+
 // ─── Import ───────────────────────────────────────────────────────
 JCM.handleImportZip = function () {
   var input = document.createElement('input');
@@ -2436,7 +2954,17 @@ JCM.handleImportZip = function () {
       // Switch to custom template
       _tpl = JCM.TEMPLATES.find(function (t) { return t.id === 'custom'; });
       _cfg = { cardName: data.cardName, bgColor: data.bgColor };
-      _elements = data.elements;
+      // GIF 动图转视频元素
+      _elements = data.elements.map(function(el) {
+        if (el.type === 'image' && el.fileName) {
+          var fi = data.files[el.fileName];
+          if (fi && fi.mimeType === 'image/gif') {
+            fi.mimeType = 'video/gif';
+            el.type = 'video';
+          }
+        }
+        return el;
+      });
       JCM.uploadedFiles = data.files;
       _selIdx = -1;
       _dirty = true;
@@ -2503,22 +3031,55 @@ JCM.replaceAssetPrompt = function (fname) {
     if (!file) return;
     var oldName = JCM._pendingReplaceAsset;
     JCM._pendingReplaceAsset = null;
-    var reader = new FileReader();
-    reader.onload = function (ev) {
-      var dataUrl = ev.target.result;
-      var base64 = dataUrl.split(',')[1];
-      var bin = atob(base64);
-      var arr = new Uint8Array(bin.length);
-      for (var i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
 
+    function replaceDone(info) {
       captureState();
-      // Replace the file data in uploadedFiles (keep same key so all references update)
-      JCM.uploadedFiles[oldName] = { data: arr.buffer, mimeType: file.type, dataUrl: dataUrl, originalName: file.name };
+      JCM.uploadedFiles[oldName] = info;
       _dirty = true;
       renderConfig();
       toast('✅ 已替换: ' + file.name, 'success');
-    };
-    reader.readAsDataURL(file);
+    }
+
+    var isGifReplace = file.type === 'image/gif';
+    var needTranscodeReplace = (isVideo || isGifReplace) && JCM.needsTranscode && JCM.needsTranscode(file);
+
+    function doReplace(workingFile) {
+      var finalIsVideo = workingFile.type.indexOf('video/') === 0 || isGifReplace;
+      if (finalIsVideo) {
+        var reader2 = new FileReader();
+        reader2.onload = function (ev) {
+          var buf = ev.target.result;
+          var storeMime = isGifReplace ? 'video/gif' : workingFile.type;
+          var blobUrl = URL.createObjectURL(new Blob([buf], { type: workingFile.type }));
+          replaceDone({ data: buf, mimeType: storeMime, dataUrl: blobUrl, originalName: workingFile.name });
+        };
+        reader2.readAsArrayBuffer(workingFile);
+      } else {
+      var reader = new FileReader();
+      reader.onload = function (ev) {
+        var dataUrl = ev.target.result;
+        var base64 = dataUrl.split(',')[1];
+        var bin = atob(base64);
+        var arr = new Uint8Array(bin.length);
+        for (var i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
+        replaceDone({ data: arr.buffer, mimeType: file.type, dataUrl: dataUrl, originalName: file.name });
+      };
+      reader.readAsDataURL(file);
+      }
+    }
+
+    if (needTranscodeReplace) {
+      toast('🔄 正在转码为 MP4 (H.264)...', 'info');
+      JCM.transcodeToH264(file).then(function (transcodedFile) {
+        toast('✅ 转码完成', 'success');
+        doReplace(transcodedFile);
+      }).catch(function (err) {
+        toast('⚠️ 转码失败，使用原始文件: ' + err.message, 'warning');
+        doReplace(file);
+      });
+    } else {
+      doReplace(file);
+    }
   };
   input.click();
 };
@@ -2534,55 +3095,118 @@ function handleFilePicked(e) {
   _pendingAdd = null;
   _pendingReplace = -1;
 
-  var ext = file.name.split('.').pop() || (type === 'image' ? 'png' : 'mp4');
-  var safeName = 'media_' + Date.now() + '.' + ext;
+  // GIF 动图自动转为视频元素（MAML <Image> 不支持动图播放）
+  var isGif = file.type === 'image/gif';
+  if (isGif) type = 'video';
 
-  var reader = new FileReader();
-  reader.onload = function (ev) {
-    var dataUrl = ev.target.result;
-    var base64 = dataUrl.split(',')[1];
-    var bin = atob(base64);
-    var arr = new Uint8Array(bin.length);
-    for (var i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
+  var isVideo = file.type.indexOf('video/') === 0 || isGif;
 
-    JCM.uploadedFiles[safeName] = { data: arr.buffer, mimeType: file.type, dataUrl: dataUrl, originalName: file.name };
+  // 视频格式提示
+  if (isVideo && !isGif && file.type !== 'video/mp4') {
+    toast('⚠️ 正在检测视频格式...', 'info');
+  }
 
-    captureState();
-    if (replaceIdx >= 0 && replaceIdx < _elements.length) {
-      _elements[replaceIdx].fileName = safeName;
-      _elements[replaceIdx].src = safeName;
+  // 需要转码的视频/GIF：先转码再存储
+  var needTranscode = isVideo && JCM.needsTranscode && JCM.needsTranscode(file);
+
+  function doStore(workingFile) {
+    var finalIsVideo = workingFile.type.indexOf('video/') === 0 || isGif;
+    var ext = workingFile.name.split('.').pop() || (type === 'image' ? 'png' : 'mp4');
+    var safeName = 'media_' + Date.now() + '.' + ext;
+
+    if (finalIsVideo || type === 'video') {
+      var reader = new FileReader();
+      reader.onload = function (ev) {
+        var buf = ev.target.result;
+        var storeMime = isGif ? 'video/gif' : workingFile.type;
+        var blobUrl = URL.createObjectURL(new Blob([buf], { type: workingFile.type }));
+        JCM.uploadedFiles[safeName] = { data: buf, mimeType: storeMime, dataUrl: blobUrl, originalName: workingFile.name };
+        captureState();
+        if (replaceIdx >= 0 && replaceIdx < _elements.length) {
+          _elements[replaceIdx].fileName = safeName;
+          _elements[replaceIdx].src = safeName;
+        } else {
+          _elements.push({ type: 'video', fileName: safeName, src: safeName, x: 10, y: 60, w: 240, h: 135 });
+          _selIdx = _elements.length - 1;
+        }
+        _dirty = true;
+        renderConfig();
+        toast(workingFile.name + ' 已添加', 'success');
+      };
+      reader.onerror = function () { toast('文件读取失败', 'error'); };
+      reader.readAsArrayBuffer(workingFile);
     } else {
-      _elements.push({ type: type, fileName: safeName, src: safeName, x: 10, y: 60, w: type === 'image' ? 200 : 240, h: type === 'image' ? 200 : 135 });
-      _selIdx = _elements.length - 1;
+      var reader2 = new FileReader();
+      reader2.onload = function (ev) {
+        var dataUrl = ev.target.result;
+        var base64 = dataUrl.split(',')[1];
+        var bin = atob(base64);
+        var arr = new Uint8Array(bin.length);
+        for (var i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
+        JCM.uploadedFiles[safeName] = { data: arr.buffer, mimeType: workingFile.type, dataUrl: dataUrl, originalName: workingFile.name };
+        captureState();
+        if (replaceIdx >= 0 && replaceIdx < _elements.length) {
+          _elements[replaceIdx].fileName = safeName;
+          _elements[replaceIdx].src = safeName;
+        } else {
+          _elements.push({ type: type, fileName: safeName, src: safeName, x: 10, y: 60, w: 200, h: 200 });
+          _selIdx = _elements.length - 1;
+        }
+        _dirty = true;
+        renderConfig();
+        toast(workingFile.name + ' 已添加', 'success');
+      };
+      reader2.readAsDataURL(workingFile);
     }
+  }
 
-    _dirty = true;
-    renderConfig();
-    toast(file.name + ' 已添加', 'success');
-  };
-  reader.readAsDataURL(file);
+  if (needTranscode) {
+    toast('🔄 正在转码为 MP4 (H.264)...', 'info');
+    JCM.transcodeToH264(file, function (pct) {
+      toast('🔄 转码中 ' + pct + '%...', 'info');
+    }).then(function (transcodedFile) {
+      toast('✅ 转码完成', 'success');
+      doStore(transcodedFile);
+    }).catch(function (err) {
+      toast('⚠️ 转码失败，使用原始文件: ' + err.message, 'warning');
+      doStore(file);
+    });
+  } else {
+    doStore(file);
+  }
 }
 
-// ─── Drag & Drop in Preview ───────────────────────────────────────
+// ─── Drag & Drop in Preview (rAF throttled + touch support) ──────
 var _dragging = null;
 var _resizing = null;
+var _rafPending = false;
 
-function onPreviewMouseDown(e) {
+function getPointerPos(e) {
+  if (e.touches && e.touches.length > 0) {
+    return { clientX: e.touches[0].clientX, clientY: e.touches[0].clientY };
+  }
+  return { clientX: e.clientX, clientY: e.clientY };
+}
+
+function onPreviewPointerDown(e) {
+  var target = e.target;
+
   // Resize handle
-  var rh = e.target.closest('[data-resize-idx]');
+  var rh = target.closest('[data-resize-idx]');
   if (rh) {
     var idx = parseInt(rh.dataset.resizeIdx, 10);
     if (!isNaN(idx) && idx < _elements.length) {
       e.preventDefault();
       e.stopPropagation();
+      var pos = getPointerPos(e);
       var device = getSelectedDevice();
       var screen = document.querySelector('.preview-screen');
       var rect = screen.getBoundingClientRect();
       var scale = rect.width / device.width;
       _resizing = {
         idx: idx,
-        startX: e.clientX,
-        startY: e.clientY,
+        startX: pos.clientX,
+        startY: pos.clientY,
         origW: _elements[idx].w || 100,
         origH: _elements[idx].h || 100,
         scale: scale
@@ -2590,17 +3214,20 @@ function onPreviewMouseDown(e) {
       captureState();
       document.addEventListener('mousemove', onResizeMove);
       document.addEventListener('mouseup', onResizeUp);
+      document.addEventListener('touchmove', onResizeMove, { passive: false });
+      document.addEventListener('touchend', onResizeUp);
       return;
     }
   }
 
   // Element drag
-  var el = e.target.closest('[data-el-idx]');
+  var el = target.closest('[data-el-idx]');
   if (!el) return;
   var idx = parseInt(el.dataset.elIdx, 10);
   if (isNaN(idx) || idx >= _elements.length) return;
 
   e.preventDefault();
+  var pos = getPointerPos(e);
   var device = getSelectedDevice();
   var screen = document.querySelector('.preview-screen');
   var rect = screen.getBoundingClientRect();
@@ -2608,8 +3235,8 @@ function onPreviewMouseDown(e) {
 
   _dragging = {
     idx: idx,
-    startX: e.clientX,
-    startY: e.clientY,
+    startX: pos.clientX,
+    startY: pos.clientY,
     origX: _elements[idx].x,
     origY: _elements[idx].y,
     scale: scale,
@@ -2623,12 +3250,16 @@ function onPreviewMouseDown(e) {
 
   document.addEventListener('mousemove', onPreviewMouseMove);
   document.addEventListener('mouseup', onPreviewMouseUp);
+  document.addEventListener('touchmove', onPreviewMouseMove, { passive: false });
+  document.addEventListener('touchend', onPreviewMouseUp);
 }
 
 function onResizeMove(e) {
   if (!_resizing) return;
-  var dx = (e.clientX - _resizing.startX) / _resizing.scale;
-  var dy = (e.clientY - _resizing.startY) / _resizing.scale;
+  e.preventDefault();
+  var pos = getPointerPos(e);
+  var dx = (pos.clientX - _resizing.startX) / _resizing.scale;
+  var dy = (pos.clientY - _resizing.startY) / _resizing.scale;
   var nw = Math.max(20, Math.round(_resizing.origW + dx));
   var nh = Math.max(20, Math.round(_resizing.origH + dy));
 
@@ -2641,7 +3272,6 @@ function onResizeMove(e) {
   _elements[_resizing.idx].w = nw;
   _elements[_resizing.idx].h = nh;
   renderPreview();
-  // Update field inputs if visible
   var wInput = document.querySelector('[data-prop="w"][data-idx="' + _resizing.idx + '"]');
   var hInput = document.querySelector('[data-prop="h"][data-idx="' + _resizing.idx + '"]');
   if (wInput) wInput.value = nw;
@@ -2652,39 +3282,80 @@ function onResizeUp() {
   _resizing = null;
   document.removeEventListener('mousemove', onResizeMove);
   document.removeEventListener('mouseup', onResizeUp);
+  document.removeEventListener('touchmove', onResizeMove);
+  document.removeEventListener('touchend', onResizeUp);
   renderConfig();
 }
 
-function onPreviewMouseMove(e) {
-  if (!_dragging) return;
-  var dx = (e.clientX - _dragging.startX) / _dragging.scale;
-  var dy = (e.clientY - _dragging.startY) / _dragging.scale;
+function applySmartAlign(nx, ny) {
+  var el = _elements[_dragging.idx];
+  var elW = el.w || (el.r ? el.r * 2 : 0) || 50;
+  var elH = el.h || (el.r ? el.r * 2 : 0) || 30;
+  var elCX = nx + elW / 2;
+  var elCY = ny + elH / 2;
+  var snapThreshold = 6;
+  var device = _dragging.device;
 
-  var nx = Math.round(_dragging.origX + dx);
-  var ny = Math.round(_dragging.origY + dy);
+  if (Math.abs(elCX - device.width / 2) < snapThreshold) nx = Math.round(device.width / 2 - elW / 2);
+  if (Math.abs(elCY - device.height / 2) < snapThreshold) ny = Math.round(device.height / 2 - elH / 2);
 
-  // Snap to grid
-  var snap = document.getElementById('snapToggle');
-  if (snap && snap.checked) {
-    nx = Math.round(nx / SNAP_GRID) * SNAP_GRID;
-    ny = Math.round(ny / SNAP_GRID) * SNAP_GRID;
+  for (var i = 0; i < _elements.length; i++) {
+    if (i === _dragging.idx) continue;
+    var other = _elements[i];
+    var oW = other.w || (other.r ? other.r * 2 : 0) || 50;
+    var oH = other.h || (other.r ? other.r * 2 : 0) || 30;
+    var oCX = other.x + oW / 2;
+    var oCY = other.y + oH / 2;
+
+    if (Math.abs(nx - other.x) < snapThreshold) nx = other.x;
+    if (Math.abs(nx + elW - (other.x + oW)) < snapThreshold) nx = other.x + oW - elW;
+    if (Math.abs(elCX - oCX) < snapThreshold) nx = Math.round(oCX - elW / 2);
+    if (Math.abs(ny - other.y) < snapThreshold) ny = other.y;
+    if (Math.abs(ny + elH - (other.y + oH)) < snapThreshold) ny = other.y + oH - elH;
+    if (Math.abs(elCY - oCY) < snapThreshold) ny = Math.round(oCY - elH / 2);
   }
+  return { x: nx, y: ny };
+}
 
-  _elements[_dragging.idx].x = Math.max(0, Math.min(nx, _dragging.device.width - 10));
-  _elements[_dragging.idx].y = Math.max(0, Math.min(ny, _dragging.device.height - 10));
+function onPreviewMouseMove(e) {
+  if (!_dragging || _rafPending) return;
+  e.preventDefault();
+  _rafPending = true;
+  requestAnimationFrame(function () {
+    _rafPending = false;
+    if (!_dragging) return;
+    var pos = getPointerPos(e);
+    var dx = (pos.clientX - _dragging.startX) / _dragging.scale;
+    var dy = (pos.clientY - _dragging.startY) / _dragging.scale;
 
-  renderPreview();
+    var nx = Math.round(_dragging.origX + dx);
+    var ny = Math.round(_dragging.origY + dy);
+
+    var snap = document.getElementById('snapToggle');
+    if (snap && snap.checked) {
+      nx = Math.round(nx / SNAP_GRID) * SNAP_GRID;
+      ny = Math.round(ny / SNAP_GRID) * SNAP_GRID;
+    }
+
+    var aligned = applySmartAlign(nx, ny);
+    _elements[_dragging.idx].x = Math.max(0, Math.min(aligned.x, _dragging.device.width - 10));
+    _elements[_dragging.idx].y = Math.max(0, Math.min(aligned.y, _dragging.device.height - 10));
+    renderPreview();
+  });
 }
 
 function onPreviewMouseUp() {
   _dragging = null;
   document.removeEventListener('mousemove', onPreviewMouseMove);
   document.removeEventListener('mouseup', onPreviewMouseUp);
+  document.removeEventListener('touchmove', onPreviewMouseMove);
+  document.removeEventListener('touchend', onPreviewMouseUp);
 }
 
 // ─── Event Delegation ─────────────────────────────────────────────
 var _autoPreview = debounce(function () {
   _dirty = true;
+  if (_step === 1) renderLivePreview();
   if (_step === 2) renderPreview();
 }, 300);
 
@@ -2781,14 +3452,49 @@ function setupEvents() {
       }
       return;
     }
+    // Theme preset (click first dot to apply as element color)
+    var themeBtn = e.target.closest('.theme-preset');
+    if (themeBtn) {
+      var tcidx = Number(themeBtn.dataset.themeCidx);
+      var tcprop = themeBtn.dataset.themeCprop;
+      if (tcidx >= 0 && tcidx < _elements.length) {
+        var dots = themeBtn.querySelectorAll('.theme-dot');
+        if (dots.length > 0) {
+          captureState();
+          _elements[tcidx][tcprop] = dots[0].style.background || dots[0].style.backgroundColor;
+          _dirty = true;
+          renderConfig();
+          toast('🎨 已应用主题色', 'success');
+        }
+      }
+      return;
+    }
   });
 
   // File inputs
   document.getElementById('fileImagePick').addEventListener('change', handleFilePicked);
   document.getElementById('fileVideoPick').addEventListener('change', handleFilePicked);
 
-  // Preview drag
-  document.getElementById('previewContent').addEventListener('mousedown', onPreviewMouseDown);
+  // Device select
+  document.getElementById('deviceSelect').addEventListener('change', function () { renderPreview(); });
+  document.getElementById('showCamera').addEventListener('change', function () { renderPreview(); });
+
+  // Config page live preview: device & camera
+  document.getElementById('cfgDeviceSelect').addEventListener('change', function () {
+    // Sync to preview page
+    var devSel = document.getElementById('deviceSelect');
+    if (devSel) devSel.value = this.value;
+    renderLivePreview();
+  });
+  document.getElementById('cfgShowCamera').addEventListener('change', function () {
+    var showCam = document.getElementById('showCamera');
+    if (showCam) showCam.checked = this.checked;
+    renderLivePreview();
+  });
+
+  // Preview drag (mouse + touch)
+  document.getElementById('previewContent').addEventListener('mousedown', onPreviewPointerDown);
+  document.getElementById('previewContent').addEventListener('touchstart', onPreviewPointerDown, { passive: false });
 
   // Keyboard shortcuts
   document.addEventListener('keydown', function (e) {
@@ -2832,13 +3538,35 @@ function setupEvents() {
   });
 }
 
-// ─── Toast ────────────────────────────────────────────────────────
+// ─── Toast (queue, supports multiple simultaneous) ────────────────
+var _toastQueue = [];
+var _toastId = 0;
+
 function toast(msg, type) {
-  var el = document.getElementById('toast');
-  el.textContent = msg;
+  var id = 'toast-' + (++_toastId);
+  var el = document.createElement('div');
+  el.id = id;
   el.className = 'toast ' + (type || 'success');
+  el.textContent = msg;
+  document.body.appendChild(el);
+
+  var offset = _toastQueue.length * 52;
+  _toastQueue.push(id);
+  el.style.bottom = (80 + offset) + 'px';
+
   requestAnimationFrame(function () { el.classList.add('show'); });
-  setTimeout(function () { el.classList.remove('show'); }, 2500);
+  setTimeout(function () {
+    el.classList.remove('show');
+    setTimeout(function () {
+      if (el.parentNode) el.parentNode.removeChild(el);
+      _toastQueue = _toastQueue.filter(function (t) { return t !== id; });
+      // Reposition remaining toasts
+      _toastQueue.forEach(function (tid, i) {
+        var t = document.getElementById(tid);
+        if (t) t.style.bottom = (80 + i * 52) + 'px';
+      });
+    }, 300);
+  }, 2500);
 }
 
 function escH(s) { return JCM.escHtml(s); }
@@ -2882,7 +3610,15 @@ JCM.initUI = function () {
   initTheme();
   renderTplGrid();
   setupEvents();
+  // Init slider position after layout
+  requestAnimationFrame(function () { moveStepSlider(0); });
+  window.addEventListener('resize', function () { moveStepSlider(_step); });
 };
+
+// Expose internal helpers for inline use
+JCM.renderPreview = renderPreview;
+JCM.renderLivePreview = renderLivePreview;
+JCM.getSelectedDevice = getSelectedDevice;
 
 // ─── App Entry ─────────────────────────────────────────────────────
 

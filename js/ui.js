@@ -23,6 +23,31 @@ function debounce(fn, ms) {
   };
 }
 
+// ─── Template Preview Helper ──────────────────────────────────────
+// 消除 renderPreview / renderLivePreview 的 switch-case 重复
+function renderTemplatePreview(device, showCam, tpl, cfg) {
+  var r = new JCM.PreviewRenderer(device, showCam);
+  switch (tpl.id) {
+    case 'clock':      return r.renderClock(cfg);
+    case 'quote':      return r.renderQuote(cfg);
+    case 'battery':    return r.renderBattery(cfg);
+    case 'status':     return r.renderStatus(cfg);
+    case 'countdown':  return r.renderCountdown(cfg);
+    case 'music':      return r.renderMusic(cfg);
+    case 'gradient':   return r.renderGradient(cfg);
+    case 'weather':    return r.renderWeather(cfg);
+    case 'steps':      return r.renderSteps(cfg);
+    case 'calendar':   return r.renderCalendar(cfg);
+    case 'dualclock':  return r.renderDualclock(cfg);
+    case 'dailyquote': return r.renderDailyquote(cfg);
+    case 'ring':       return r.renderRing(cfg);
+    case 'dashboard':  return r.renderDashboard(cfg);
+    case 'image':      return r.renderImage(cfg);
+    case 'custom':     return r.renderCustom(cfg);
+    default:           return '';
+  }
+}
+
 // ─── Undo/Redo ────────────────────────────────────────────────────
 var _history = [];
 var _redoStack = [];
@@ -31,7 +56,13 @@ var _deepClone = typeof structuredClone === 'function'
   : function (v) { return JSON.parse(JSON.stringify(v)); };
 
 function captureState() {
-  _history.push({ cfg: _deepClone(_cfg), elements: _deepClone(_elements) });
+  // 深拷贝时排除文件数据（ArrayBuffer 太大，撤销不需要还原文件）
+  var filesSnapshot = {};
+  Object.keys(JCM.uploadedFiles).forEach(function (k) {
+    var f = JCM.uploadedFiles[k];
+    filesSnapshot[k] = { mimeType: f.mimeType, originalName: f.originalName, fileName: f.fileName };
+  });
+  _history.push({ cfg: _deepClone(_cfg), elements: _deepClone(_elements), files: filesSnapshot });
   _redoStack = [];
   if (_history.length > 50) _history.shift();
 }
@@ -427,27 +458,8 @@ function renderPreview() {
   document.getElementById('deviceLabel').textContent = device.label;
   document.getElementById('previewCamera').style.width = showCam ? (device.cameraZoneRatio * 100) + '%' : '0';
 
-  var r = new JCM.PreviewRenderer(device, showCam);
-  var html = '';
-  switch (_tpl.id) {
-    case 'clock':     html = r.renderClock(_cfg); break;
-    case 'quote':     html = r.renderQuote(_cfg); break;
-    case 'battery':   html = r.renderBattery(_cfg); break;
-    case 'status':    html = r.renderStatus(_cfg); break;
-    case 'countdown': html = r.renderCountdown(_cfg); break;
-    case 'music':     html = r.renderMusic(_cfg); break;
-    case 'gradient':  html = r.renderGradient(_cfg); break;
-    case 'weather':   html = r.renderWeather(_cfg); break;
-    case 'steps':     html = r.renderSteps(_cfg); break;
-    case 'calendar':  html = r.renderCalendar(_cfg); break;
-    case 'dualclock': html = r.renderDualclock(_cfg); break;
-    case 'dailyquote':html = r.renderDailyquote(_cfg); break;
-    case 'ring':      html = r.renderRing(_cfg); break;
-    case 'dashboard': html = r.renderDashboard(_cfg); break;
-    case 'image':     html = r.renderImage(_cfg); break;
-    case 'custom':    html = r.renderCustom(_cfg); break;
-  }
-  html += r.renderElements(_elements, JCM.uploadedFiles, _selIdx);
+  var html = renderTemplatePreview(device, showCam, _tpl, _cfg);
+  html += new JCM.PreviewRenderer(device, showCam).renderElements(_elements, JCM.uploadedFiles, _selIdx);
   document.getElementById('previewContent').innerHTML = html;
 
   var innerXml = _tpl.gen ? _tpl.gen(_cfg) : generateCustomMAML(device);
@@ -484,27 +496,8 @@ function renderLivePreview() {
   var camEl = document.getElementById('cfgPreviewCamera');
   if (camEl) camEl.style.width = showCam ? (device.cameraZoneRatio * 100) + '%' : '0';
 
-  var r = new JCM.PreviewRenderer(device, showCam);
-  var html = '';
-  switch (_tpl.id) {
-    case 'clock':     html = r.renderClock(_cfg); break;
-    case 'quote':     html = r.renderQuote(_cfg); break;
-    case 'battery':   html = r.renderBattery(_cfg); break;
-    case 'status':    html = r.renderStatus(_cfg); break;
-    case 'countdown': html = r.renderCountdown(_cfg); break;
-    case 'music':     html = r.renderMusic(_cfg); break;
-    case 'gradient':  html = r.renderGradient(_cfg); break;
-    case 'weather':   html = r.renderWeather(_cfg); break;
-    case 'steps':     html = r.renderSteps(_cfg); break;
-    case 'calendar':  html = r.renderCalendar(_cfg); break;
-    case 'dualclock': html = r.renderDualclock(_cfg); break;
-    case 'dailyquote':html = r.renderDailyquote(_cfg); break;
-    case 'ring':      html = r.renderRing(_cfg); break;
-    case 'dashboard': html = r.renderDashboard(_cfg); break;
-    case 'image':     html = r.renderImage(_cfg); break;
-    case 'custom':    html = r.renderCustom(_cfg); break;
-  }
-  html += r.renderElements(_elements, JCM.uploadedFiles, _selIdx);
+  var html = renderTemplatePreview(device, showCam, _tpl, _cfg);
+  html += new JCM.PreviewRenderer(device, showCam).renderElements(_elements, JCM.uploadedFiles, _selIdx);
   var contentEl = document.getElementById('cfgPreviewContent');
   if (contentEl) contentEl.innerHTML = html;
 }
@@ -896,26 +889,37 @@ function handleFilePicked(e) {
   }
 }
 
-// ─── Drag & Drop in Preview ───────────────────────────────────────
+// ─── Drag & Drop in Preview (rAF throttled + touch support) ──────
 var _dragging = null;
 var _resizing = null;
+var _rafPending = false;
 
-function onPreviewMouseDown(e) {
+function getPointerPos(e) {
+  if (e.touches && e.touches.length > 0) {
+    return { clientX: e.touches[0].clientX, clientY: e.touches[0].clientY };
+  }
+  return { clientX: e.clientX, clientY: e.clientY };
+}
+
+function onPreviewPointerDown(e) {
+  var target = e.target;
+
   // Resize handle
-  var rh = e.target.closest('[data-resize-idx]');
+  var rh = target.closest('[data-resize-idx]');
   if (rh) {
     var idx = parseInt(rh.dataset.resizeIdx, 10);
     if (!isNaN(idx) && idx < _elements.length) {
       e.preventDefault();
       e.stopPropagation();
+      var pos = getPointerPos(e);
       var device = getSelectedDevice();
       var screen = document.querySelector('.preview-screen');
       var rect = screen.getBoundingClientRect();
       var scale = rect.width / device.width;
       _resizing = {
         idx: idx,
-        startX: e.clientX,
-        startY: e.clientY,
+        startX: pos.clientX,
+        startY: pos.clientY,
         origW: _elements[idx].w || 100,
         origH: _elements[idx].h || 100,
         scale: scale
@@ -923,17 +927,20 @@ function onPreviewMouseDown(e) {
       captureState();
       document.addEventListener('mousemove', onResizeMove);
       document.addEventListener('mouseup', onResizeUp);
+      document.addEventListener('touchmove', onResizeMove, { passive: false });
+      document.addEventListener('touchend', onResizeUp);
       return;
     }
   }
 
   // Element drag
-  var el = e.target.closest('[data-el-idx]');
+  var el = target.closest('[data-el-idx]');
   if (!el) return;
   var idx = parseInt(el.dataset.elIdx, 10);
   if (isNaN(idx) || idx >= _elements.length) return;
 
   e.preventDefault();
+  var pos = getPointerPos(e);
   var device = getSelectedDevice();
   var screen = document.querySelector('.preview-screen');
   var rect = screen.getBoundingClientRect();
@@ -941,8 +948,8 @@ function onPreviewMouseDown(e) {
 
   _dragging = {
     idx: idx,
-    startX: e.clientX,
-    startY: e.clientY,
+    startX: pos.clientX,
+    startY: pos.clientY,
     origX: _elements[idx].x,
     origY: _elements[idx].y,
     scale: scale,
@@ -956,12 +963,16 @@ function onPreviewMouseDown(e) {
 
   document.addEventListener('mousemove', onPreviewMouseMove);
   document.addEventListener('mouseup', onPreviewMouseUp);
+  document.addEventListener('touchmove', onPreviewMouseMove, { passive: false });
+  document.addEventListener('touchend', onPreviewMouseUp);
 }
 
 function onResizeMove(e) {
   if (!_resizing) return;
-  var dx = (e.clientX - _resizing.startX) / _resizing.scale;
-  var dy = (e.clientY - _resizing.startY) / _resizing.scale;
+  e.preventDefault();
+  var pos = getPointerPos(e);
+  var dx = (pos.clientX - _resizing.startX) / _resizing.scale;
+  var dy = (pos.clientY - _resizing.startY) / _resizing.scale;
   var nw = Math.max(20, Math.round(_resizing.origW + dx));
   var nh = Math.max(20, Math.round(_resizing.origH + dy));
 
@@ -974,7 +985,6 @@ function onResizeMove(e) {
   _elements[_resizing.idx].w = nw;
   _elements[_resizing.idx].h = nh;
   renderPreview();
-  // Update field inputs if visible
   var wInput = document.querySelector('[data-prop="w"][data-idx="' + _resizing.idx + '"]');
   var hInput = document.querySelector('[data-prop="h"][data-idx="' + _resizing.idx + '"]');
   if (wInput) wInput.value = nw;
@@ -985,25 +995,12 @@ function onResizeUp() {
   _resizing = null;
   document.removeEventListener('mousemove', onResizeMove);
   document.removeEventListener('mouseup', onResizeUp);
+  document.removeEventListener('touchmove', onResizeMove);
+  document.removeEventListener('touchend', onResizeUp);
   renderConfig();
 }
 
-function onPreviewMouseMove(e) {
-  if (!_dragging) return;
-  var dx = (e.clientX - _dragging.startX) / _dragging.scale;
-  var dy = (e.clientY - _dragging.startY) / _dragging.scale;
-
-  var nx = Math.round(_dragging.origX + dx);
-  var ny = Math.round(_dragging.origY + dy);
-
-  // Snap to grid
-  var snap = document.getElementById('snapToggle');
-  if (snap && snap.checked) {
-    nx = Math.round(nx / SNAP_GRID) * SNAP_GRID;
-    ny = Math.round(ny / SNAP_GRID) * SNAP_GRID;
-  }
-
-  // Smart alignment guides
+function applySmartAlign(nx, ny) {
   var el = _elements[_dragging.idx];
   var elW = el.w || (el.r ? el.r * 2 : 0) || 50;
   var elH = el.h || (el.r ? el.r * 2 : 0) || 30;
@@ -1012,11 +1009,9 @@ function onPreviewMouseMove(e) {
   var snapThreshold = 6;
   var device = _dragging.device;
 
-  // Check against device center
-  if (Math.abs(elCX - device.width / 2) < snapThreshold) { nx = Math.round(device.width / 2 - elW / 2); }
-  if (Math.abs(elCY - device.height / 2) < snapThreshold) { ny = Math.round(device.height / 2 - elH / 2); }
+  if (Math.abs(elCX - device.width / 2) < snapThreshold) nx = Math.round(device.width / 2 - elW / 2);
+  if (Math.abs(elCY - device.height / 2) < snapThreshold) ny = Math.round(device.height / 2 - elH / 2);
 
-  // Check against other elements
   for (var i = 0; i < _elements.length; i++) {
     if (i === _dragging.idx) continue;
     var other = _elements[i];
@@ -1025,27 +1020,49 @@ function onPreviewMouseMove(e) {
     var oCX = other.x + oW / 2;
     var oCY = other.y + oH / 2;
 
-    // Horizontal alignment (left, center, right)
     if (Math.abs(nx - other.x) < snapThreshold) nx = other.x;
     if (Math.abs(nx + elW - (other.x + oW)) < snapThreshold) nx = other.x + oW - elW;
     if (Math.abs(elCX - oCX) < snapThreshold) nx = Math.round(oCX - elW / 2);
-
-    // Vertical alignment (top, center, bottom)
     if (Math.abs(ny - other.y) < snapThreshold) ny = other.y;
     if (Math.abs(ny + elH - (other.y + oH)) < snapThreshold) ny = other.y + oH - elH;
     if (Math.abs(elCY - oCY) < snapThreshold) ny = Math.round(oCY - elH / 2);
   }
+  return { x: nx, y: ny };
+}
 
-  _elements[_dragging.idx].x = Math.max(0, Math.min(nx, _dragging.device.width - 10));
-  _elements[_dragging.idx].y = Math.max(0, Math.min(ny, _dragging.device.height - 10));
+function onPreviewMouseMove(e) {
+  if (!_dragging || _rafPending) return;
+  e.preventDefault();
+  _rafPending = true;
+  requestAnimationFrame(function () {
+    _rafPending = false;
+    if (!_dragging) return;
+    var pos = getPointerPos(e);
+    var dx = (pos.clientX - _dragging.startX) / _dragging.scale;
+    var dy = (pos.clientY - _dragging.startY) / _dragging.scale;
 
-  renderPreview();
+    var nx = Math.round(_dragging.origX + dx);
+    var ny = Math.round(_dragging.origY + dy);
+
+    var snap = document.getElementById('snapToggle');
+    if (snap && snap.checked) {
+      nx = Math.round(nx / SNAP_GRID) * SNAP_GRID;
+      ny = Math.round(ny / SNAP_GRID) * SNAP_GRID;
+    }
+
+    var aligned = applySmartAlign(nx, ny);
+    _elements[_dragging.idx].x = Math.max(0, Math.min(aligned.x, _dragging.device.width - 10));
+    _elements[_dragging.idx].y = Math.max(0, Math.min(aligned.y, _dragging.device.height - 10));
+    renderPreview();
+  });
 }
 
 function onPreviewMouseUp() {
   _dragging = null;
   document.removeEventListener('mousemove', onPreviewMouseMove);
   document.removeEventListener('mouseup', onPreviewMouseUp);
+  document.removeEventListener('touchmove', onPreviewMouseMove);
+  document.removeEventListener('touchend', onPreviewMouseUp);
 }
 
 // ─── Event Delegation ─────────────────────────────────────────────
@@ -1188,8 +1205,9 @@ function setupEvents() {
     renderLivePreview();
   });
 
-  // Preview drag
-  document.getElementById('previewContent').addEventListener('mousedown', onPreviewMouseDown);
+  // Preview drag (mouse + touch)
+  document.getElementById('previewContent').addEventListener('mousedown', onPreviewPointerDown);
+  document.getElementById('previewContent').addEventListener('touchstart', onPreviewPointerDown, { passive: false });
 
   // Keyboard shortcuts
   document.addEventListener('keydown', function (e) {
@@ -1233,13 +1251,35 @@ function setupEvents() {
   });
 }
 
-// ─── Toast ────────────────────────────────────────────────────────
+// ─── Toast (queue, supports multiple simultaneous) ────────────────
+var _toastQueue = [];
+var _toastId = 0;
+
 function toast(msg, type) {
-  var el = document.getElementById('toast');
-  el.textContent = msg;
+  var id = 'toast-' + (++_toastId);
+  var el = document.createElement('div');
+  el.id = id;
   el.className = 'toast ' + (type || 'success');
+  el.textContent = msg;
+  document.body.appendChild(el);
+
+  var offset = _toastQueue.length * 52;
+  _toastQueue.push(id);
+  el.style.bottom = (80 + offset) + 'px';
+
   requestAnimationFrame(function () { el.classList.add('show'); });
-  setTimeout(function () { el.classList.remove('show'); }, 2500);
+  setTimeout(function () {
+    el.classList.remove('show');
+    setTimeout(function () {
+      if (el.parentNode) el.parentNode.removeChild(el);
+      _toastQueue = _toastQueue.filter(function (t) { return t !== id; });
+      // Reposition remaining toasts
+      _toastQueue.forEach(function (tid, i) {
+        var t = document.getElementById(tid);
+        if (t) t.style.bottom = (80 + i * 52) + 'px';
+      });
+    }, 300);
+  }, 2500);
 }
 
 function escH(s) { return JCM.escHtml(s); }
