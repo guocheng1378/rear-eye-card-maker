@@ -1354,17 +1354,17 @@ function validateMAMLRegex(xml) {
 
   // 正确处理属性值中的 > 字符（如 expression="(#x > 5)"）
   var openCount = 0, selfCloseCount = 0;
-  var inQuote = false, quoteChar = '';
   for (var i = 0; i < xml.length; i++) {
-    var c = xml[i];
-    if (inQuote) { if (c === quoteChar) inQuote = false; continue; }
-    if (c === '"' || c === "'") { inQuote = true; quoteChar = c; continue; }
-    if (c === '<' && i + 1 < xml.length && xml[i + 1].match(/[A-Z]/)) {
-      // 找到标签的结束 >
-      var end = xml.indexOf('>', i + 1);
-      if (end < 0) continue;
-      var tagContent = xml.substring(i, end + 1);
-      if (tagContent.match(/\/\s*>$/)) selfCloseCount++;
+    if (xml[i] === '<' && i + 1 < xml.length && xml[i + 1].match(/[A-Z]/)) {
+      // 跳过引号内的 > 找到真正的标签结束
+      var tagEnd = -1, inQ = false, qC = '';
+      for (var j = i + 1; j < xml.length; j++) {
+        if (inQ) { if (xml[j] === qC) inQ = false; continue; }
+        if (xml[j] === '"' || xml[j] === "'") { inQ = true; qC = xml[j]; continue; }
+        if (xml[j] === '>') { tagEnd = j; break; }
+      }
+      if (tagEnd < 0) continue;
+      if (xml[tagEnd - 1] === '/') selfCloseCount++;
       else openCount++;
     }
   }
