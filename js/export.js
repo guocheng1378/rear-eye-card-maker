@@ -245,7 +245,7 @@ JCM.exportPNG = function (cardName) {
   var el = document.querySelector('.preview-screen');
   if (!el) return Promise.reject(new Error('预览区域不存在'));
 
-  var device = getSelectedDevice ? getSelectedDevice() : { width: 420, height: 252 };
+  var device = JCM.getSelectedDevice ? JCM.getSelectedDevice() : { width: 420, height: 252 };
   var scale = 2;
   var canvas = document.createElement('canvas');
   canvas.width = device.width * scale;
