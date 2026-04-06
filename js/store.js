@@ -30,6 +30,25 @@ JCM.addRecentColor = function (color) {
   try { localStorage.setItem('jcm-recent-colors', JSON.stringify(recent)); } catch (e) {}
 };
 
+// ─── 模板分类 ──────────────────────────────────────────────────────
+JCM.TPL_CATEGORIES = [
+  { id: 'all', label: '全部' },
+  { id: 'time', label: '⏰ 时间' },
+  { id: 'info', label: '📊 信息' },
+  { id: 'media', label: '🎨 媒体' },
+  { id: 'device', label: '📱 设备' },
+  { id: 'custom', label: '🛠️ 自定义' },
+];
+JCM.TPL_CATEGORY_MAP = {
+  clock: 'time', dualclock: 'time', countdown: 'time',
+  quote: 'info', status: 'info', weather: 'info', steps: 'info',
+  calendar: 'info', dailyquote: 'info', dashboard: 'info',
+  battery: 'info', ring: 'info',
+  music: 'media', gradient: 'media', image: 'media',
+  custom: 'custom',
+  weather_real: 'device', music_real: 'device',
+};
+
 // ─── 模板收藏 ──────────────────────────────────────────────────────
 JCM.getFavorites = function () {
   try { return JSON.parse(localStorage.getItem('jcm-favorites') || '[]'); } catch (e) { return []; }

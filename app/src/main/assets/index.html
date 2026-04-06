@@ -622,6 +622,37 @@ kbd{
 /* ─── Lottie element ─── */
 .el-badge[data-type="lottie"]{background:#9b59b6}
 
+/* ─── Toggle Switch ─── */
+.toggle-switch{position:relative;display:inline-block;width:40px;height:22px;cursor:pointer}
+.toggle-switch input{opacity:0;width:0;height:0}
+.toggle-slider{position:absolute;inset:0;background:var(--surface3);border-radius:11px;transition:var(--transition)}
+.toggle-slider::before{content:'';position:absolute;width:16px;height:16px;left:3px;bottom:3px;background:#fff;border-radius:50%;transition:var(--transition)}
+.toggle-switch input:checked+.toggle-slider{background:var(--accent)}
+.toggle-switch input:checked+.toggle-slider::before{transform:translateX(18px)}
+
+/* ─── Auto-save Toast ─── */
+.autosave-indicator{
+  position:fixed;bottom:16px;right:16px;padding:6px 14px;
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--radius-sm);font-size:12px;color:var(--text2);
+  box-shadow:var(--shadow);z-index:9999;
+  opacity:0;transform:translateY(10px);
+  transition:opacity .3s,transform .3s;pointer-events:none;
+}
+.autosave-indicator.show{opacity:1;transform:translateY(0)}
+
+/* ─── Template Category Tabs ─── */
+.tpl-categories{
+  display:flex;gap:6px;padding:0 20px 12px;flex-wrap:wrap;
+}
+.tpl-cat{
+  padding:5px 14px;font-size:12px;border-radius:20px;cursor:pointer;
+  background:var(--surface2);border:1px solid var(--border);
+  color:var(--text2);transition:var(--transition);white-space:nowrap;
+}
+.tpl-cat:hover{border-color:var(--accent);color:var(--text)}
+.tpl-cat.active{background:var(--accent);border-color:var(--accent);color:#fff}
+
 /* ─── Element count badge ─── */
 .el-count-badge{
   display:inline-block;min-width:20px;height:20px;line-height:20px;
@@ -703,6 +734,7 @@ kbd{
     <div class="page page-tpl active" id="page0">
       <div class="page-title">选择卡片模板</div>
       <div class="page-subtitle">从预设模板开始，或选择自定义从零创建</div>
+      <div class="tpl-categories" id="tplCategories"></div>
       <div class="tpl-search"><input type="text" id="tplSearch" placeholder="🔍 搜索模板..." oninput="JCM.filterTemplates(this.value)"></div>
       <div class="tpl-grid" id="tplGrid"></div>
     </div>
@@ -879,6 +911,9 @@ kbd{
 <div class="toast" id="toast"></div>
 
 <!-- JS Modules (loaded in order) -->
+<!-- Auto-save indicator -->
+<div class="autosave-indicator" id="autosaveIndicator">💾 已自动保存</div>
+
 <!-- Right-click Context Menu -->
 <div class="context-menu" id="contextMenu" style="display:none">
   <div class="ctx-item" data-ctx="duplicate">📋 复制元素</div>
@@ -937,6 +972,25 @@ JCM.addRecentColor = function (color) {
   recent.unshift(color);
   if (recent.length > 12) recent = recent.slice(0, 12);
   try { localStorage.setItem('jcm-recent-colors', JSON.stringify(recent)); } catch (e) {}
+};
+
+// ─── 模板分类 ──────────────────────────────────────────────────────
+JCM.TPL_CATEGORIES = [
+  { id: 'all', label: '全部' },
+  { id: 'time', label: '⏰ 时间' },
+  { id: 'info', label: '📊 信息' },
+  { id: 'media', label: '🎨 媒体' },
+  { id: 'device', label: '📱 设备' },
+  { id: 'custom', label: '🛠️ 自定义' },
+];
+JCM.TPL_CATEGORY_MAP = {
+  clock: 'time', dualclock: 'time', countdown: 'time',
+  quote: 'info', status: 'info', weather: 'info', steps: 'info',
+  calendar: 'info', dailyquote: 'info', dashboard: 'info',
+  battery: 'info', ring: 'info',
+  music: 'media', gradient: 'media', image: 'media',
+  custom: 'custom',
+  weather_real: 'device', music_real: 'device',
 };
 
 // ─── 模板收藏 ──────────────────────────────────────────────────────
@@ -1159,6 +1213,7 @@ JCM.TEMPLATES = [
       { group: '基本', fields: [
         { key: 'cardName', label: '卡片名称', type: 'text', default: '时钟卡片' },
         { key: 'bgColor', label: '背景颜色', type: 'color', default: '#000000' },
+        { key: 'bgImage', label: '背景图 URL（可选）', type: 'text', default: '' },
       ]},
       { group: '样式', fields: [
         { key: 'timeColor', label: '时间颜色', type: 'color', default: '#ffffff' },
@@ -1197,6 +1252,7 @@ JCM.TEMPLATES = [
       { group: '基本', fields: [
         { key: 'cardName', label: '卡片名称', type: 'text', default: '名言卡片' },
         { key: 'bgColor', label: '背景颜色', type: 'color', default: '#1a1a2e' },
+        { key: 'bgImage', label: '背景图 URL（可选）', type: 'text', default: '' },
       ]},
       { group: '内容', fields: [
         { key: 'text', label: '文字内容', type: 'textarea', default: 'Stay hungry.\nStay foolish.' },
@@ -1227,6 +1283,7 @@ JCM.TEMPLATES = [
       { group: '基本', fields: [
         { key: 'cardName', label: '卡片名称', type: 'text', default: '电池卡片' },
         { key: 'bgColor', label: '背景颜色', type: 'color', default: '#0d1117' },
+        { key: 'bgImage', label: '背景图 URL（可选）', type: 'text', default: '' },
       ]},
       { group: '样式', fields: [
         { key: 'barColor', label: '电量条颜色', type: 'color', default: '#00b894' },
@@ -1260,6 +1317,7 @@ JCM.TEMPLATES = [
       { group: '基本', fields: [
         { key: 'cardName', label: '卡片名称', type: 'text', default: '状态卡片' },
         { key: 'bgColor', label: '背景颜色', type: 'color', default: '#0f0f1a' },
+        { key: 'bgImage', label: '背景图 URL（可选）', type: 'text', default: '' },
         { key: 'title', label: '标题', type: 'text', default: '系统状态' },
       ]},
       { group: '项目', fields: [
@@ -1299,6 +1357,7 @@ JCM.TEMPLATES = [
       { group: '基本', fields: [
         { key: 'cardName', label: '卡片名称', type: 'text', default: '倒计时卡片' },
         { key: 'bgColor', label: '背景颜色', type: 'color', default: '#1a0a2e' },
+        { key: 'bgImage', label: '背景图 URL（可选）', type: 'text', default: '' },
       ]},
       { group: '内容', fields: [
         { key: 'eventName', label: '事件名称', type: 'text', default: '距离新年' },
@@ -1344,6 +1403,7 @@ JCM.TEMPLATES = [
       { group: '基本', fields: [
         { key: 'cardName', label: '卡片名称', type: 'text', default: '音乐卡片' },
         { key: 'bgColor', label: '背景颜色', type: 'color', default: '#0a0a0a' },
+        { key: 'bgImage', label: '背景图 URL（可选）', type: 'text', default: '' },
       ]},
       { group: '内容', fields: [
         { key: 'songName', label: '歌曲名称', type: 'text', default: '歌曲名称' },
@@ -1411,6 +1471,7 @@ JCM.TEMPLATES = [
       { group: '基本', fields: [
         { key: 'cardName', label: '卡片名称', type: 'text', default: '天气卡片' },
         { key: 'bgColor', label: '背景颜色', type: 'color', default: '#0a1628' },
+        { key: 'bgImage', label: '背景图 URL（可选）', type: 'text', default: '' },
       ]},
       { group: '天气', fields: [
         { key: 'city', label: '城市', type: 'text', default: '北京' },
@@ -1443,6 +1504,7 @@ JCM.TEMPLATES = [
       { group: '基本', fields: [
         { key: 'cardName', label: '卡片名称', type: 'text', default: '步数卡片' },
         { key: 'bgColor', label: '背景颜色', type: 'color', default: '#0a0a1a' },
+        { key: 'bgImage', label: '背景图 URL（可选）', type: 'text', default: '' },
       ]},
       { group: '样式', fields: [
         { key: 'goal', label: '目标步数', type: 'text', default: '10000' },
@@ -1481,6 +1543,7 @@ JCM.TEMPLATES = [
       { group: '基本', fields: [
         { key: 'cardName', label: '卡片名称', type: 'text', default: '日历卡片' },
         { key: 'bgColor', label: '背景颜色', type: 'color', default: '#0f0f1a' },
+        { key: 'bgImage', label: '背景图 URL（可选）', type: 'text', default: '' },
       ]},
       { group: '样式', fields: [
         { key: 'dayColor', label: '日期颜色', type: 'color', default: '#ffffff' },
@@ -1520,6 +1583,7 @@ JCM.TEMPLATES = [
       { group: '基本', fields: [
         { key: 'cardName', label: '卡片名称', type: 'text', default: '双时钟' },
         { key: 'bgColor', label: '背景颜色', type: 'color', default: '#000000' },
+        { key: 'bgImage', label: '背景图 URL（可选）', type: 'text', default: '' },
       ]},
       { group: '城市 1', fields: [
         { key: 'city1', label: '城市名', type: 'text', default: '北京' },
@@ -1575,6 +1639,7 @@ JCM.TEMPLATES = [
       { group: '基本', fields: [
         { key: 'cardName', label: '卡片名称', type: 'text', default: '每日一句' },
         { key: 'bgColor', label: '背景颜色', type: 'color', default: '#0a0a1a' },
+        { key: 'bgImage', label: '背景图 URL（可选）', type: 'text', default: '' },
       ]},
       { group: '语录 (每天轮换一条)', fields: [
         { key: 'quote1', label: '语录 1', type: 'textarea', default: '生活不止眼前的苟且\n还有诗和远方' },
@@ -1639,6 +1704,7 @@ JCM.TEMPLATES = [
       { group: '基本', fields: [
         { key: 'cardName', label: '卡片名称', type: 'text', default: '环形进度' },
         { key: 'bgColor', label: '背景颜色', type: 'color', default: '#0a0a1a' },
+        { key: 'bgImage', label: '背景图 URL（可选）', type: 'text', default: '' },
       ]},
       { group: '数据源', fields: [
         { key: 'source', label: '数据来源', type: 'select', options: [
@@ -1688,6 +1754,7 @@ JCM.TEMPLATES = [
       { group: '基本', fields: [
         { key: 'cardName', label: '卡片名称', type: 'text', default: '仪表盘' },
         { key: 'bgColor', label: '背景颜色', type: 'color', default: '#0a0e1a' },
+        { key: 'bgImage', label: '背景图 URL（可选）', type: 'text', default: '' },
       ]},
       { group: '样式', fields: [
         { key: 'timeColor', label: '时间颜色', type: 'color', default: '#ffffff' },
@@ -1732,6 +1799,7 @@ JCM.TEMPLATES = [
       { group: '基本', fields: [
         { key: 'cardName', label: '卡片名称', type: 'text', default: '图片卡片' },
         { key: 'bgColor', label: '背景颜色', type: 'color', default: '#000000' },
+        { key: 'bgImage', label: '背景图 URL（可选）', type: 'text', default: '' },
       ]},
     ],
     gen: function (c) {
@@ -1749,6 +1817,7 @@ JCM.TEMPLATES = [
       { group: '基本', fields: [
         { key: 'cardName', label: '卡片名称', type: 'text', default: '自定义卡片' },
         { key: 'bgColor', label: '背景颜色', type: 'color', default: '#000000' },
+        { key: 'bgImage', label: '背景图 URL（可选）', type: 'text', default: '' },
         { key: 'bgPattern', label: '背景图案', type: 'select', options: [
           { v: 'solid', l: '纯色' },
           { v: 'dots', l: '点阵' },
@@ -1774,6 +1843,7 @@ JCM.TEMPLATES = [
       { group: '基本', fields: [
         { key: 'cardName', label: '卡片名称', type: 'text', default: '天气卡片' },
         { key: 'bgColor', label: '背景颜色', type: 'color', default: '#0a1628' },
+        { key: 'bgImage', label: '背景图 URL（可选）', type: 'text', default: '' },
       ]},
       { group: '样式', fields: [
         { key: 'timeColor', label: '时间颜色', type: 'color', default: '#ffffff' },
@@ -1820,6 +1890,7 @@ JCM.TEMPLATES = [
       { group: '基本', fields: [
         { key: 'cardName', label: '卡片名称', type: 'text', default: '音乐卡片' },
         { key: 'bgColor', label: '背景颜色', type: 'color', default: '#1a1a2e' },
+        { key: 'bgImage', label: '背景图 URL（可选）', type: 'text', default: '' },
       ]},
       { group: '样式', fields: [
         { key: 'titleColor', label: '歌名颜色', type: 'color', default: '#ffffff' },
@@ -2343,12 +2414,8 @@ JCM.renderElementEditor = function (el, idx, device) {
         '<option value="left"' + (el.textAlign === 'left' ? ' selected' : '') + '>左对齐</option>' +
         '<option value="center"' + (el.textAlign === 'center' ? ' selected' : '') + '>居中</option>' +
         '<option value="right"' + (el.textAlign === 'right' ? ' selected' : '') + '>右对齐</option></select>') +
-      field('加粗', '<select data-prop="bold" data-idx="' + idx + '">' +
-        '<option value="false"' + (!el.bold ? ' selected' : '') + '>否</option>' +
-        '<option value="true"' + (el.bold ? ' selected' : '') + '>是</option></select>') +
-      field('多行', '<select data-prop="multiLine" data-idx="' + idx + '">' +
-        '<option value="false"' + (!el.multiLine ? ' selected' : '') + '>否</option>' +
-        '<option value="true"' + (el.multiLine ? ' selected' : '') + '>是</option></select>') +
+      field('加粗', '<label class="toggle-switch"><input type="checkbox" data-prop="bold" data-idx="' + idx + '"' + (el.bold ? ' checked' : '') + '><span class="toggle-slider"></span></label>') +
+      field('多行', '<label class="toggle-switch"><input type="checkbox" data-prop="multiLine" data-idx="' + idx + '"' + (el.multiLine ? ' checked' : '') + '><span class="toggle-slider"></span></label>') +
       field('宽度', '<input type="number" value="' + (el.w || 200) + '" data-prop="w" data-idx="' + idx + '">') +
       field('阴影', '<select data-prop="shadow" data-idx="' + idx + '">' +
         '<option value="none"' + (!el.shadow || el.shadow === 'none' ? ' selected' : '') + '>无</option>' +
@@ -3217,6 +3284,7 @@ function renderTplGrid() {
       '<div class="tpl-card-name">' + t.name + '</div>' +
       '<div class="tpl-card-desc">' + t.desc + '</div></div>';
   }).join('');
+  renderTplCategories();
 }
 
 // ─── Template Thumbnails ──────────────────────────────────────────
@@ -3521,9 +3589,17 @@ function renderPreview() {
 
   var html = renderTemplatePreview(device, showCam, _tpl, _cfg);
   html += new JCM.PreviewRenderer(device, showCam).renderElements(_elements, JCM.uploadedFiles, _selIdx);
+  if (_cfg.bgImage) {
+    html = '<div style="position:absolute;inset:0;background-image:url(\'' + _cfg.bgImage.replace(/'/g, "\\'") + '\');background-size:cover;background-position:center;z-index:-1"></div>' + html;
+  }
   document.getElementById('previewContent').innerHTML = html;
 
   var innerXml = getTemplateMAML(_tpl, _cfg, device);
+  // 背景图支持
+  if (_cfg.bgImage && innerXml.indexOf('<Rectangle') >= 0) {
+    var bgImg = '  <Image src="' + JCM.escXml(_cfg.bgImage) + '" x="0" y="0" w="#view_width" h="#view_height" />\n';
+    innerXml = innerXml.replace(/(  <Rectangle w="#view_width"[^>]*>)/, bgImg + '$1');
+  }
   var maml;
   if (_tpl.rawXml) {
     // rawXml 模板已经是完整 XML，直接使用
@@ -3566,6 +3642,9 @@ function renderLivePreview() {
 
   var html = renderTemplatePreview(device, showCam, _tpl, _cfg);
   html += new JCM.PreviewRenderer(device, showCam).renderElements(_elements, JCM.uploadedFiles, _selIdx);
+  if (_cfg.bgImage) {
+    html = '<div style="position:absolute;inset:0;background-image:url(\'' + _cfg.bgImage.replace(/'/g, "\\'") + '\');background-size:cover;background-position:center;z-index:-1"></div>' + html;
+  }
   var contentEl = document.getElementById('cfgPreviewContent');
   if (contentEl) contentEl.innerHTML = html;
 }
@@ -3640,6 +3719,11 @@ JCM.handleExport = function () {
   if (!_tpl) return toast('请先选择模板', 'error');
   var device = getSelectedDevice();
   var innerXml = getTemplateMAML(_tpl, _cfg, device);
+  // 背景图支持
+  if (_cfg.bgImage && innerXml.indexOf('<Rectangle') >= 0) {
+    var bgImg = '  <Image src="' + JCM.escXml(_cfg.bgImage) + '" x="0" y="0" w="#view_width" h="#view_height" />\n';
+    innerXml = innerXml.replace(/(  <Rectangle w="#view_width"[^>]*>)/, bgImg + '$1');
+  }
   var maml = _tpl.rawXml ? innerXml : JCM.generateMAML({
     cardName: _cfg.cardName || _tpl.name,
     device: device,
@@ -4451,6 +4535,18 @@ function setupEvents() {
     if (card) JCM.selectTemplate(card.dataset.tpl);
   });
 
+  // Category tabs
+  var catContainer = document.getElementById('tplCategories');
+  if (catContainer) {
+    catContainer.addEventListener('click', function (e) {
+      var btn = e.target.closest('.tpl-cat');
+      if (!btn) return;
+      _activeCategory = btn.dataset.cat;
+      document.querySelectorAll('.tpl-cat').forEach(function (b) { b.classList.toggle('active', b === btn); });
+      JCM.filterTemplates(document.getElementById('tplSearch').value);
+    });
+  }
+
   // Config content
   document.getElementById('cfgContent').addEventListener('input', function (e) {
     var t = e.target;
@@ -4491,6 +4587,13 @@ function setupEvents() {
       if (val === 'true') val = true;
       else if (val === 'false') val = false;
       _elements[idx][t.dataset.prop] = val;
+      _dirty = true;
+      renderConfig();
+    }
+    // Toggle switch (checkbox) for boolean element props
+    if (t.dataset.prop && t.type === 'checkbox' && t.dataset.idx) {
+      var cidx = Number(t.dataset.idx);
+      _elements[cidx][t.dataset.prop] = t.checked;
       _dirty = true;
       renderConfig();
     }
@@ -4802,6 +4905,9 @@ function autoSave() {
         timestamp: Date.now()
       };
       localStorage.setItem('jcm-draft', JSON.stringify(draft));
+      // Show save indicator
+      var el = document.getElementById('autosaveIndicator');
+      if (el) { el.classList.add('show'); setTimeout(function () { el.classList.remove('show'); }, 1500); }
     } catch (e) { }
   }, 2000);
 }
@@ -4925,15 +5031,29 @@ JCM.toggleThemeCompare = function () {
 };
 
 // ─── Template Filter ─────────────────────────────────────────────
+// ─── Template Categories ─────────────────────────────────────────
+var _activeCategory = 'all';
+
+function renderTplCategories() {
+  var container = document.getElementById('tplCategories');
+  if (!container || !JCM.TPL_CATEGORIES) return;
+  container.innerHTML = JCM.TPL_CATEGORIES.map(function (cat) {
+    return '<button class="tpl-cat' + (_activeCategory === cat.id ? ' active' : '') + '" data-cat="' + cat.id + '">' + cat.label + '</button>';
+  }).join('');
+}
+
 JCM.filterTemplates = function (query) {
   var cards = document.querySelectorAll('.tpl-card');
   query = (query || '').toLowerCase();
   cards.forEach(function (card) {
+    var tplId = card.dataset.tpl;
     var nameEl = card.querySelector('.tpl-card-name');
     var descEl = card.querySelector('.tpl-card-desc');
     var name = nameEl ? nameEl.textContent.toLowerCase() : '';
     var desc = descEl ? descEl.textContent.toLowerCase() : '';
-    card.style.display = (!query || name.indexOf(query) >= 0 || desc.indexOf(query) >= 0) ? '' : 'none';
+    var catMatch = _activeCategory === 'all' || (JCM.TPL_CATEGORY_MAP && JCM.TPL_CATEGORY_MAP[tplId] === _activeCategory);
+    var searchMatch = !query || name.indexOf(query) >= 0 || desc.indexOf(query) >= 0;
+    card.style.display = (catMatch && searchMatch) ? '' : 'none';
   });
 };
 

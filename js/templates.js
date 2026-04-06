@@ -7,6 +7,7 @@ JCM.TEMPLATES = [
       { group: '基本', fields: [
         { key: 'cardName', label: '卡片名称', type: 'text', default: '时钟卡片' },
         { key: 'bgColor', label: '背景颜色', type: 'color', default: '#000000' },
+        { key: 'bgImage', label: '背景图 URL（可选）', type: 'text', default: '' },
       ]},
       { group: '样式', fields: [
         { key: 'timeColor', label: '时间颜色', type: 'color', default: '#ffffff' },
@@ -45,6 +46,7 @@ JCM.TEMPLATES = [
       { group: '基本', fields: [
         { key: 'cardName', label: '卡片名称', type: 'text', default: '名言卡片' },
         { key: 'bgColor', label: '背景颜色', type: 'color', default: '#1a1a2e' },
+        { key: 'bgImage', label: '背景图 URL（可选）', type: 'text', default: '' },
       ]},
       { group: '内容', fields: [
         { key: 'text', label: '文字内容', type: 'textarea', default: 'Stay hungry.\nStay foolish.' },
@@ -75,6 +77,7 @@ JCM.TEMPLATES = [
       { group: '基本', fields: [
         { key: 'cardName', label: '卡片名称', type: 'text', default: '电池卡片' },
         { key: 'bgColor', label: '背景颜色', type: 'color', default: '#0d1117' },
+        { key: 'bgImage', label: '背景图 URL（可选）', type: 'text', default: '' },
       ]},
       { group: '样式', fields: [
         { key: 'barColor', label: '电量条颜色', type: 'color', default: '#00b894' },
@@ -108,6 +111,7 @@ JCM.TEMPLATES = [
       { group: '基本', fields: [
         { key: 'cardName', label: '卡片名称', type: 'text', default: '状态卡片' },
         { key: 'bgColor', label: '背景颜色', type: 'color', default: '#0f0f1a' },
+        { key: 'bgImage', label: '背景图 URL（可选）', type: 'text', default: '' },
         { key: 'title', label: '标题', type: 'text', default: '系统状态' },
       ]},
       { group: '项目', fields: [
@@ -147,6 +151,7 @@ JCM.TEMPLATES = [
       { group: '基本', fields: [
         { key: 'cardName', label: '卡片名称', type: 'text', default: '倒计时卡片' },
         { key: 'bgColor', label: '背景颜色', type: 'color', default: '#1a0a2e' },
+        { key: 'bgImage', label: '背景图 URL（可选）', type: 'text', default: '' },
       ]},
       { group: '内容', fields: [
         { key: 'eventName', label: '事件名称', type: 'text', default: '距离新年' },
@@ -192,6 +197,7 @@ JCM.TEMPLATES = [
       { group: '基本', fields: [
         { key: 'cardName', label: '卡片名称', type: 'text', default: '音乐卡片' },
         { key: 'bgColor', label: '背景颜色', type: 'color', default: '#0a0a0a' },
+        { key: 'bgImage', label: '背景图 URL（可选）', type: 'text', default: '' },
       ]},
       { group: '内容', fields: [
         { key: 'songName', label: '歌曲名称', type: 'text', default: '歌曲名称' },
@@ -259,6 +265,7 @@ JCM.TEMPLATES = [
       { group: '基本', fields: [
         { key: 'cardName', label: '卡片名称', type: 'text', default: '天气卡片' },
         { key: 'bgColor', label: '背景颜色', type: 'color', default: '#0a1628' },
+        { key: 'bgImage', label: '背景图 URL（可选）', type: 'text', default: '' },
       ]},
       { group: '天气', fields: [
         { key: 'city', label: '城市', type: 'text', default: '北京' },
@@ -291,6 +298,7 @@ JCM.TEMPLATES = [
       { group: '基本', fields: [
         { key: 'cardName', label: '卡片名称', type: 'text', default: '步数卡片' },
         { key: 'bgColor', label: '背景颜色', type: 'color', default: '#0a0a1a' },
+        { key: 'bgImage', label: '背景图 URL（可选）', type: 'text', default: '' },
       ]},
       { group: '样式', fields: [
         { key: 'goal', label: '目标步数', type: 'text', default: '10000' },
@@ -329,6 +337,7 @@ JCM.TEMPLATES = [
       { group: '基本', fields: [
         { key: 'cardName', label: '卡片名称', type: 'text', default: '日历卡片' },
         { key: 'bgColor', label: '背景颜色', type: 'color', default: '#0f0f1a' },
+        { key: 'bgImage', label: '背景图 URL（可选）', type: 'text', default: '' },
       ]},
       { group: '样式', fields: [
         { key: 'dayColor', label: '日期颜色', type: 'color', default: '#ffffff' },
@@ -368,6 +377,7 @@ JCM.TEMPLATES = [
       { group: '基本', fields: [
         { key: 'cardName', label: '卡片名称', type: 'text', default: '双时钟' },
         { key: 'bgColor', label: '背景颜色', type: 'color', default: '#000000' },
+        { key: 'bgImage', label: '背景图 URL（可选）', type: 'text', default: '' },
       ]},
       { group: '城市 1', fields: [
         { key: 'city1', label: '城市名', type: 'text', default: '北京' },
@@ -423,6 +433,7 @@ JCM.TEMPLATES = [
       { group: '基本', fields: [
         { key: 'cardName', label: '卡片名称', type: 'text', default: '每日一句' },
         { key: 'bgColor', label: '背景颜色', type: 'color', default: '#0a0a1a' },
+        { key: 'bgImage', label: '背景图 URL（可选）', type: 'text', default: '' },
       ]},
       { group: '语录 (每天轮换一条)', fields: [
         { key: 'quote1', label: '语录 1', type: 'textarea', default: '生活不止眼前的苟且\n还有诗和远方' },
@@ -487,6 +498,7 @@ JCM.TEMPLATES = [
       { group: '基本', fields: [
         { key: 'cardName', label: '卡片名称', type: 'text', default: '环形进度' },
         { key: 'bgColor', label: '背景颜色', type: 'color', default: '#0a0a1a' },
+        { key: 'bgImage', label: '背景图 URL（可选）', type: 'text', default: '' },
       ]},
       { group: '数据源', fields: [
         { key: 'source', label: '数据来源', type: 'select', options: [
@@ -536,6 +548,7 @@ JCM.TEMPLATES = [
       { group: '基本', fields: [
         { key: 'cardName', label: '卡片名称', type: 'text', default: '仪表盘' },
         { key: 'bgColor', label: '背景颜色', type: 'color', default: '#0a0e1a' },
+        { key: 'bgImage', label: '背景图 URL（可选）', type: 'text', default: '' },
       ]},
       { group: '样式', fields: [
         { key: 'timeColor', label: '时间颜色', type: 'color', default: '#ffffff' },
@@ -580,6 +593,7 @@ JCM.TEMPLATES = [
       { group: '基本', fields: [
         { key: 'cardName', label: '卡片名称', type: 'text', default: '图片卡片' },
         { key: 'bgColor', label: '背景颜色', type: 'color', default: '#000000' },
+        { key: 'bgImage', label: '背景图 URL（可选）', type: 'text', default: '' },
       ]},
     ],
     gen: function (c) {
@@ -597,6 +611,7 @@ JCM.TEMPLATES = [
       { group: '基本', fields: [
         { key: 'cardName', label: '卡片名称', type: 'text', default: '自定义卡片' },
         { key: 'bgColor', label: '背景颜色', type: 'color', default: '#000000' },
+        { key: 'bgImage', label: '背景图 URL（可选）', type: 'text', default: '' },
         { key: 'bgPattern', label: '背景图案', type: 'select', options: [
           { v: 'solid', l: '纯色' },
           { v: 'dots', l: '点阵' },
@@ -622,6 +637,7 @@ JCM.TEMPLATES = [
       { group: '基本', fields: [
         { key: 'cardName', label: '卡片名称', type: 'text', default: '天气卡片' },
         { key: 'bgColor', label: '背景颜色', type: 'color', default: '#0a1628' },
+        { key: 'bgImage', label: '背景图 URL（可选）', type: 'text', default: '' },
       ]},
       { group: '样式', fields: [
         { key: 'timeColor', label: '时间颜色', type: 'color', default: '#ffffff' },
@@ -668,6 +684,7 @@ JCM.TEMPLATES = [
       { group: '基本', fields: [
         { key: 'cardName', label: '卡片名称', type: 'text', default: '音乐卡片' },
         { key: 'bgColor', label: '背景颜色', type: 'color', default: '#1a1a2e' },
+        { key: 'bgImage', label: '背景图 URL（可选）', type: 'text', default: '' },
       ]},
       { group: '样式', fields: [
         { key: 'titleColor', label: '歌名颜色', type: 'color', default: '#ffffff' },

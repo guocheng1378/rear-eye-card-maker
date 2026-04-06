@@ -78,12 +78,8 @@ JCM.renderElementEditor = function (el, idx, device) {
         '<option value="left"' + (el.textAlign === 'left' ? ' selected' : '') + '>左对齐</option>' +
         '<option value="center"' + (el.textAlign === 'center' ? ' selected' : '') + '>居中</option>' +
         '<option value="right"' + (el.textAlign === 'right' ? ' selected' : '') + '>右对齐</option></select>') +
-      field('加粗', '<select data-prop="bold" data-idx="' + idx + '">' +
-        '<option value="false"' + (!el.bold ? ' selected' : '') + '>否</option>' +
-        '<option value="true"' + (el.bold ? ' selected' : '') + '>是</option></select>') +
-      field('多行', '<select data-prop="multiLine" data-idx="' + idx + '">' +
-        '<option value="false"' + (!el.multiLine ? ' selected' : '') + '>否</option>' +
-        '<option value="true"' + (el.multiLine ? ' selected' : '') + '>是</option></select>') +
+      field('加粗', '<label class="toggle-switch"><input type="checkbox" data-prop="bold" data-idx="' + idx + '"' + (el.bold ? ' checked' : '') + '><span class="toggle-slider"></span></label>') +
+      field('多行', '<label class="toggle-switch"><input type="checkbox" data-prop="multiLine" data-idx="' + idx + '"' + (el.multiLine ? ' checked' : '') + '><span class="toggle-slider"></span></label>') +
       field('宽度', '<input type="number" value="' + (el.w || 200) + '" data-prop="w" data-idx="' + idx + '">') +
       field('阴影', '<select data-prop="shadow" data-idx="' + idx + '">' +
         '<option value="none"' + (!el.shadow || el.shadow === 'none' ? ' selected' : '') + '>无</option>' +

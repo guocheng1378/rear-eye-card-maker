@@ -96,6 +96,7 @@
     <div class="page page-tpl active" id="page0">
       <div class="page-title">选择卡片模板</div>
       <div class="page-subtitle">从预设模板开始，或选择自定义从零创建</div>
+      <div class="tpl-categories" id="tplCategories"></div>
       <div class="tpl-search"><input type="text" id="tplSearch" placeholder="🔍 搜索模板..." oninput="JCM.filterTemplates(this.value)"></div>
       <div class="tpl-grid" id="tplGrid"></div>
     </div>
@@ -284,6 +285,9 @@
 <script src="js/ui.js"></script>
 <script src="js/app.js"></script>
 
+
+<!-- Auto-save indicator -->
+<div class="autosave-indicator" id="autosaveIndicator">💾 已自动保存</div>
 
 <!-- Right-click Context Menu -->
 <div class="context-menu" id="contextMenu" style="display:none">

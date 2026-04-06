@@ -248,6 +248,7 @@ function renderTplGrid() {
       '<div class="tpl-card-name">' + t.name + '</div>' +
       '<div class="tpl-card-desc">' + t.desc + '</div></div>';
   }).join('');
+  renderTplCategories();
 }
 
 // ─── Template Thumbnails ──────────────────────────────────────────
@@ -552,9 +553,17 @@ function renderPreview() {
 
   var html = renderTemplatePreview(device, showCam, _tpl, _cfg);
   html += new JCM.PreviewRenderer(device, showCam).renderElements(_elements, JCM.uploadedFiles, _selIdx);
+  if (_cfg.bgImage) {
+    html = '<div style="position:absolute;inset:0;background-image:url(\'' + _cfg.bgImage.replace(/'/g, "\\'") + '\');background-size:cover;background-position:center;z-index:-1"></div>' + html;
+  }
   document.getElementById('previewContent').innerHTML = html;
 
   var innerXml = getTemplateMAML(_tpl, _cfg, device);
+  // 背景图支持
+  if (_cfg.bgImage && innerXml.indexOf('<Rectangle') >= 0) {
+    var bgImg = '  <Image src="' + JCM.escXml(_cfg.bgImage) + '" x="0" y="0" w="#view_width" h="#view_height" />\n';
+    innerXml = innerXml.replace(/(  <Rectangle w="#view_width"[^>]*>)/, bgImg + '$1');
+  }
   var maml;
   if (_tpl.rawXml) {
     // rawXml 模板已经是完整 XML，直接使用
@@ -597,6 +606,9 @@ function renderLivePreview() {
 
   var html = renderTemplatePreview(device, showCam, _tpl, _cfg);
   html += new JCM.PreviewRenderer(device, showCam).renderElements(_elements, JCM.uploadedFiles, _selIdx);
+  if (_cfg.bgImage) {
+    html = '<div style="position:absolute;inset:0;background-image:url(\'' + _cfg.bgImage.replace(/'/g, "\\'") + '\');background-size:cover;background-position:center;z-index:-1"></div>' + html;
+  }
   var contentEl = document.getElementById('cfgPreviewContent');
   if (contentEl) contentEl.innerHTML = html;
 }
@@ -671,6 +683,11 @@ JCM.handleExport = function () {
   if (!_tpl) return toast('请先选择模板', 'error');
   var device = getSelectedDevice();
   var innerXml = getTemplateMAML(_tpl, _cfg, device);
+  // 背景图支持
+  if (_cfg.bgImage && innerXml.indexOf('<Rectangle') >= 0) {
+    var bgImg = '  <Image src="' + JCM.escXml(_cfg.bgImage) + '" x="0" y="0" w="#view_width" h="#view_height" />\n';
+    innerXml = innerXml.replace(/(  <Rectangle w="#view_width"[^>]*>)/, bgImg + '$1');
+  }
   var maml = _tpl.rawXml ? innerXml : JCM.generateMAML({
     cardName: _cfg.cardName || _tpl.name,
     device: device,
@@ -1482,6 +1499,18 @@ function setupEvents() {
     if (card) JCM.selectTemplate(card.dataset.tpl);
   });
 
+  // Category tabs
+  var catContainer = document.getElementById('tplCategories');
+  if (catContainer) {
+    catContainer.addEventListener('click', function (e) {
+      var btn = e.target.closest('.tpl-cat');
+      if (!btn) return;
+      _activeCategory = btn.dataset.cat;
+      document.querySelectorAll('.tpl-cat').forEach(function (b) { b.classList.toggle('active', b === btn); });
+      JCM.filterTemplates(document.getElementById('tplSearch').value);
+    });
+  }
+
   // Config content
   document.getElementById('cfgContent').addEventListener('input', function (e) {
     var t = e.target;
@@ -1522,6 +1551,13 @@ function setupEvents() {
       if (val === 'true') val = true;
       else if (val === 'false') val = false;
       _elements[idx][t.dataset.prop] = val;
+      _dirty = true;
+      renderConfig();
+    }
+    // Toggle switch (checkbox) for boolean element props
+    if (t.dataset.prop && t.type === 'checkbox' && t.dataset.idx) {
+      var cidx = Number(t.dataset.idx);
+      _elements[cidx][t.dataset.prop] = t.checked;
       _dirty = true;
       renderConfig();
     }
@@ -1833,6 +1869,9 @@ function autoSave() {
         timestamp: Date.now()
       };
       localStorage.setItem('jcm-draft', JSON.stringify(draft));
+      // Show save indicator
+      var el = document.getElementById('autosaveIndicator');
+      if (el) { el.classList.add('show'); setTimeout(function () { el.classList.remove('show'); }, 1500); }
     } catch (e) { }
   }, 2000);
 }
@@ -1956,15 +1995,29 @@ JCM.toggleThemeCompare = function () {
 };
 
 // ─── Template Filter ─────────────────────────────────────────────
+// ─── Template Categories ─────────────────────────────────────────
+var _activeCategory = 'all';
+
+function renderTplCategories() {
+  var container = document.getElementById('tplCategories');
+  if (!container || !JCM.TPL_CATEGORIES) return;
+  container.innerHTML = JCM.TPL_CATEGORIES.map(function (cat) {
+    return '<button class="tpl-cat' + (_activeCategory === cat.id ? ' active' : '') + '" data-cat="' + cat.id + '">' + cat.label + '</button>';
+  }).join('');
+}
+
 JCM.filterTemplates = function (query) {
   var cards = document.querySelectorAll('.tpl-card');
   query = (query || '').toLowerCase();
   cards.forEach(function (card) {
+    var tplId = card.dataset.tpl;
     var nameEl = card.querySelector('.tpl-card-name');
     var descEl = card.querySelector('.tpl-card-desc');
     var name = nameEl ? nameEl.textContent.toLowerCase() : '';
     var desc = descEl ? descEl.textContent.toLowerCase() : '';
-    card.style.display = (!query || name.indexOf(query) >= 0 || desc.indexOf(query) >= 0) ? '' : 'none';
+    var catMatch = _activeCategory === 'all' || (JCM.TPL_CATEGORY_MAP && JCM.TPL_CATEGORY_MAP[tplId] === _activeCategory);
+    var searchMatch = !query || name.indexOf(query) >= 0 || desc.indexOf(query) >= 0;
+    card.style.display = (catMatch && searchMatch) ? '' : 'none';
   });
 };
 
