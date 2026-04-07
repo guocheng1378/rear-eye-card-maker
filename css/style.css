@@ -549,7 +549,7 @@ kbd{
   .config-live-left{padding:16px;border-right:none;max-height:none;overflow-y:auto;flex:1}
   .config-live-right{display:none}
   /* Category tabs: horizontal scroll on mobile */
-  .tpl-categories{flex-wrap:nowrap;overflow-x:auto;padding:0 16px 20px !important;gap:6px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+  .tpl-categories{flex-wrap:nowrap !important;overflow-x:auto !important;padding:0 16px 20px !important;gap:6px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
   .tpl-categories::-webkit-scrollbar{display:none}
   .tpl-cat{flex-shrink:0}
 }
