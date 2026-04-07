@@ -504,9 +504,9 @@ kbd{
   .bottombar{padding:10px 16px;padding-bottom:calc(10px + var(--safe-bottom, env(safe-area-inset-bottom, 0px)))}
   /* Config live preview: stack vertically on mobile */
   .page-config-live{flex-direction:column}
-  .config-live-left{padding:16px;border-right:none;border-bottom:1px solid var(--border);max-height:55%;overflow-y:auto}
-  .config-live-right{width:100%;padding:16px;flex:1;min-height:200px}
-  .config-preview-phone{width:260px;height:156px}
+  .config-live-left{padding:16px;border-right:none;border-bottom:1px solid var(--border);max-height:50%;overflow-y:auto}
+  .config-live-right{width:100%;padding:16px;flex:1;min-height:240px}
+  .config-preview-phone{width:280px;height:168px}
 }
 
 /* ─── Template Search ─── */

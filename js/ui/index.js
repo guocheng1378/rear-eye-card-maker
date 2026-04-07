@@ -700,6 +700,7 @@ export function initUI() {
   initCanvas({
     captureState: captureState,
     renderPreview: renderPreview,
+    renderLivePreview: renderLivePreview,
     renderConfig: function () { renderConfig(getTemplateMAML); },
   });
 

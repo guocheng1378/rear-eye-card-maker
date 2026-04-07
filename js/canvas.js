@@ -13,8 +13,22 @@ function getPointerPos(e) {
   return { clientX: e.clientX, clientY: e.clientY };
 }
 
-function getSelectedDevice() {
-  return getDevice(document.getElementById('deviceSelect').value);
+// 动态选择设备：根据当前激活的预览容器
+function getActiveDevice() {
+  var cfgPage = document.getElementById('page1');
+  var isCfgActive = cfgPage && cfgPage.classList.contains('active');
+  var selId = isCfgActive ? 'cfgDeviceSelect' : 'deviceSelect';
+  return getDevice(document.getElementById(selId).value);
+}
+
+// 获取当前活跃的 preview-screen 容器
+function getActiveScreen() {
+  var cfgPage = document.getElementById('page1');
+  var isCfgActive = cfgPage && cfgPage.classList.contains('active');
+  if (isCfgActive) {
+    return document.querySelector('.config-live-right .preview-screen');
+  }
+  return document.querySelector('#page2 .preview-screen');
 }
 
 // ─── Smart Align ──────────────────────────────────────────────────
@@ -57,7 +71,7 @@ function applySmartAlign(nx, ny) {
 
 // ─── Guide Lines ──────────────────────────────────────────────────
 function renderGuideLines(guides, scale) {
-  var screen = document.querySelector('.preview-screen');
+  var screen = getActiveScreen();
   if (!screen) return;
   screen.querySelectorAll('.align-guide').forEach(function (g) { g.remove(); });
   guides.forEach(function (g) {
@@ -92,7 +106,6 @@ function onResizeMove(e) {
   S.elements[resizing.idx].w = nw;
   S.elements[resizing.idx].h = nh;
 
-  // Trigger preview re-render (called from outside)
   if (resizing.onUpdate) resizing.onUpdate();
 
   var wInput = document.querySelector('[data-prop="w"][data-idx="' + resizing.idx + '"]');
@@ -149,15 +162,20 @@ function onPreviewMouseUp() {
 }
 
 // ─── Pointer Down (entry point) ───────────────────────────────────
-// callbacks: { captureState, renderPreview, renderConfig }
+// callbacks: { captureState, renderPreview, renderConfig, renderLivePreview }
 export function initCanvas(callbacks) {
   var previewContent = document.getElementById('previewContent');
-  if (!previewContent) return;
+  if (previewContent) bindCanvasEvents(previewContent, callbacks);
 
-  previewContent.addEventListener('mousedown', function (e) {
+  var cfgPreviewContent = document.getElementById('cfgPreviewContent');
+  if (cfgPreviewContent) bindCanvasEvents(cfgPreviewContent, callbacks);
+}
+
+function bindCanvasEvents(container, callbacks) {
+  container.addEventListener('mousedown', function (e) {
     handlePointerDown(e, callbacks);
   });
-  previewContent.addEventListener('touchstart', function (e) {
+  container.addEventListener('touchstart', function (e) {
     handlePointerDown(e, callbacks);
   }, { passive: false });
 }
@@ -173,8 +191,8 @@ function handlePointerDown(e, callbacks) {
       e.preventDefault();
       e.stopPropagation();
       var pos = getPointerPos(e);
-      var device = getSelectedDevice();
-      var screen = document.querySelector('.preview-screen');
+      var device = getActiveDevice();
+      var screen = getActiveScreen();
       var rect = screen.getBoundingClientRect();
       var scale = rect.width / device.width;
       resizing = {
@@ -184,7 +202,7 @@ function handlePointerDown(e, callbacks) {
         origW: S.elements[idx].w || 100,
         origH: S.elements[idx].h || 100,
         scale: scale,
-        onUpdate: callbacks.renderPreview,
+        onUpdate: function () { triggerUpdate(callbacks); },
       };
       callbacks.captureState();
       document.addEventListener('mousemove', onResizeMove);
@@ -203,11 +221,11 @@ function handlePointerDown(e, callbacks) {
   if (S.elements[idx].locked) return;
 
   e.preventDefault();
-  var pos = getPointerPos(e);
-  var device = getSelectedDevice();
-  var screen = document.querySelector('.preview-screen');
-  var rect = screen.getBoundingClientRect();
-  var scale = rect.width / device.width;
+  var pos2 = getPointerPos(e);
+  var device2 = getActiveDevice();
+  var screen2 = getActiveScreen();
+  var rect2 = screen2.getBoundingClientRect();
+  var scale2 = rect2.width / device2.width;
 
   // Alt+drag = duplicate
   if (e.altKey) {
@@ -224,13 +242,13 @@ function handlePointerDown(e, callbacks) {
 
   dragging = {
     idx: idx,
-    startX: pos.clientX,
-    startY: pos.clientY,
+    startX: pos2.clientX,
+    startY: pos2.clientY,
     origX: S.elements[idx].x,
     origY: S.elements[idx].y,
-    scale: scale,
-    device: device,
-    onUpdate: callbacks.renderPreview,
+    scale: scale2,
+    device: device2,
+    onUpdate: function () { triggerUpdate(callbacks); },
   };
 
   callbacks.captureState();
@@ -242,4 +260,10 @@ function handlePointerDown(e, callbacks) {
   document.addEventListener('mouseup', onPreviewMouseUp);
   document.addEventListener('touchmove', onPreviewMouseMove, { passive: false });
   document.addEventListener('touchend', onPreviewMouseUp);
+}
+
+// 同时更新两个预览
+function triggerUpdate(callbacks) {
+  if (callbacks.renderPreview) callbacks.renderPreview();
+  if (callbacks.renderLivePreview) callbacks.renderLivePreview();
 }
