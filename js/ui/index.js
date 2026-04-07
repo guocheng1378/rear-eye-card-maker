@@ -734,8 +734,21 @@ function checkLocalDraft() {
 
 // ─── Expose to JCM global (for HTML onclick handlers) ─────────────
 window.JCM = window.JCM || {};
+// ─── More Menu ──────────────────────────────────────────────────
+function toggleMoreMenu() {
+  var menu = document.getElementById('moreMenu');
+  if (menu) menu.style.display = menu.style.display === 'none' ? '' : 'none';
+}
+// Close on outside click
+document.addEventListener('click', function(e) {
+  var menu = document.getElementById('moreMenu');
+  var btn = document.getElementById('moreMenuBtn');
+  if (menu && btn && !menu.contains(e.target) && e.target !== btn) menu.style.display = 'none';
+});
+
 Object.assign(window.JCM, {
   toggleLayerPanel: toggleLayerPanel,
+  toggleMoreMenu: toggleMoreMenu,
   renderLayerPanel: renderLayerPanel,
   goStep: function (n) { goStep(n, stepCallbacks); },
   nextStep: function () { goStep(getStep() + 1, stepCallbacks); },
