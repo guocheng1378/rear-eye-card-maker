@@ -543,7 +543,7 @@ function setupEvents() {
     if (!btn) return;
     setActiveCategory(btn.dataset.cat);
     document.querySelectorAll('.tpl-cat').forEach(function (b) { b.classList.toggle('active', b === btn); });
-    filterTemplates(document.getElementById('tplSearch').value);
+    filterTemplates('');
   });
 
   // Config content events (delegated)
