@@ -627,6 +627,93 @@ kbd{
   content:'▾';float:right;font-size:10px;transition:transform .2s;
 }
 .config-section-title.collapsed::after{transform:rotate(-90deg)}
+.config-section .config-grid,
+.config-section .el-toolbar,
+.config-section .el-list,
+.config-section .el-detail,
+.config-section .color-presets,
+.config-section .theme-presets,
+.config-section .font-preview-item,
+.config-section .field,
+.config-section .field-color {
+  transition: max-height .25s ease, opacity .2s ease;
+}
+.config-section.collapsed > :not(.config-section-title) {
+  display: none;
+}
+
+/* ─── Bottom Bar Undo/Redo ─── */
+.bottombar-center {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+.bottombar-undo-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--surface2);
+  color: var(--text2);
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--transition);
+}
+.bottombar-undo-btn:hover:not(:disabled) {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.bottombar-undo-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+/* ─── More Elements Dropdown ─── */
+.el-toolbar-more-wrap {
+  position: relative;
+}
+.el-toolbar-more-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  margin-top: 4px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 4px;
+  min-width: 140px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.35);
+  z-index: 200;
+  display: flex;
+  flex-direction: column;
+}
+.el-toolbar-more-menu .el-btn {
+  width: 100%;
+  justify-content: flex-start;
+  border: none;
+  background: none;
+  border-radius: 6px;
+  padding: 8px 12px;
+}
+.el-toolbar-more-menu .el-btn:hover {
+  background: var(--accent-glow);
+}
+
+/* ─── Element List Drag Reorder ─── */
+.el-item.drag-over-top {
+  border-top: 2px solid var(--accent);
+}
+.el-item.drag-over-bottom {
+  border-bottom: 2px solid var(--accent);
+}
+.el-item.dragging-el {
+  opacity: 0.4;
+}
+
+/* ─── Config Section Collapse ─── */
 
 /* ─── Smart Alignment Guide Lines ─── */
 .align-guide{

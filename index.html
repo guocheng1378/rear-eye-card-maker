@@ -240,6 +240,22 @@
         <span class="btn-icon" aria-hidden="true">←</span> 上一步
       </button>
     </div>
+    <div class="bottombar-center">
+      <button class="bottombar-undo-btn" id="btnUndo" onclick="JCM.undo()" title="撤销 (Ctrl+Z)" disabled>↩️</button>
+      <button class="bottombar-undo-btn" id="btnRedo" onclick="JCM.redo()" title="重做 (Ctrl+Y)" disabled>↪️</button>
+      <div class="more-menu-wrap" style="position:relative">
+        <button class="bottombar-undo-btn" onclick="JCM.toggleShareMenu()" title="分享/导出">📤</button>
+        <div class="more-menu" id="shareMoreMenu" style="display:none;bottom:100%;top:auto;margin-bottom:4px;margin-top:0;left:50%;transform:translateX(-50%)">
+          <button onclick="JCM.handleExport();JCM.toggleShareMenu()">📦 导出 ZIP</button>
+          <button onclick="JCM.handleExportPNG();JCM.toggleShareMenu()">🖼 导出 PNG</button>
+          <button onclick="JCM.copyXML();JCM.toggleShareMenu()">📋 复制 XML</button>
+          <button onclick="JCM.handleExportTemplate();JCM.toggleShareMenu()">💾 导出配置</button>
+          <button onclick="JCM.handleImportTemplate();JCM.toggleShareMenu()">📂 导入配置</button>
+          <button onclick="JCM.shareTemplate();JCM.toggleShareMenu()">🔗 分享链接</button>
+          <button onclick="JCM.showQR();JCM.toggleShareMenu()">📱 扫码分享</button>
+        </div>
+      </div>
+    </div>
     <div class="bottombar-right">
       <button class="btn btn-primary" id="btnNext" onclick="JCM.nextStep()" aria-label="进入下一步">
         下一步 <span class="btn-icon" aria-hidden="true">→</span>

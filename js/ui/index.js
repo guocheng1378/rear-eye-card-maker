@@ -648,6 +648,117 @@ function setupEvents() {
     }
   });
 
+  // Section collapse toggle
+  document.getElementById('cfgContent').addEventListener('click', function (e) {
+    var toggle = e.target.closest('[data-toggle-section]');
+    if (!toggle) return;
+    var key = toggle.dataset.toggleSection;
+    var section = toggle.parentElement;
+    var isCollapsed = section.classList.toggle('collapsed');
+    toggle.classList.toggle('collapsed', isCollapsed);
+    var state = {};
+    try { state = JSON.parse(localStorage.getItem('jcm-collapsed') || '{}'); } catch(e2) {}
+    state[key] = isCollapsed;
+    try { localStorage.setItem('jcm-collapsed', JSON.stringify(state)); } catch(e2) {}
+  });
+
+  // Element toolbar "⋯ 更多" toggle
+  document.getElementById('cfgContent').addEventListener('click', function (e) {
+    var moreToggle = e.target.closest('[data-elmore-toggle]');
+    if (!moreToggle) return;
+    e.stopPropagation();
+    var menu = moreToggle.nextElementSibling;
+    if (menu) menu.style.display = menu.style.display === 'none' ? '' : 'none';
+  });
+  // Close el-more on outside click
+  document.addEventListener('click', function (e) {
+    if (!e.target.closest('[data-elmore-toggle]') && !e.target.closest('[data-elmore-menu]')) {
+      document.querySelectorAll('[data-elmore-menu]').forEach(function (m) { m.style.display = 'none'; });
+    }
+  });
+
+  // Duplicate element button
+  document.getElementById('cfgContent').addEventListener('click', function (e) {
+    var dupBtn = e.target.closest('[data-duplicate]');
+    if (!dupBtn) return;
+    var idx = Number(dupBtn.dataset.duplicate);
+    if (idx >= 0 && idx < S.elements.length) {
+      captureState('复制元素');
+      S.setClipboard(JSON.parse(JSON.stringify(S.elements[idx])));
+      var clone = JSON.parse(JSON.stringify(S.elements[idx]));
+      clone.x += 10; clone.y += 10;
+      S.elements.push(clone);
+      S.setSelIdx(S.elements.length - 1);
+      S.setDirty(true);
+      renderConfig(getTemplateMAML);
+      toast('📋 已复制元素', 'success');
+    }
+  });
+
+  // Paste element button
+  document.getElementById('cfgContent').addEventListener('click', function (e) {
+    var pasteBtn = e.target.closest('[data-paste-el]');
+    if (!pasteBtn) return;
+    if (S.clipboard) {
+      captureState('粘贴元素');
+      var paste = JSON.parse(JSON.stringify(S.clipboard));
+      paste.x += 10; paste.y += 10;
+      S.elements.push(paste);
+      S.setSelIdx(S.elements.length - 1);
+      S.setDirty(true);
+      renderConfig(getTemplateMAML);
+      toast('📌 已粘贴', 'success');
+    }
+  });
+
+  // Element list drag reorder
+  var _dragReorderIdx = -1;
+  document.getElementById('cfgContent').addEventListener('dragstart', function (e) {
+    var item = e.target.closest('[data-drag-idx]');
+    if (!item) return;
+    _dragReorderIdx = Number(item.dataset.dragIdx);
+    item.classList.add('dragging-el');
+    e.dataTransfer.effectAllowed = 'move';
+  });
+  document.getElementById('cfgContent').addEventListener('dragover', function (e) {
+    var item = e.target.closest('[data-drag-idx]');
+    if (!item || _dragReorderIdx < 0) return;
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    // Clear all drag indicators
+    document.querySelectorAll('.el-item').forEach(function (el) {
+      el.classList.remove('drag-over-top', 'drag-over-bottom');
+    });
+    var rect = item.getBoundingClientRect();
+    var midY = rect.top + rect.height / 2;
+    if (e.clientY < midY) item.classList.add('drag-over-top');
+    else item.classList.add('drag-over-bottom');
+  });
+  document.getElementById('cfgContent').addEventListener('dragend', function () {
+    document.querySelectorAll('.el-item').forEach(function (el) {
+      el.classList.remove('dragging-el', 'drag-over-top', 'drag-over-bottom');
+    });
+    _dragReorderIdx = -1;
+  });
+  document.getElementById('cfgContent').addEventListener('drop', function (e) {
+    var item = e.target.closest('[data-drag-idx]');
+    if (!item || _dragReorderIdx < 0) return;
+    e.preventDefault();
+    var targetIdx = Number(item.dataset.dragIdx);
+    if (targetIdx === _dragReorderIdx) return;
+    captureState('调整层级');
+    var el = S.elements.splice(_dragReorderIdx, 1)[0];
+    var rect = item.getBoundingClientRect();
+    var midY = rect.top + rect.height / 2;
+    var insertIdx = e.clientY < midY ? targetIdx : targetIdx + 1;
+    if (_dragReorderIdx < targetIdx) insertIdx--;
+    S.elements.splice(Math.max(0, insertIdx), 0, el);
+    S.setDirty(true);
+    _dragReorderIdx = -1;
+    renderConfig(getTemplateMAML);
+    toast('↕ 已调整顺序', 'success');
+  });
+
   // File inputs
   document.getElementById('fileImagePick').addEventListener('change', handleFilePicked);
   document.getElementById('fileVideoPick').addEventListener('change', handleFilePicked);
@@ -740,6 +851,7 @@ export function initUI() {
   setupEvents();
   setupCodeEditor();
   initSimpleMode();
+  updateUndoRedoState();
 
   // Init canvas drag
   initCanvas({
@@ -786,6 +898,18 @@ function toggleMoreMenu() {
   var menu = document.getElementById('moreMenu');
   if (menu) menu.style.display = menu.style.display === 'none' ? '' : 'none';
 }
+// ─── Undo/Redo State Update ──────────────────────────────────────
+function updateUndoRedoState() {
+  var labels = getHistoryLabels();
+  var btnUndo = document.getElementById('btnUndo');
+  var btnRedo = document.getElementById('btnRedo');
+  // We can't easily know current position, so enable undo if there are labels
+  if (btnUndo) btnUndo.disabled = labels.length === 0;
+  // Redo is harder to track without position; keep enabled if user has undone
+  // For now, just enable both when there's history
+  if (btnRedo) btnRedo.disabled = labels.length === 0;
+}
+
 // ─── Simple Mode Toggle ──────────────────────────────────────────
 function toggleSimpleMode() {
   var app = document.querySelector('.app');
@@ -835,6 +959,9 @@ document.addEventListener('click', function(e) {
   var menu = document.getElementById('moreMenu');
   var btn = document.getElementById('moreMenuBtn');
   if (menu && btn && !menu.contains(e.target) && e.target !== btn) menu.style.display = 'none';
+  // Close share menu
+  var shareMenu = document.getElementById('shareMoreMenu');
+  if (shareMenu && !shareMenu.parentElement.contains(e.target)) shareMenu.style.display = 'none';
 });
 
 Object.assign(window.JCM, {
@@ -842,6 +969,20 @@ Object.assign(window.JCM, {
   toggleMoreMenu: toggleMoreMenu,
   toggleSimpleMode: toggleSimpleMode,
   toggleMoreActions: toggleMoreActions,
+  undo: function () {
+    var r = undo();
+    if (r && r.needsRerender) { renderConfig(getTemplateMAML); toast(r.message, 'success'); }
+    updateUndoRedoState();
+  },
+  redo: function () {
+    var r = redo();
+    if (r && r.needsRerender) { renderConfig(getTemplateMAML); toast(r.message, 'success'); }
+    updateUndoRedoState();
+  },
+  toggleShareMenu: function () {
+    var menu = document.getElementById('shareMoreMenu');
+    if (menu) menu.style.display = menu.style.display === 'none' ? '' : 'none';
+  },
   renderLayerPanel: renderLayerPanel,
   goStep: function (n) { goStep(n, stepCallbacks); },
   nextStep: function () { goStep(getStep() + 1, stepCallbacks); },

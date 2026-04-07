@@ -102,36 +102,49 @@ export function renderConfig(getTemplateMAML) {
   document.getElementById('cfgTitle').textContent = S.tpl.name;
   document.getElementById('cfgDesc').textContent = S.tpl.desc;
 
+  // Section collapse state
+  var collapseState = {};
+  try { collapseState = JSON.parse(localStorage.getItem('jcm-collapsed') || '{}'); } catch(e) {}
+  function sec(key, title, inner, defaultCollapsed) {
+    var collapsed = collapseState[key] !== undefined ? collapseState[key] : !!defaultCollapsed;
+    return '<div class="config-section' + (collapsed ? ' collapsed' : '') + '" data-section="' + key + '">' +
+      '<div class="config-section-title' + (collapsed ? ' collapsed' : '') + '" data-toggle-section="' + key + '"><span>▸</span> ' + title + '</div>' +
+      inner + '</div>';
+  }
+
   var html = '';
 
+  // Template config groups
   S.tpl.config.forEach(function (group) {
-    html += '<div class="config-section"><div class="config-section-title"><span>▸</span> ' + group.group + '</div><div class="config-grid">';
-    group.fields.forEach(function (f) { html += renderField(f); });
-    html += '</div></div>';
+    html += sec('tpl_' + group.group, group.group, '<div class="config-grid">' +
+      group.fields.map(function (f) { return renderField(f); }).join('') + '</div>');
   });
 
-  // Element toolbar
-  html += '<div class="config-section"><div class="config-section-title"><span>▸</span> 额外元素' +
-    (S.elements.length > 0 ? ' <span class="el-count-badge">' + S.elements.length + '</span>' : '') +
-    '</div><div class="el-toolbar">' +
+  // ── Element toolbar (simplified on mobile) ──
+  var coreAddBtns =
     '<button class="el-btn" data-add="text"><span class="el-btn-icon">T</span> 文字</button>' +
     '<button class="el-btn" data-add="rectangle"><span class="el-btn-icon">▢</span> 矩形</button>' +
-    '<button class="el-btn" data-add="circle"><span class="el-btn-icon">○</span> 圆形</button>' +
+    '<button class="el-btn" data-pick="image"><span class="el-btn-icon">🖼</span> 图片</button>' +
+    '<button class="el-btn" data-pick="video"><span class="el-btn-icon">🎬</span> 视频</button>' +
+    '<button class="el-btn" data-add="circle"><span class="el-btn-icon">○</span> 圆形</button>';
+  var extraAddBtns =
     '<button class="el-btn" data-add="line"><span class="el-btn-icon">─</span> 线条</button>' +
     '<button class="el-btn" data-add="arc"><span class="el-btn-icon">◠</span> 弧形</button>' +
     '<button class="el-btn" data-add="progress"><span class="el-btn-icon">▰</span> 进度条</button>' +
-    '<button class="el-btn" data-pick="image"><span class="el-btn-icon">🖼</span> 图片</button>' +
-    '<button class="el-btn" data-pick="video"><span class="el-btn-icon">🎬</span> 视频</button>' +
     '<button class="el-btn" data-add="lottie"><span class="el-btn-icon">🎭</span> Lottie</button>' +
-    '<button class="el-btn" data-action="importZip" title="导入 MAML ZIP"><span class="el-btn-icon">📦</span> 导入ZIP</button>' +
-    '</div>';
+    '<button class="el-btn" data-action="importZip"><span class="el-btn-icon">📦</span> 导入ZIP</button>';
 
-  html += '<div style="display:flex;gap:12px;margin-bottom:12px;align-items:center">' +
+  var elementSectionInner = '<div class="el-toolbar">' + coreAddBtns +
+    '<div class="el-toolbar-more-wrap">' +
+    '<button class="el-btn" data-elmore-toggle>⋯ 更多</button>' +
+    '<div class="el-toolbar-more-menu" style="display:none" data-elmore-menu>' + extraAddBtns + '</div>' +
+    '</div></div>' +
+    '<div style="display:flex;gap:12px;margin-bottom:12px;align-items:center">' +
     '<label class="check-label"><input type="checkbox" id="snapToggle" checked> 吸附网格 (' + S.SNAP_GRID + 'px)</label>' +
     '</div>';
 
-  // Element list
-  html += '<div class="el-list">';
+  // Element list with drag reorder
+  elementSectionInner += '<div class="el-list" id="elListDrag">';
   S.elements.forEach(function (el, i) {
     var label = el.type === 'text' ? (el.text || '')
       : el.type === 'image' ? '🖼 ' + (el.fileName || '图片')
@@ -139,59 +152,50 @@ export function renderConfig(getTemplateMAML) {
       : (el.type === 'rectangle' && el.h <= 3 && el.radius >= 1) ? 'line'
       : el.type + ' #' + (i + 1);
     var inCam = isInCameraZone(el, device);
-    html += '<div class="el-item' + (S.selIdx === i ? ' active' : '') + (el.visible === false ? ' hidden-el' : '') + '" draggable="true" data-sel="' + i + '">' +
+    elementSectionInner += '<div class="el-item' + (S.selIdx === i ? ' active' : '') + (el.visible === false ? ' hidden-el' : '') + '" draggable="true" data-sel="' + i + '" data-drag-idx="' + i + '">' +
+      '<span class="layer-visibility" data-vis="' + i + '" title="' + (el.visible === false ? '显示' : '隐藏') + '">' + (el.visible === false ? '👁️‍🗨️' : '👁️') + '</span>' +
       '<span class="el-badge">' + el.type + '</span>' +
       '<span class="el-item-name">' + esc(label) + '</span>' +
       (inCam ? '<span title="在摄像头遮挡区内" style="color:#e17055;font-size:14px">⚠️</span>' : '') +
-      '<span class="layer-visibility" data-vis="' + i + '" title="' + (el.visible === false ? '显示' : '隐藏') + '">' + (el.visible === false ? '👁️‍🗨️' : '👁️') + '</span>' +
-      '<button class="el-lock-btn" data-lock="' + i + '" title="锁定/解锁">' + (el.locked ? '🔒' : '🔓') + '</button>' +
-      '<span class="el-z-btns">' +
-      '<button class="el-z-btn" data-z="up" data-zi="' + i + '" title="上移一层">↑</button>' +
-      '<button class="el-z-btn" data-z="down" data-zi="' + i + '" title="下移一层">↓</button>' +
-      '</span>' +
       '<button class="el-item-del" data-del="' + i + '">✕</button></div>';
   });
   if (S.elements.length === 0) {
-    html += '<div style="text-align:center;padding:20px;color:var(--text3);font-size:12px">点击上方按钮添加元素</div>';
+    elementSectionInner += '<div style="text-align:center;padding:20px;color:var(--text3);font-size:12px">点击上方按钮添加元素</div>';
   }
-  html += '</div>';
+  elementSectionInner += '</div>';
+
+  html += sec('elements', '额外元素' + (S.elements.length > 0 ? ' <span class="el-count-badge">' + S.elements.length + '</span>' : ''), elementSectionInner);
 
   // Selected element editor
   if (S.selIdx >= 0 && S.selIdx < S.elements.length) {
     html += renderElementEditorInline(S.elements[S.selIdx], S.selIdx, device);
-    html += '<div class="config-section" style="margin-top:12px"><div class="config-section-title"><span>▸</span> 快速操作</div>' +
-      '<div class="el-toolbar">' +
+
+    // Quick operations + copy/paste
+    var quickOpsInner = '<div class="el-toolbar">' +
+      '<button class="el-btn" data-duplicate="' + S.selIdx + '">📋 复制元素</button>' +
+      (S.clipboard ? '<button class="el-btn" data-paste-el>📌 粘贴</button>' : '') +
       '<button class="el-btn" data-align="left" data-ai="' + S.selIdx + '">⬅ 左对齐</button>' +
-      '<button class="el-btn" data-align="hcenter" data-ai="' + S.selIdx + '">↔ 水平居中</button>' +
+      '<button class="el-btn" data-align="hcenter" data-ai="' + S.selIdx + '">↔ 居中</button>' +
       '<button class="el-btn" data-align="right" data-ai="' + S.selIdx + '">➡ 右对齐</button>' +
-      '<button class="el-btn" data-align="top" data-ai="' + S.selIdx + '">⬆ 顶对齐</button>' +
-      '<button class="el-btn" data-align="vcenter" data-ai="' + S.selIdx + '">↕ 垂直居中</button>' +
-      '<button class="el-btn" data-align="bottom" data-ai="' + S.selIdx + '">⬇ 底对齐</button>' +
       '</div>';
     var selEl = S.elements[S.selIdx];
     if (selEl.type === 'rectangle' || selEl.type === 'image' || selEl.type === 'video') {
-      html += '<div class="el-toolbar" style="margin-top:8px">' +
+      quickOpsInner += '<div class="el-toolbar" style="margin-top:8px">' +
+        '<button class="el-btn" data-align="top" data-ai="' + S.selIdx + '">⬆ 顶</button>' +
+        '<button class="el-btn" data-align="vcenter" data-ai="' + S.selIdx + '">↕ 中</button>' +
+        '<button class="el-btn" data-align="bottom" data-ai="' + S.selIdx + '">⬇ 底</button>' +
         '<button class="el-btn" data-qsize="full" data-qi="' + S.selIdx + '">全屏</button>' +
         '<button class="el-btn" data-qsize="half" data-qi="' + S.selIdx + '">半屏</button>' +
         '<button class="el-btn" data-qsize="quarter" data-qi="' + S.selIdx + '">1/4</button>' +
         '</div>';
     }
-    if (selEl.color !== undefined) html += renderColorPresets('color', S.selIdx);
-    html += '</div>';
+    if (selEl.color !== undefined) quickOpsInner += renderColorPresets('color', S.selIdx);
+    html += sec('quickOps', '快速操作', quickOpsInner);
 
-    // Design tools inline
-    html += renderDesignToolsInline(S.selIdx);
+    // Design tools (default collapsed)
+    html += sec('designTools', '设计工具', renderDesignToolsInline(S.selIdx), true);
   }
   html += '</div>';
-
-  // Share buttons
-  html += '<div class="config-section"><div class="config-section-title"><span>▸</span> 模板分享</div>' +
-    '<div class="el-toolbar">' +
-    '<button class="el-btn" data-action="exportTemplate"><span class="el-btn-icon">💾</span> 导出配置</button>' +
-    '<button class="el-btn" data-action="importTemplate"><span class="el-btn-icon">📂</span> 导入配置</button>' +
-    '<button class="el-btn" data-action="shareTemplate" style="color:var(--green)"><span class="el-btn-icon">🔗</span> 分享链接</button>' +
-    '<button class="el-btn" data-action="shareQR"><span class="el-btn-icon">📱</span> 扫码分享</button>' +
-    '</div></div>';
 
   document.getElementById('cfgContent').innerHTML = html;
 }
