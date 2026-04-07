@@ -37,7 +37,7 @@ document.addEventListener('DOMContentLoaded', function () {
   updateOnlineStatus();
 });
 
-// PWA Service Worker
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('sw.js').catch(function () {});
-}
+// PWA Service Worker disabled - was causing module cache issues
+// if ('serviceWorker' in navigator) {
+//   navigator.serviceWorker.register('sw.js').catch(function () {});
+// }
