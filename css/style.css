@@ -238,72 +238,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC',sans-
 .preview-device-label{font-size:11px;color:var(--text3);text-align:center}
 .preview-side{display:flex;flex-direction:column;gap:16px}
 .preview-side h3{font-size:14px;font-weight:700;display:flex;align-items:center;gap:6px}
-/* ─── Code Editor Enhanced Features ─── */
-
-/* Autocomplete Dropdown */
-.code-autocomplete{
-  position:absolute;z-index:200;max-height:180px;overflow-y:auto;
-  background:var(--surface);border:1px solid var(--border);border-radius:8px;
-  box-shadow:0 8px 24px rgba(0,0,0,.4);min-width:220px;max-width:360px;
-  font-size:12px;animation:fadeIn .15s ease;
-}
-.code-ac-item{
-  display:flex;align-items:center;gap:8px;padding:6px 12px;cursor:pointer;
-  transition:background .1s;
-}
-.code-ac-item:hover,.code-ac-item.active{background:var(--accent-glow)}
-.code-ac-label{font-weight:600;color:var(--text);font-family:'SF Mono',Monaco,monospace;white-space:nowrap}
-.code-ac-desc{font-size:10px;color:var(--text3);flex:1;text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-
-/* Find & Replace Bar */
-.code-find-bar{
-  display:flex;flex-direction:column;gap:4px;
-  padding:6px 10px;background:var(--surface2);border-bottom:1px solid var(--border);
-  flex-shrink:0;
-}
-.code-find-row,.code-replace-row{display:flex;align-items:center;gap:6px}
-.code-find-input{
-  flex:1;padding:5px 10px;background:var(--surface);border:1px solid var(--border);
-  border-radius:6px;color:var(--text);font-size:12px;outline:none;font-family:inherit;
-  transition:border-color .2s;
-}
-.code-find-input:focus{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent-glow)}
-.code-find-count{font-size:11px;color:var(--text3);min-width:48px;text-align:center;white-space:nowrap}
-.code-find-btn{
-  padding:3px 8px;border-radius:5px;border:1px solid var(--border);background:var(--surface);
-  color:var(--text2);font-size:11px;cursor:pointer;transition:var(--transition);
-  font-family:inherit;white-space:nowrap;
-}
-.code-find-btn:hover{border-color:var(--accent);color:var(--text)}
-
-/* Minimap — positioned on code-editor so it stays fixed during scroll */
-.code-minimap{
-  position:absolute;right:0;top:0;width:80px;
-  height:100%;max-height:480px;
-  background:var(--surface);border-left:1px solid var(--border);
-  z-index:10;opacity:0.8;pointer-events:none;overflow:hidden;
-}
-.code-minimap canvas{display:block}
-
-/* Current Line Highlight */
-.code-line-highlight{
-  position:absolute;left:44px;right:0;height:21px;
-  background:var(--accent-glow);z-index:0;pointer-events:none;
-  border-left:2px solid var(--accent);opacity:0.5;
-  transition:top .05s ease;
-}
-
-/* Expression variables (#var) */
-.code-highlight .expr{color:#c678dd;font-weight:600}
-
-/* Error squiggles overlay */
-.code-errors{position:absolute;inset:0;pointer-events:none;z-index:4}
-
 /* ─── Code Editor ─── */
 .code-editor{
   flex:1;display:flex;flex-direction:column;
   background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
-  overflow:hidden;max-height:480px;position:relative;
+  overflow:hidden;max-height:420px;
   font-family:'SF Mono',Monaco,'Cascadia Code','Fira Code',monospace;
 }
 .code-toolbar{
@@ -322,7 +261,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC',sans-
 .code-btn:hover{color:var(--text);border-color:var(--accent);background:var(--accent-glow)}
 .code-body{
   flex:1;position:relative;overflow:auto;
-  padding-right:80px; /* room for minimap */
 }
 .code-body::-webkit-scrollbar{width:6px;height:6px}
 .code-body::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}

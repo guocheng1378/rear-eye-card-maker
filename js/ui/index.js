@@ -11,7 +11,7 @@ import { debounce, fmtSize, addRecentColor } from '../utils.js';
 
 import { toast, toastProgress } from './toast.js';
 import { getStep, goStep, moveStepSlider, syncDeviceSelect } from './steps.js';
-import { setupCodeEditor, updateCodeEditor, formatXML, openFindReplace, closeFindReplace, goToLine } from './code-editor.js';
+import { setupCodeEditor, updateCodeEditor, formatXML } from './code-editor.js';
 import {
   ElementDefaults, getSelectedDevice, isInCameraZone,
   addElement, removeElement, alignElement, applyQuickSize, moveElementZ
@@ -1140,15 +1140,6 @@ Object.assign(window.JCM, {
     navigator.clipboard.writeText(text).then(function () { toast('📋 XML 已复制到剪贴板', 'success'); }).catch(function () { toast('复制失败，请手动选择复制', 'error'); });
   },
   formatXML: function () { formatXML(); toast('🔧 XML 已格式化', 'success'); },
-  openFindReplace: openFindReplace,
-  closeFindReplace: closeFindReplace,
-  goToLine: goToLine,
-  openLint: function () {
-    var textarea = document.getElementById('codeContent');
-    var xml = textarea ? textarea.value : '';
-    var issues = lintMAML(xml);
-    showLintResults(issues);
-  },
   toggleFullscreen: function () {
     var el = document.querySelector('#page2 .preview-phone');
     if (!el) return;
