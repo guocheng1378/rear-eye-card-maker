@@ -46,6 +46,7 @@
       <button class="lang-switch desktop-only" id="langSwitchBtn" onclick="JCM.switchLang()" title="切换语言">EN</button>
       <a class="theme-toggle desktop-only" href="REAREYE_USAGE.md" target="_blank" title="REAREye 使用说明">📱</a>
       <!-- Mobile more menu -->
+      <button class="mode-toggle-btn" id="modeToggleBtn" onclick="JCM.toggleSimpleMode()" title="切换简洁/完整模式">简洁</button>
       <div class="more-menu-wrap">
         <button class="theme-toggle mobile-only" id="moreMenuBtn" onclick="JCM.toggleMoreMenu()" title="更多" aria-label="更多菜单">⋯</button>
         <div class="more-menu" id="moreMenu" style="display:none">
@@ -200,13 +201,15 @@
           </div>
           <div class="preview-actions">
             <button class="btn btn-secondary" onclick="JCM.renderPreview()"><span class="btn-icon">🔄</span> 生成预览</button>
-            <button class="btn btn-secondary" onclick="JCM.copyXML()"><span class="btn-icon">📋</span> 复制 XML</button>
             <button class="btn btn-export" onclick="JCM.handleExport()"><span class="btn-icon">📦</span> 导出 ZIP</button>
+            <button class="btn btn-secondary" onclick="JCM.copyXML()"><span class="btn-icon">📋</span> 复制 XML</button>
             <button class="btn btn-secondary" onclick="JCM.handleExportPNG()"><span class="btn-icon">🖼</span> 导出 PNG</button>
-            <button class="btn btn-secondary" onclick="JCM.handleExportSVG()"><span class="btn-icon">📐</span> 导出 SVG</button>
-            <button class="btn btn-secondary" onclick="JCM.saveToLibrary()" title="保存到卡片库"><span class="btn-icon">📚</span> 保存到库</button>
+            <div class="preview-actions-extra">
+              <button class="btn btn-secondary" onclick="JCM.handleExportSVG()"><span class="btn-icon">📐</span> 导出 SVG</button>
+              <button class="btn btn-secondary" onclick="JCM.saveToLibrary()" title="保存到卡片库"><span class="btn-icon">📚</span> 保存到库</button>
               <button class="btn btn-secondary" onclick="JCM.showQR()" title="扫码分享"><span class="btn-icon">📱</span> 扫码分享</button>
-            <button class="btn btn-secondary" onclick="JCM.showADBPush()" title="ADB 推送"><span class="btn-icon">📲</span> ADB 推送</button>
+              <button class="btn btn-secondary" onclick="JCM.showADBPush()" title="ADB 推送"><span class="btn-icon">📲</span> ADB 推送</button>
+            </div>
           </div>
           <div class="batch-export-bar">
             <span style="font-size:11px;color:var(--text2)">批量导出：</span>
@@ -224,6 +227,7 @@
             <button class="btn btn-secondary" onclick="JCM.runA11yCheck()"><span class="btn-icon">♿</span> 无障碍</button>
             <button class="btn btn-secondary" onclick="JCM.exportPDF()"><span class="btn-icon">📄</span> PDF</button>
           </div>
+          <button class="more-actions-btn" id="moreActionsBtn" onclick="JCM.toggleMoreActions()" style="display:none">⋯ 展开更多操作</button>
         </div>
       </div>
     </section>

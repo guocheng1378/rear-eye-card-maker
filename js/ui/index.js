@@ -694,6 +694,7 @@ export function initUI() {
   renderTplGrid();
   setupEvents();
   setupCodeEditor();
+  initSimpleMode();
 
   // Init canvas drag
   initCanvas({
@@ -739,6 +740,50 @@ function toggleMoreMenu() {
   var menu = document.getElementById('moreMenu');
   if (menu) menu.style.display = menu.style.display === 'none' ? '' : 'none';
 }
+// ─── Simple Mode Toggle ──────────────────────────────────────────
+function toggleSimpleMode() {
+  var app = document.querySelector('.app');
+  var btn = document.getElementById('modeToggleBtn');
+  var moreBtn = document.getElementById('moreActionsBtn');
+  var isSimple = app.classList.toggle('simple-mode');
+  if (btn) {
+    btn.textContent = isSimple ? '简洁' : '完整';
+    btn.classList.toggle('active', isSimple);
+  }
+  // Show/hide expand button in simple mode
+  if (moreBtn) moreBtn.style.display = isSimple ? '' : 'none';
+  // Reset expanded state when switching modes
+  if (isSimple) {
+    document.querySelectorAll('.preview-actions-extra, .batch-export-bar').forEach(function(el) {
+      el.classList.remove('show');
+    });
+    if (moreBtn) moreBtn.textContent = '⋯ 展开更多操作';
+  }
+  try { localStorage.setItem('jcm-simple-mode', isSimple ? '1' : '0'); } catch(e) {}
+}
+function toggleMoreActions() {
+  var extras = document.querySelectorAll('.preview-actions-extra, .batch-export-bar');
+  var btn = document.getElementById('moreActionsBtn');
+  var anyVisible = false;
+  extras.forEach(function(el) { if (el.classList.contains('show')) anyVisible = true; });
+  extras.forEach(function(el) { el.classList.toggle('show', !anyVisible); });
+  if (btn) btn.textContent = anyVisible ? '⋯ 展开更多操作' : '⋯ 收起';
+}
+function initSimpleMode() {
+  var saved = null;
+  try { saved = localStorage.getItem('jcm-simple-mode'); } catch(e) {}
+  // Default to simple on mobile
+  var isMobile = window.innerWidth <= 768;
+  var isSimple = saved !== null ? saved === '1' : isMobile;
+  if (isSimple) {
+    var app = document.querySelector('.app');
+    var btn = document.getElementById('modeToggleBtn');
+    var moreBtn = document.getElementById('moreActionsBtn');
+    if (app) app.classList.add('simple-mode');
+    if (btn) { btn.textContent = '简洁'; btn.classList.add('active'); }
+    if (moreBtn) moreBtn.style.display = '';
+  }
+}
 // Close on outside click
 document.addEventListener('click', function(e) {
   var menu = document.getElementById('moreMenu');
@@ -749,6 +794,8 @@ document.addEventListener('click', function(e) {
 Object.assign(window.JCM, {
   toggleLayerPanel: toggleLayerPanel,
   toggleMoreMenu: toggleMoreMenu,
+  toggleSimpleMode: toggleSimpleMode,
+  toggleMoreActions: toggleMoreActions,
   renderLayerPanel: renderLayerPanel,
   goStep: function (n) { goStep(n, stepCallbacks); },
   nextStep: function () { goStep(getStep() + 1, stepCallbacks); },

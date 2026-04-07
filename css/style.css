@@ -1156,6 +1156,84 @@ kbd{
   background: var(--accent-bg) !important;
 }
 
+/* ─── Simple Mode ────────────────────────────────────────────────── */
+/* 简洁模式: 手机端精简按钮，展开按钮 + 更多区域 */
+.preview-actions-extra {
+  display: contents;
+}
+.app.simple-mode .preview-actions-extra {
+  display: none;
+}
+.app.simple-mode .batch-export-bar {
+  display: none;
+}
+.app.simple-mode .preview-actions-extra.show {
+  display: contents;
+}
+.app.simple-mode .batch-export-bar.show {
+  display: flex;
+}
+/* 简洁模式切换按钮 */
+.mode-toggle-btn {
+  font-size: 11px;
+  padding: 3px 10px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--surface2);
+  color: var(--text2);
+  cursor: pointer;
+  transition: var(--transition);
+  white-space: nowrap;
+  font-family: inherit;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+  height: 34px;
+}
+.mode-toggle-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.mode-toggle-btn.active {
+  background: var(--accent-glow);
+  border-color: var(--accent);
+  color: var(--accent2);
+}
+/* 展开/收起更多操作按钮 */
+.more-actions-btn {
+  font-size: 12px;
+  padding: 6px 14px;
+  border-radius: 8px;
+  border: 1px dashed var(--border);
+  background: transparent;
+  color: var(--text2);
+  cursor: pointer;
+  transition: var(--transition);
+  font-family: inherit;
+  width: 100%;
+  text-align: center;
+}
+.more-actions-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent2);
+  background: var(--accent-glow);
+}
+/* 桌面端隐藏简洁模式按钮 */
+@media (min-width: 769px) {
+  .mode-toggle-btn { display: none; }
+}
+/* 手机端: 简洁模式下预览操作行 */
+@media (max-width: 768px) {
+  .app.simple-mode .preview-actions {
+    gap: 8px;
+  }
+  .app.simple-mode .preview-actions .btn {
+    font-size: 12px;
+    padding: 7px 12px;
+  }
+}
+
 /* ─── Toolbar Responsive ──────────────────────────────────────── */
 .desktop-only { display: flex; }
 .mobile-only { display: none; }
