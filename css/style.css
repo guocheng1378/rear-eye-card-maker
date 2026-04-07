@@ -188,6 +188,20 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC',sans-
 }
 @keyframes fadeIn{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
 
+/* ─── Element Editor Sections ─── */
+.el-editor-section{
+  margin-bottom:12px;padding:10px 12px;
+  background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);
+}
+.el-editor-section:last-child{margin-bottom:0}
+.el-editor-section-title{
+  font-size:11px;font-weight:700;color:var(--text2);
+  margin-bottom:8px;display:flex;align-items:center;gap:4px;
+}
+/* Range slider value display */
+.el-editor-section input[type=range]{padding:0;background:transparent;border:none;height:28px}
+.el-editor-section .config-grid{gap:8px}
+
 /* ─── Media Picker ─── */
 .media-picker{
   display:flex;align-items:center;gap:12px;padding:12px;

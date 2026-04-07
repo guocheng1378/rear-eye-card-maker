@@ -565,7 +565,25 @@ function setupEvents() {
       clearTimeout(_cfgChangeTimer);
       _cfgChangeTimer = setTimeout(function () { _cfgChangeTimer = null; }, 1000);
       var idx = Number(t.dataset.idx), prop = t.dataset.prop;
-      if (t.type === 'number' || t.type === 'range') S.elements[idx][prop] = Number(t.value);
+      if (t.type === 'number') S.elements[idx][prop] = Number(t.value);
+      else if (t.type === 'range') {
+        var rawVal = Number(t.value);
+        // lineHeight stored as float (range * 10)
+        if (prop === 'lineHeight') { rawVal = rawVal / 10; S.elements[idx][prop] = rawVal; }
+        // speed stored as float (range * 10)
+        else if (prop === 'speed') { rawVal = rawVal / 10; S.elements[idx][prop] = rawVal; }
+        else { S.elements[idx][prop] = rawVal; }
+        // Update adjacent value display span
+        var valSpan = t.parentElement.querySelector('span') || t.nextElementSibling;
+        if (valSpan && valSpan.tagName === 'SPAN') {
+          if (prop === 'rotation') valSpan.textContent = rawVal + '°';
+          else if (prop === 'opacity') valSpan.textContent = rawVal + '%';
+          else if (prop === 'lineHeight') valSpan.textContent = rawVal.toFixed(1);
+          else if (prop === 'speed') valSpan.textContent = rawVal.toFixed(1) + 'x';
+          else if (prop === 'blur') valSpan.textContent = rawVal + 'px';
+          else valSpan.textContent = rawVal;
+        }
+      }
       else if (t.type === 'color') { S.elements[idx][prop] = t.value; var cv2 = t.nextElementSibling; if (cv2 && cv2.classList.contains('color-val')) cv2.textContent = t.value; }
       else S.elements[idx][prop] = t.value;
       S.setDirty(true);
@@ -645,6 +663,36 @@ function setupEvents() {
     if (alignBtn) { alignElement(Number(alignBtn.dataset.ai), alignBtn.dataset.align); renderConfig(getTemplateMAML); return; }
     var sizeBtn = e.target.closest('[data-qsize]');
     if (sizeBtn) { applyQuickSize(Number(sizeBtn.dataset.qi), sizeBtn.dataset.qsize); renderConfig(getTemplateMAML); return; }
+    // Text alignment buttons (data-val on data-prop buttons)
+    var valBtn = e.target.closest('[data-val][data-prop]');
+    if (valBtn) {
+      e.stopPropagation();
+      captureState('修改对齐');
+      var vi = Number(valBtn.dataset.idx);
+      var vp = valBtn.dataset.prop;
+      var vv = valBtn.dataset.val;
+      if (vi >= 0 && vi < S.elements.length) {
+        S.elements[vi][vp] = vv;
+        S.setDirty(true);
+        renderConfig(getTemplateMAML);
+        _autoPreview();
+      }
+      return;
+    }
+    // Clear gradient (fillColor2)
+    var clearGrad = e.target.closest('[data-clear-fill2]');
+    if (clearGrad) {
+      e.stopPropagation();
+      captureState('清除渐变');
+      var ci = Number(clearGrad.dataset.idx);
+      if (ci >= 0 && ci < S.elements.length) {
+        S.elements[ci].fillColor2 = '';
+        S.setDirty(true);
+        renderConfig(getTemplateMAML);
+        _autoPreview();
+      }
+      return;
+    }
     var swatch = e.target.closest('.color-swatch');
     if (swatch) { captureState(); S.elements[Number(swatch.dataset.cidx)][swatch.dataset.cprop] = swatch.dataset.color; S.setDirty(true); renderConfig(getTemplateMAML); return; }
     var colorDot = e.target.closest('.color-dot');

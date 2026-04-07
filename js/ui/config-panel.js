@@ -414,55 +414,183 @@ function renderElementEditorInline(el, idx, device) {
     var safeX = cameraZoneWidth(device);
     html += '<div style="display:flex;align-items:center;gap:8px;padding:8px 12px;margin-bottom:12px;background:rgba(225,112,85,0.1);border:1px solid rgba(225,112,85,0.3);border-radius:8px;font-size:12px;color:#e17055"><span>⚠️</span> 此元素位于摄像头遮挡区内，建议将 X 调整到 ≥ ' + safeX + '</div>';
   }
+
+  // Element type header with lock toggle
+  html += '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">';
+  html += '<div style="display:flex;align-items:center;gap:8px">';
+  html += '<span class="el-badge">' + el.type + '</span>';
+  html += '<span style="font-size:13px;font-weight:600">' + getElementTypeLabel(el) + '</span>';
+  html += '</div>';
+  html += '<label class="check-label" style="font-size:11px"><input type="checkbox" data-prop="locked" data-idx="' + idx + '"' + (el.locked ? ' checked' : '') + '> 🔒 锁定</label>';
+  html += '</div>';
+
+  // ── Section: Position & Size ──
+  html += '<div class="el-editor-section">';
+  html += '<div class="el-editor-section-title">📍 位置 & 大小</div>';
+  html += '<div class="config-grid">';
+  html += fieldHtml('X', '<input type="number" value="' + el.x + '" data-prop="x" data-idx="' + idx + '">');
+  html += fieldHtml('Y', '<input type="number" value="' + el.y + '" data-prop="y" data-idx="' + idx + '">');
+  if (el.w !== undefined) html += fieldHtml('宽', '<input type="number" value="' + (el.w || 100) + '" data-prop="w" data-idx="' + idx + '" min="1" max="9999">');
+  if (el.h !== undefined) html += fieldHtml('高', '<input type="number" value="' + (el.h || 100) + '" data-prop="h" data-idx="' + idx + '" min="1" max="9999">');
+  if (el.r !== undefined) html += fieldHtml('半径', '<input type="number" value="' + (el.r || 30) + '" data-prop="r" data-idx="' + idx + '" min="1" max="999">');
+  html += '</div>';
+  // Quick position/size buttons
+  html += '<div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:8px">';
+  html += '<button class="el-btn" data-align="left" data-ai="' + idx + '" style="font-size:10px;padding:4px 8px">⬅ 左</button>';
+  html += '<button class="el-btn" data-align="hcenter" data-ai="' + idx + '" style="font-size:10px;padding:4px 8px">↔ 中</button>';
+  html += '<button class="el-btn" data-align="right" data-ai="' + idx + '" style="font-size:10px;padding:4px 8px">➡ 右</button>';
+  html += '<button class="el-btn" data-align="top" data-ai="' + idx + '" style="font-size:10px;padding:4px 8px">⬆ 顶</button>';
+  html += '<button class="el-btn" data-align="vcenter" data-ai="' + idx + '" style="font-size:10px;padding:4px 8px">↕ 中</button>';
+  html += '<button class="el-btn" data-align="bottom" data-ai="' + idx + '" style="font-size:10px;padding:4px 8px">⬇ 底</button>';
+  html += '</div>';
+  // Quick size buttons (for applicable types)
+  if (el.type === 'rectangle' || el.type === 'image' || el.type === 'video' || el.type === 'progress') {
+    html += '<div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:4px">';
+    html += '<button class="el-btn" data-qsize="full" data-qi="' + idx + '" style="font-size:10px;padding:4px 8px">⛶ 全屏</button>';
+    html += '<button class="el-btn" data-qsize="half" data-qi="' + idx + '" style="font-size:10px;padding:4px 8px">◧ 半屏</button>';
+    html += '<button class="el-btn" data-qsize="quarter" data-qi="' + idx + '" style="font-size:10px;padding:4px 8px">◫ 1/4</button>';
+    html += '</div>';
+  }
+  html += '</div>';
+
+  // ── Section: Style (type-specific) ──
+  html += '<div class="el-editor-section">';
+  html += '<div class="el-editor-section-title">🎨 样式</div>';
   html += '<div class="config-grid">';
 
   if (el.type === 'text') {
     html += fieldHtml('文字', '<input type="text" value="' + esc(el.text || '') + '" data-prop="text" data-idx="' + idx + '">', true);
-    html += fieldHtml('字号', '<input type="number" value="' + el.size + '" data-prop="size" data-idx="' + idx + '">');
+    html += fieldHtml('字号', '<input type="number" value="' + el.size + '" data-prop="size" data-idx="' + idx + '" min="8" max="200">');
     html += colorFieldHtml('颜色', el.color || '#ffffff', 'color', idx);
+    // Font family
+    html += '<div class="field"><label>字体</label><select data-prop="fontFamily" data-idx="' + idx + '">' +
+      FONT_OPTIONS.map(function (f) { return '<option value="' + f.id + '"' + (el.fontFamily === f.id ? ' selected' : '') + '>' + f.name + '</option>'; }).join('') +
+      '</select></div>';
+    // Text alignment
+    html += '<div class="field"><label>对齐</label><div style="display:flex;gap:2px">' +
+      ['left', 'center', 'right'].map(function (a) {
+        var icons = { left: '⬅', center: '≡', right: '➡' };
+        var isActive = (el.textAlign || 'left') === a;
+        return '<button class="el-btn" data-prop="textAlign" data-idx="' + idx + '" data-val="' + a + '" style="flex:1;justify-content:center;font-size:12px;padding:6px;background:' + (isActive ? 'var(--accent-glow)' : '') + ';border-color:' + (isActive ? 'var(--accent)' : 'var(--border)') + '">' + icons[a] + '</button>';
+      }).join('') + '</div></div>';
     html += fieldHtml('加粗', '<label class="toggle-switch"><input type="checkbox" data-prop="bold" data-idx="' + idx + '"' + (el.bold ? ' checked' : '') + '><span class="toggle-slider"></span></label>');
     html += fieldHtml('多行', '<label class="toggle-switch"><input type="checkbox" data-prop="multiLine" data-idx="' + idx + '"' + (el.multiLine ? ' checked' : '') + '><span class="toggle-slider"></span></label>');
-    html += fieldHtml('宽度', '<input type="number" value="' + (el.w || 200) + '" data-prop="w" data-idx="' + idx + '">');
-    html += fieldHtml('透明度', '<input type="range" min="0" max="100" value="' + (el.opacity !== undefined ? el.opacity : 100) + '" data-prop="opacity" data-idx="' + idx + '">');
+    if (el.multiLine) {
+      html += fieldHtml('行高', '<input type="range" min="10" max="30" value="' + Math.round((el.lineHeight || 1.4) * 10) + '" data-prop="lineHeight" data-idx="' + idx + '" step="1"><span style="font-size:10px;color:var(--text3)">' + (el.lineHeight || 1.4).toFixed(1) + '</span>');
+    }
+    html += fieldHtml('宽度', '<input type="number" value="' + (el.w || 200) + '" data-prop="w" data-idx="' + idx + '" min="20" max="999">');
+
   } else if (el.type === 'rectangle') {
-    html += fieldHtml('X', '<input type="number" value="' + el.x + '" data-prop="x" data-idx="' + idx + '">');
-    html += fieldHtml('Y', '<input type="number" value="' + el.y + '" data-prop="y" data-idx="' + idx + '">');
-    html += fieldHtml('宽', '<input type="number" value="' + el.w + '" data-prop="w" data-idx="' + idx + '">');
-    html += fieldHtml('高', '<input type="number" value="' + el.h + '" data-prop="h" data-idx="' + idx + '">');
     html += colorFieldHtml('颜色', el.color || '#333333', 'color', idx);
-    html += fieldHtml('圆角', '<input type="number" value="' + (el.radius || 0) + '" data-prop="radius" data-idx="' + idx + '">');
-    html += fieldHtml('透明度', '<input type="range" min="0" max="100" value="' + (el.opacity !== undefined ? el.opacity : 100) + '" data-prop="opacity" data-idx="' + idx + '">');
+    // Gradient toggle
+    html += fieldHtml('渐变', '<div style="display:flex;gap:6px;align-items:center">' +
+      colorFieldHtml2(el.fillColor2 || '', 'fillColor2', idx) +
+      (el.fillColor2 ? '<button class="el-btn" data-clear-fill2 data-idx="' + idx + '" style="font-size:10px;padding:3px 6px">✕</button>' : '') +
+      '</div>');
+    html += fieldHtml('圆角', '<input type="number" value="' + (el.radius || 0) + '" data-prop="radius" data-idx="' + idx + '" min="0" max="500">');
+    html += fieldHtml('描边', '<div style="display:flex;gap:6px;align-items:center">' +
+      '<input type="number" value="' + (el.strokeWidth || 0) + '" data-prop="strokeWidth" data-idx="' + idx + '" min="0" max="20" style="width:60px">' +
+      (el.strokeWidth > 0 ? colorFieldHtml2(el.strokeColor || '#ffffff', 'strokeColor', idx) : '') +
+      '</div>');
+    html += fieldHtml('模糊', '<input type="range" min="0" max="30" value="' + (el.blur || 0) + '" data-prop="blur" data-idx="' + idx + '"><span style="font-size:10px;color:var(--text3)">' + (el.blur || 0) + 'px</span>');
+
   } else if (el.type === 'circle') {
-    html += fieldHtml('中心 X', '<input type="number" value="' + el.x + '" data-prop="x" data-idx="' + idx + '">');
-    html += fieldHtml('中心 Y', '<input type="number" value="' + el.y + '" data-prop="y" data-idx="' + idx + '">');
-    html += fieldHtml('半径', '<input type="number" value="' + el.r + '" data-prop="r" data-idx="' + idx + '">');
-    html += colorFieldHtml('填充', el.color || '#6c5ce7', 'color', idx);
-    html += fieldHtml('描边宽', '<input type="number" value="' + (el.strokeWidth || 0) + '" data-prop="strokeWidth" data-idx="' + idx + '" min="0" max="20">');
-    if (el.strokeWidth > 0) {
-      html += colorFieldHtml('描边色', el.strokeColor || '#ffffff', 'strokeColor', idx);
-    }
-  } else if (el.type === 'arc') {
-    html += fieldHtml('中心 X', '<input type="number" value="' + el.x + '" data-prop="x" data-idx="' + idx + '">');
-    html += fieldHtml('中心 Y', '<input type="number" value="' + el.y + '" data-prop="y" data-idx="' + idx + '">');
-    html += fieldHtml('半径', '<input type="number" value="' + (el.r || 40) + '" data-prop="r" data-idx="' + idx + '">');
-    html += fieldHtml('起始角', '<input type="number" value="' + (el.startAngle || 0) + '" data-prop="startAngle" data-idx="' + idx + '" min="0" max="360">');
-    html += fieldHtml('终止角', '<input type="number" value="' + (el.endAngle || 270) + '" data-prop="endAngle" data-idx="' + idx + '" min="0" max="360">');
-    html += fieldHtml('线宽', '<input type="number" value="' + (el.strokeWidth || 6) + '" data-prop="strokeWidth" data-idx="' + idx + '" min="1" max="20">');
     html += colorFieldHtml('颜色', el.color || '#6c5ce7', 'color', idx);
-  } else {
-    html += fieldHtml('X', '<input type="number" value="' + el.x + '" data-prop="x" data-idx="' + idx + '">');
-    html += fieldHtml('Y', '<input type="number" value="' + el.y + '" data-prop="y" data-idx="' + idx + '">');
-    if (el.w !== undefined) html += fieldHtml('宽', '<input type="number" value="' + (el.w || 100) + '" data-prop="w" data-idx="' + idx + '">');
-    if (el.h !== undefined) html += fieldHtml('高', '<input type="number" value="' + (el.h || 100) + '" data-prop="h" data-idx="' + idx + '">');
-    if (el.color !== undefined) html += colorFieldHtml('颜色', el.color, 'color', idx);
-    if (el.type === 'progress') {
-      html += fieldHtml('进度', '<input type="range" min="0" max="100" value="' + (el.value || 60) + '" data-prop="value" data-idx="' + idx + '">');
-      html += fieldHtml('圆角', '<input type="number" value="' + (el.radius || 4) + '" data-prop="radius" data-idx="' + idx + '">');
-      html += colorFieldHtml('背景', el.bgColor || '#333333', 'bgColor', idx);
+    html += fieldHtml('描边', '<div style="display:flex;gap:6px;align-items:center">' +
+      '<input type="number" value="' + (el.strokeWidth || 0) + '" data-prop="strokeWidth" data-idx="' + idx + '" min="0" max="20" style="width:60px">' +
+      (el.strokeWidth > 0 ? colorFieldHtml2(el.strokeColor || '#ffffff', 'strokeColor', idx) : '') +
+      '</div>');
+
+  } else if (el.type === 'arc') {
+    html += colorFieldHtml('颜色', el.color || '#6c5ce7', 'color', idx);
+    html += fieldHtml('起始角', '<input type="number" value="' + (el.startAngle || 0) + '" data-prop="startAngle" data-idx="' + idx + '" min="0" max="360">°');
+    html += fieldHtml('终止角', '<input type="number" value="' + (el.endAngle || 270) + '" data-prop="endAngle" data-idx="' + idx + '" min="0" max="360">°');
+    html += fieldHtml('线宽', '<input type="number" value="' + (el.strokeWidth || 6) + '" data-prop="strokeWidth" data-idx="' + idx + '" min="1" max="30">');
+
+  } else if (el.type === 'image' || el.type === 'video') {
+    html += '<div class="field"><label>适配</label><select data-prop="fit" data-idx="' + idx + '">' +
+      ['cover', 'contain', 'fill', 'none'].map(function (f) { return '<option value="' + f + '"' + ((el.fit || 'cover') === f ? ' selected' : '') + '>' + f + '</option>'; }).join('') +
+      '</select></div>';
+    html += fieldHtml('圆角', '<input type="number" value="' + (el.radius || 0) + '" data-prop="radius" data-idx="' + idx + '" min="0" max="500">');
+    if (el.type === 'image' && el.fileName) {
+      html += '<div style="grid-column:1/-1"><button class="el-btn" data-pick="image" style="font-size:11px">🖼 替换图片</button></div>';
     }
+    if (el.type === 'video' && el.fileName) {
+      html += '<div style="grid-column:1/-1"><button class="el-btn" data-pick="video" style="font-size:11px">🎬 替换视频</button></div>';
+    }
+
+  } else if (el.type === 'progress') {
+    html += fieldHtml('进度', '<input type="range" min="0" max="100" value="' + (el.value || 60) + '" data-prop="value" data-idx="' + idx + '"><span style="font-size:10px;color:var(--text3)">' + (el.value || 60) + '%</span>');
+    html += colorFieldHtml('前景', el.color || '#6c5ce7', 'color', idx);
+    html += colorFieldHtml('背景', el.bgColor || '#333333', 'bgColor', idx);
+    html += fieldHtml('圆角', '<input type="number" value="' + (el.radius || 4) + '" data-prop="radius" data-idx="' + idx + '" min="0" max="50">');
+
+  } else if (el.type === 'lottie') {
+    html += '<div style="grid-column:1/-1;padding:12px;background:rgba(155,89,182,0.1);border-radius:8px;font-size:12px;color:#9b59b6">🎭 Lottie 动画仅支持浏览器预览，MAML 不支持此格式。<br>建议替换为 Image 或 Video 元素。</div>';
+    html += fieldHtml('速度', '<input type="range" min="1" max="50" value="' + Math.round((el.speed || 1) * 10) + '" data-prop="speed" data-idx="' + idx + '"><span style="font-size:10px;color:var(--text3)">' + (el.speed || 1).toFixed(1) + 'x</span>');
   }
   html += '</div></div>';
+
+  // ── Section: Transform & Effects ──
+  html += '<div class="el-editor-section">';
+  html += '<div class="el-editor-section-title">✨ 变换 & 效果</div>';
+  html += '<div class="config-grid">';
+  html += fieldHtml('旋转', '<div style="display:flex;gap:6px;align-items:center"><input type="range" min="0" max="360" value="' + (el.rotation || 0) + '" data-prop="rotation" data-idx="' + idx + '" style="flex:1"><span style="font-size:11px;color:var(--text3);min-width:30px;text-align:right">' + (el.rotation || 0) + '°</span></div>');
+  html += fieldHtml('透明度', '<div style="display:flex;gap:6px;align-items:center"><input type="range" min="0" max="100" value="' + (el.opacity !== undefined ? el.opacity : 100) + '" data-prop="opacity" data-idx="' + idx + '" style="flex:1"><span style="font-size:11px;color:var(--text3);min-width:30px;text-align:right">' + (el.opacity !== undefined ? el.opacity : 100) + '%</span></div>');
+
+  // Shadow (text only)
+  if (el.type === 'text') {
+    html += '<div class="field"><label>阴影</label><select data-prop="shadow" data-idx="' + idx + '">' +
+      [{ v: 'none', l: '无' }, { v: 'light', l: '轻阴影' }, { v: 'dark', l: '深阴影' }, { v: 'glow', l: '发光' }].map(function (s) {
+        return '<option value="' + s.v + '"' + ((el.shadow || 'none') === s.v ? ' selected' : '') + '>' + s.l + '</option>';
+      }).join('') + '</select></div>';
+  }
+  html += '</div></div>';
+
+  // ── Color presets ──
+  if (el.color !== undefined) {
+    html += '<div class="el-editor-section">';
+    html += '<div class="el-editor-section-title">🎨 颜色预设</div>';
+    html += renderColorPresets('color', idx);
+    html += '</div>';
+  }
+
+  // ── Quick Actions ──
+  html += '<div class="el-editor-section">';
+  html += '<div class="el-editor-section-title">⚡ 快捷操作</div>';
+  html += '<div style="display:flex;gap:4px;flex-wrap:wrap">';
+  html += '<button class="el-btn" data-duplicate="' + idx + '" style="font-size:11px">📋 复制</button>';
+  if (S.clipboard) html += '<button class="el-btn" data-paste-el style="font-size:11px">📌 粘贴</button>';
+  html += '<button class="el-btn" data-del="' + idx + '" style="font-size:11px;color:var(--red)">🗑️ 删除</button>';
+  html += '</div>';
+  html += '</div>';
+
+  html += '</div>';
   return html;
+}
+
+// Helper: element type labels
+function getElementTypeLabel(el) {
+  var labels = { text: '文字', rectangle: '矩形', circle: '圆形', arc: '弧形', image: '图片', video: '视频', progress: '进度条', lottie: 'Lottie 动画' };
+  return labels[el.type] || el.type;
+}
+
+// Font options for the dropdown
+var FONT_OPTIONS = [
+  { id: 'default', name: '系统默认' },
+  { id: 'mipro-normal', name: 'Mi Sans Regular' },
+  { id: 'mipro-demibold', name: 'Mi Sans SemiBold' },
+  { id: 'mipro-bold', name: 'Mi Sans Bold' },
+  { id: 'mipro-light', name: 'Mi Sans Light' },
+  { id: 'mibright', name: 'Mi Bright' },
+  { id: 'noto-sans-sc', name: 'Noto Sans SC' },
+  { id: 'roboto', name: 'Roboto' },
+  { id: 'monospace', name: '等宽' },
+];
+
+// Helper: inline color field (small version for gradients)
+function colorFieldHtml2(value, prop, idx) {
+  return '<input type="color" value="' + (value || '#000000') + '" data-prop="' + prop + '" data-idx="' + idx + '" style="width:32px;height:28px;padding:2px;border-radius:4px;cursor:pointer;border:1px solid var(--border)">';
 }
 
 function fieldHtml(label, input, full) {

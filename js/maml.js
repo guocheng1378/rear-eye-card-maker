@@ -47,10 +47,11 @@ function renderEl(el, files) {
     case 'rectangle': {
       var rectRot = el.rotation ? ' rotation="' + el.rotation + '"' : '';
       var blur = el.blur ? ' blur="' + el.blur + '"' : '';
+      var rectStroke = el.strokeWidth > 0 ? ' stroke="' + el.strokeWidth + '" strokeColor="' + (el.strokeColor || '#ffffff') + '"' : '';
       if (el.fillColor2) {
-        return p + '<Rectangle x="' + el.x + '" y="' + el.y + '" w="' + el.w + '" h="' + el.h + '" fillColor="' + el.color + '" fillColor2="' + el.fillColor2 + '"' + (el.radius ? ' cornerRadius="' + el.radius + '"' : '') + alphaAttr(el) + rectRot + blur + ' />';
+        return p + '<Rectangle x="' + el.x + '" y="' + el.y + '" w="' + el.w + '" h="' + el.h + '" fillColor="' + el.color + '" fillColor2="' + el.fillColor2 + '"' + (el.radius ? ' cornerRadius="' + el.radius + '"' : '') + alphaAttr(el) + rectRot + blur + rectStroke + ' />';
       }
-      return p + '<Rectangle x="' + el.x + '" y="' + el.y + '" w="' + el.w + '" h="' + el.h + '" fillColor="' + el.color + '"' + (el.radius ? ' cornerRadius="' + el.radius + '"' : '') + alphaAttr(el) + rectRot + blur + ' />';
+      return p + '<Rectangle x="' + el.x + '" y="' + el.y + '" w="' + el.w + '" h="' + el.h + '" fillColor="' + el.color + '"' + (el.radius ? ' cornerRadius="' + el.radius + '"' : '') + alphaAttr(el) + rectRot + blur + rectStroke + ' />';
     }
     case 'circle': {
       return p + '<Circle x="' + el.x + '" y="' + el.y + '" r="' + el.r + '" fillColor="' + el.color + '"' + alphaAttr(el) + ' />';
@@ -59,7 +60,8 @@ function renderEl(el, files) {
       var srcFile = el.src || el.fileName || '';
       var folder = srcFile && files[srcFile] && files[srcFile].mimeType.indexOf('video/') === 0 ? 'videos' : 'images';
       var fitAttr = el.fit && el.fit !== 'cover' ? ' fitMode="' + el.fit + '"' : '';
-      return p + '<Image src="' + folder + '/' + escXml(srcFile) + '" x="' + el.x + '" y="' + el.y + '" w="' + (el.w || 100) + '" h="' + (el.h || 100) + '"' + fitAttr + ' />';
+      var imgRadius = el.radius ? ' cornerRadius="' + el.radius + '"' : '';
+      return p + '<Image src="' + folder + '/' + escXml(srcFile) + '" x="' + el.x + '" y="' + el.y + '" w="' + (el.w || 100) + '" h="' + (el.h || 100) + '"' + fitAttr + imgRadius + alphaAttr(el) + ' />';
     }
     case 'video':
       return p + '<Video src="videos/' + escXml(el.src || el.fileName || '') + '" x="' + el.x + '" y="' + el.y + '" w="' + (el.w || 240) + '" h="' + (el.h || 135) + '" autoPlay="true" loop="true" />';
