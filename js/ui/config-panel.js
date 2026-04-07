@@ -53,10 +53,19 @@ export function generateTplThumbnail(tpl) {
 export function renderTplGrid() {
   _thumbCache = {}; // clear cache to pick up config changes
   var favs = getFavorites();
+  // Get custom order from localStorage
+  var customOrder = [];
+  try { customOrder = JSON.parse(localStorage.getItem('jcm-tpl-order') || '[]'); } catch(e) {}
   var sorted = TEMPLATES.slice().sort(function (a, b) {
     var aFav = favs.indexOf(a.id) >= 0 ? 0 : 1;
     var bFav = favs.indexOf(b.id) >= 0 ? 0 : 1;
-    return aFav - bFav;
+    if (aFav !== bFav) return aFav - bFav;
+    var aOrd = customOrder.indexOf(a.id);
+    var bOrd = customOrder.indexOf(b.id);
+    if (aOrd >= 0 && bOrd >= 0) return aOrd - bOrd;
+    if (aOrd >= 0) return -1;
+    if (bOrd >= 0) return 1;
+    return 0;
   });
   document.getElementById('tplGrid').innerHTML = sorted.map(function (t) {
     var thumb = generateTplThumbnail(t);
@@ -106,8 +115,9 @@ export function renderConfig(getTemplateMAML) {
   // Section collapse state
   var collapseState = {};
   try { collapseState = JSON.parse(localStorage.getItem('jcm-collapsed') || '{}'); } catch(e) {}
+  var isMobile = window.innerWidth <= 768;
   function sec(key, title, inner, defaultCollapsed) {
-    var collapsed = collapseState[key] !== undefined ? collapseState[key] : !!defaultCollapsed;
+    var collapsed = collapseState[key] !== undefined ? collapseState[key] : (isMobile ? true : !!defaultCollapsed);
     return '<div class="config-section' + (collapsed ? ' collapsed' : '') + '" data-section="' + key + '">' +
       '<div class="config-section-title' + (collapsed ? ' collapsed' : '') + '" data-toggle-section="' + key + '"><span>▸</span> ' + title + '</div>' +
       inner + '</div>';

@@ -266,8 +266,15 @@ export function applyI18n() {
     if (text !== key) {
       // For inputs, update placeholder
       if (el.tagName === 'INPUT' && el.placeholder) el.placeholder = text;
-      // For buttons/links with only text, update textContent
-      else if (!el.querySelector('[data-i18n]')) el.textContent = text;
+      // For elements that are pure text nodes (no child elements), update textContent
+      else if (el.children.length === 0) el.textContent = text;
+      // For elements with emoji prefix + text span, update the text span
+      else if (el.childNodes.length <= 3) {
+        el.childNodes.forEach(function (node) {
+          if (node.nodeType === 3 && node.textContent.trim()) node.textContent = ' ' + text;
+          else if (node.nodeType === 1 && node.getAttribute('data-i18n') === key) node.textContent = text;
+        });
+      }
     }
   });
   // Elements with data-i18n-placeholder

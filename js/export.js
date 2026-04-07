@@ -637,3 +637,57 @@ export function importTemplateJSON(file) {
     reader.readAsText(file);
   });
 }
+
+// ─── .rear-eye 自定义格式 ─────────────────────────────────────
+export function exportRearEyeFormat(tplId, cfg, elements, uploadedFiles) {
+  var data = {
+    format: 'rear-eye',
+    version: 1,
+    templateId: tplId,
+    config: cfg,
+    elements: elements,
+    files: {},
+    exportedAt: new Date().toISOString(),
+  };
+  // Include file metadata (not binary data for this lightweight format)
+  Object.keys(uploadedFiles || {}).forEach(function (k) {
+    var f = uploadedFiles[k];
+    data.files[k] = {
+      mimeType: f.mimeType,
+      originalName: f.originalName,
+      hasData: !!f.data,
+      dataUrl: f.dataUrl && f.dataUrl.indexOf('blob:') !== 0 ? f.dataUrl : '',
+    };
+  });
+  var json = JSON.stringify(data, null, 2);
+  var blob = new Blob([json], { type: 'application/json' });
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url;
+  a.download = (cfg.cardName || 'card') + '.rear-eye';
+  a.style.display = 'none';
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(function () { URL.revokeObjectURL(url); a.remove(); }, 10000);
+}
+
+export function importRearEyeFormat(file) {
+  return new Promise(function (resolve, reject) {
+    var reader = new FileReader();
+    reader.onload = function () {
+      try {
+        var data = JSON.parse(reader.result);
+        if (data.format !== 'rear-eye') throw new Error('不是 .rear-eye 格式');
+        resolve({
+          templateId: data.templateId,
+          config: data.config || {},
+          elements: data.elements || [],
+          files: {},
+        });
+      } catch (e) {
+        reject(new Error('导入失败: ' + e.message));
+      }
+    };
+    reader.readAsText(file);
+  });
+}

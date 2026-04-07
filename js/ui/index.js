@@ -35,7 +35,7 @@ import { showADBPush, exportGIF, exportPDF } from './export-adb.js';
 import { renderLayerPanel, toggleLayerPanel, isLayerPanelVisible, initLayerPanel } from './layer-panel.js';
 
 // re-export from export.js, transcode.js, storage.js (loaded as ES modules)
-import { exportZip, exportPNG, exportSVG, exportTemplateJSON, importTemplateJSON, importZip } from '../export.js';
+import { exportZip, exportPNG, exportSVG, exportTemplateJSON, importTemplateJSON, importZip, exportRearEyeFormat, importRearEyeFormat } from '../export.js';
 import { needsTranscode, transcodeToH264, forceTranscodeAsset } from '../transcode.js';
 import { saveDraft as _saveDraft, loadDraft as _loadDraft, clearDraft as _clearDraft } from '../storage.js';
 
@@ -493,10 +493,45 @@ var _autoPreview = debounce(function () {
 }, 300);
 
 function setupEvents() {
-  // Template grid click
+  // Template grid click + drag reorder
   document.getElementById('tplGrid').addEventListener('click', function (e) {
     var card = e.target.closest('.tpl-card');
     if (card) selectTemplate(card.dataset.tpl);
+  });
+
+  // Template card drag reorder
+  var _tplDragIdx = -1;
+  document.getElementById('tplGrid').addEventListener('dragstart', function (e) {
+    var card = e.target.closest('.tpl-card');
+    if (!card) return;
+    _tplDragIdx = Array.from(card.parentElement.children).indexOf(card);
+    card.classList.add('dragging-el');
+    e.dataTransfer.effectAllowed = 'move';
+  });
+  document.getElementById('tplGrid').addEventListener('dragover', function (e) {
+    e.preventDefault();
+    var card = e.target.closest('.tpl-card');
+    if (!card) return;
+    e.dataTransfer.dropEffect = 'move';
+  });
+  document.getElementById('tplGrid').addEventListener('drop', function (e) {
+    e.preventDefault();
+    var targetCard = e.target.closest('.tpl-card');
+    if (!targetCard || _tplDragIdx < 0) return;
+    var targetIdx = Array.from(targetCard.parentElement.children).indexOf(targetCard);
+    if (_tplDragIdx === targetIdx) return;
+    // Save order
+    var cards = Array.from(document.querySelectorAll('.tpl-card'));
+    var order = cards.map(function (c) { return c.dataset.tpl; });
+    var moved = order.splice(_tplDragIdx, 1)[0];
+    order.splice(targetIdx, 0, moved);
+    try { localStorage.setItem('jcm-tpl-order', JSON.stringify(order)); } catch(ex) {}
+    renderTplGrid();
+    _tplDragIdx = -1;
+  });
+  document.getElementById('tplGrid').addEventListener('dragend', function () {
+    document.querySelectorAll('.tpl-card').forEach(function (c) { c.classList.remove('dragging-el'); });
+    _tplDragIdx = -1;
   });
 
   // Category tabs
@@ -1203,6 +1238,30 @@ Object.assign(window.JCM, {
   },
   forceTranscodeAsset: forceTranscodeAsset,
   handleExportTemplate: function () { exportTemplateJSON(S.tpl ? S.tpl.id : 'custom', S.cfg, S.elements); toast('✅ 配置已导出', 'success'); },
+  exportRearEye: function () {
+    if (!S.tpl) return toast('请先选择模板', 'error');
+    exportRearEyeFormat(S.tpl.id, S.cfg, S.elements, S.uploadedFiles);
+    toast('✅ .rear-eye 已导出', 'success');
+  },
+  importRearEye: function () {
+    var input = document.createElement('input');
+    input.type = 'file'; input.accept = '.rear-eye,.json';
+    input.onchange = function () {
+      var file = input.files[0]; if (!file) return;
+      importRearEyeFormat(file).then(function (data) {
+        var TPLS = window.__jcm_templates;
+        var tpl = TPLS.find(function (t) { return t.id === data.templateId; }) || TPLS.find(function (t) { return t.id === 'custom'; });
+        S.setTpl(tpl);
+        S.setCfg(data.config || {});
+        S.setElements(data.elements || []);
+        S.setDirty(true);
+        resetHistory();
+        renderTplGrid(); goStep(1, stepCallbacks);
+        toast('✅ .rear-eye 已导入', 'success');
+      }).catch(function (e) { toast(e.message, 'error'); });
+    };
+    input.click();
+  },
   handleImportTemplate: function () {
     var input = document.createElement('input');
     input.type = 'file'; input.accept = '.json';

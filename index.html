@@ -50,14 +50,14 @@
       <div class="more-menu-wrap">
         <button class="theme-toggle mobile-only" id="moreMenuBtn" onclick="JCM.toggleMoreMenu()" title="更多" aria-label="更多菜单">⋯</button>
         <div class="more-menu" id="moreMenu" style="display:none">
-          <button onclick="JCM.openLibrary();JCM.toggleMoreMenu()">📚 卡片库</button>
-          <button onclick="JCM.openMarket();JCM.toggleMoreMenu()">🏪 模板市场</button>
-          <button onclick="JCM.openDesignTools();JCM.toggleMoreMenu()">🎨 设计工具</button>
-          <button onclick="JCM.showSnapshots();JCM.toggleMoreMenu()">📸 版本快照</button>
-          <button onclick="JCM.toggleHistory();JCM.toggleMoreMenu()">📜 操作历史</button>
-          <button onclick="JCM.toggleLayerPanel();JCM.toggleMoreMenu()">🗂️ 图层管理</button>
-          <button onclick="JCM.toggleChangelog();JCM.toggleMoreMenu()">📝 更新日志</button>
-          <button onclick="JCM.switchLang();JCM.toggleMoreMenu()">🌐 切换语言</button>
+          <button onclick="JCM.openLibrary();JCM.toggleMoreMenu()">📚 <span data-i18n="tool.library">卡片库</span></button>
+          <button onclick="JCM.openMarket();JCM.toggleMoreMenu()">🏪 <span data-i18n="tool.market">模板市场</span></button>
+          <button onclick="JCM.openDesignTools();JCM.toggleMoreMenu()">🎨 <span data-i18n="tool.design">设计工具</span></button>
+          <button onclick="JCM.showSnapshots();JCM.toggleMoreMenu()">📸 <span data-i18n="tool.snapshots">版本快照</span></button>
+          <button onclick="JCM.toggleHistory();JCM.toggleMoreMenu()">📜 <span data-i18n="app.history">操作历史</span></button>
+          <button onclick="JCM.toggleLayerPanel();JCM.toggleMoreMenu()">🗂️ <span data-i18n="tool.layers">图层管理</span></button>
+          <button onclick="JCM.toggleChangelog();JCM.toggleMoreMenu()">📝 <span data-i18n="app.changelog">更新日志</span></button>
+          <button onclick="JCM.switchLang();JCM.toggleMoreMenu()">🌐 <span data-i18n="tool.lang">切换语言</span></button>
           <a href="REAREYE_USAGE.md" target="_blank" onclick="JCM.toggleMoreMenu()">📱 REAREye 使用说明</a>
         </div>
       </div>
@@ -99,12 +99,12 @@
         <div class="config-header">
           <span class="tpl-icon" id="cfgIcon"></span>
           <div>
-            <h2 id="cfgTitle">配置</h2>
+            <h2 id="cfgTitle" data-i18n="cfg.tplConfig">配置</h2>
             <p id="cfgDesc">调整参数以自定义卡片</p>
           </div>
         </div>
         <div class="config-live-device-row">
-          <label>机型</label>
+          <label data-i18n="cfg.device">机型</label>
           <select id="cfgDeviceSelect">
             <option value="p2">Pro Max — 976×596</option>
             <option value="q200">Pro — 904×572</option>
@@ -118,7 +118,7 @@
         <div id="cfgContent"></div>
       </div>
       <div class="config-live-right">
-        <div class="config-live-preview-label"><span>📱</span> 实时预览</div>
+        <div class="config-live-preview-label"><span>📱</span> <span data-i18n="cfg.preview">实时预览</span></div>
         <div class="preview-phone config-preview-phone">
           <div class="preview-screen">
             <div class="preview-camera" id="cfgPreviewCamera"></div>
@@ -159,8 +159,8 @@
           <input type="checkbox" id="showCamera" checked> 摄像头遮挡区
         </label>
         <label class="check-label">
-          <input type="checkbox" id="showGrid" onchange="JCM.toggleGrid()"> 网格
-          <label class="check-label"><input type="checkbox" id="showThemeCompare" onchange="JCM.toggleThemeCompare()"> 双主题</label>
+          <input type="checkbox" id="showGrid" onchange="JCM.toggleGrid()"> <span data-i18n="preview.grid">网格</span>
+          <label class="check-label"><input type="checkbox" id="showThemeCompare" onchange="JCM.toggleThemeCompare()"> <span data-i18n="preview.themeCompare">双主题</span></label>
         </label>
         <div class="zoom-controls">
           <button onclick="JCM.zoomOut()" title="缩小">−</button>
@@ -212,14 +212,14 @@
             </div>
           </div>
           <div class="batch-export-bar">
-            <span style="font-size:11px;color:var(--text2)">批量导出：</span>
+            <span style="font-size:11px;color:var(--text2)" data-i18n="batch.title">批量导出：</span>
             <button class="btn btn-secondary" onclick="JCM.handleBatchExport()"><span class="btn-icon">📦</span> 全部机型 ZIP</button>
             <button class="btn btn-secondary" onclick="JCM.handleUniversalExport()"><span class="btn-icon">📱</span> 通用卡片</button>
             <button class="btn btn-secondary" onclick="JCM.toggleFullscreen()"><span class="btn-icon">⛶</span> 全屏预览</button>
             <button class="btn btn-secondary" onclick="JCM.triggerBuild()" style="color:var(--green)"><span class="btn-icon">🤖</span> 构建 APK</button>
           </div>
           <div class="batch-export-bar" style="margin-top:6px">
-            <span style="font-size:11px;color:var(--text2)">工具：</span>
+            <span style="font-size:11px;color:var(--text2)" data-i18n="tools.title">工具：</span>
             <button class="btn btn-secondary" onclick="JCM.openDesignTools()"><span class="btn-icon">🎨</span> 设计工具</button>
             <button class="btn btn-secondary" onclick="JCM.openBindingWizard()"><span class="btn-icon">🔗</span> 数据绑定</button>
             <button class="btn btn-secondary" onclick="JCM.runMamlLint()"><span class="btn-icon">✅</span> 语法检查</button>
@@ -227,7 +227,7 @@
             <button class="btn btn-secondary" onclick="JCM.runA11yCheck()"><span class="btn-icon">♿</span> 无障碍</button>
             <button class="btn btn-secondary" onclick="JCM.exportPDF()"><span class="btn-icon">📄</span> PDF</button>
           </div>
-          <button class="more-actions-btn" id="moreActionsBtn" onclick="JCM.toggleMoreActions()" style="display:none">⋯ 展开更多操作</button>
+          <button class="more-actions-btn" id="moreActionsBtn" onclick="JCM.toggleMoreActions()" style="display:none"><span data-i18n="more.expand">⋯ 展开更多操作</span></button>
         </div>
       </div>
     </section>
@@ -237,7 +237,7 @@
   <footer class="bottombar" role="contentinfo">
     <div class="bottombar-left">
       <button class="btn btn-back" id="btnBack" onclick="JCM.prevStep()" style="display:none" aria-label="返回上一步">
-        <span class="btn-icon" aria-hidden="true">←</span> 上一步
+        <span class="btn-icon" aria-hidden="true">←</span> <span data-i18n="btn.prev">上一步</span>
       </button>
     </div>
     <div class="bottombar-center">
@@ -246,9 +246,9 @@
       <div class="more-menu-wrap" style="position:relative">
         <button class="bottombar-undo-btn" onclick="JCM.toggleShareMenu()" title="分享/导出">📤</button>
         <div class="more-menu" id="shareMoreMenu" style="display:none;bottom:100%;top:auto;margin-bottom:4px;margin-top:0;left:50%;transform:translateX(-50%)">
-          <button onclick="JCM.handleExport();JCM.toggleShareMenu()">📦 导出 ZIP</button>
-          <button onclick="JCM.handleExportPNG();JCM.toggleShareMenu()">🖼 导出 PNG</button>
-          <button onclick="JCM.copyXML();JCM.toggleShareMenu()">📋 复制 XML</button>
+          <button onclick="JCM.handleExport();JCM.toggleShareMenu()">📦 <span data-i18n="preview.exportZip">导出 ZIP</span></button>
+          <button onclick="JCM.handleExportPNG();JCM.toggleShareMenu()">🖼 <span data-i18n="preview.exportPng">导出 PNG</span></button>
+          <button onclick="JCM.copyXML();JCM.toggleShareMenu()">📋 <span data-i18n="preview.copy">复制 XML</span></button>
           <button onclick="JCM.handleExportTemplate();JCM.toggleShareMenu()">💾 导出配置</button>
           <button onclick="JCM.handleImportTemplate();JCM.toggleShareMenu()">📂 导入配置</button>
           <button onclick="JCM.shareTemplate();JCM.toggleShareMenu()">🔗 分享链接</button>
@@ -258,14 +258,14 @@
     </div>
     <div class="bottombar-right">
       <button class="btn btn-primary" id="btnNext" onclick="JCM.nextStep()" aria-label="进入下一步">
-        下一步 <span class="btn-icon" aria-hidden="true">→</span>
+        <span data-i18n="btn.next">下一步</span> <span class="btn-icon" aria-hidden="true">→</span>
       </button>
     </div>
   </footer>
 <!-- Layer Panel -->
 <div class="layer-panel" id="layerPanel">
   <div class="layer-panel-header">
-    <span>📚 图层管理</span>
+    <span>📚 <span data-i18n="layer.title">图层管理</span></span>
     <button class="layer-panel-close" onclick="JCM.toggleLayerPanel()" aria-label="关闭图层面板">✕</button>
   </div>
   <div id="layerPanelList"></div>
