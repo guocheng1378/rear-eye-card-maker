@@ -529,6 +529,26 @@ PreviewRenderer.prototype.renderQuickSettings = function (c) {
   return html;
 };
 
+
+PreviewRenderer.prototype.renderVideoWallpaper = function (c) {
+  var bg = c.bgColor || '#000000';
+  var html = '<div style="position:absolute;inset:0;background:' + bg + '"></div>';
+  // Video placeholder with play icon
+  html += '<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:6px">';
+  html += '<div style="width:' + Math.round(48 * this.scale) + 'px;height:' + Math.round(48 * this.scale) + 'px;border-radius:50%;background:rgba(255,255,255,0.1);display:flex;align-items:center;justify-content:center;font-size:' + Math.round(24 * this.scale) + 'px">▶️</div>';
+  html += '<div style="font-size:' + Math.round(11 * this.scale) + 'px;color:rgba(255,255,255,0.4)">上传视频以预览</div>';
+  html += '</div>';
+  // Settings indicator
+  var settings = [];
+  if (c.loopMode === 'loop') settings.push('🔁 循环');
+  else if (c.loopMode === 'bounce') settings.push('↔️ 来回');
+  else settings.push('▶️ 单次');
+  if (c.volume > 0) settings.push('🔊 ' + c.volume + '%');
+  if (c.overlayEnable === 'true') settings.push('🎭 遮罩');
+  html += '<div style="position:absolute;left:8px;bottom:6px;font-size:' + Math.round(8 * this.scale) + 'px;color:rgba(255,255,255,0.3)">' + settings.join(' · ') + '</div>';
+  return html;
+};
+
 // ─── Render Template Preview (dispatch) ───────────────────────────
 export function renderTemplatePreview(device, showCam, tpl, cfg) {
   if (tpl.rawXml) {
@@ -551,8 +571,9 @@ export function renderTemplatePreview(device, showCam, tpl, cfg) {
     case 'ring':       return r.renderRing(cfg);
     case 'dashboard':  return r.renderDashboard(cfg);
     case 'image':      return r.renderImage(cfg);
-    case 'custom':     return r.renderCustom(cfg);
-    default:           return '';
+    case 'custom':          return r.renderCustom(cfg);
+    case 'video_wallpaper': return r.renderVideoWallpaper(cfg);
+    default:                return '';
   }
 }
 
