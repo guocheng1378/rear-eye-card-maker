@@ -32,6 +32,7 @@ import { openCommandPalette, isCommandPaletteOpen } from './command-palette.js';
 import { lintMAML, showLintResults, analyzePerformance, showPerfResults, checkAccessibility, showA11yResults } from './linter-tools.js';
 import { autoSnapshot, showSnapshotsModal } from './version-snapshots.js';
 import { showADBPush, exportGIF, exportPDF } from './export-adb.js';
+import { renderLayerPanel, toggleLayerPanel, isLayerPanelVisible, initLayerPanel } from './layer-panel.js';
 
 // re-export from export.js, transcode.js, storage.js (loaded as ES modules)
 import { exportZip, exportPNG, exportSVG, exportTemplateJSON, importTemplateJSON, importZip } from '../export.js';
@@ -466,6 +467,7 @@ function triggerBuild() {
 
 // ─── Event Setup ──────────────────────────────────────────────────
 var _autoPreview = debounce(function () {
+  if (isLayerPanelVisible()) renderLayerPanel();
   S.setDirty(true);
   if (getStep() === 1) renderLivePreview();
   if (getStep() === 2) renderPreview();
@@ -627,6 +629,7 @@ function setupEvents() {
     if (e.ctrlKey && e.key === 'z' && !e.shiftKey && !isInCodeEditor) { e.preventDefault(); var r = undo(); if (r && r.needsRerender) { renderConfig(getTemplateMAML); toast(r.message, 'success'); } }
     if (e.ctrlKey && (e.key === 'y' || (e.key === 'z' && e.shiftKey)) && !isInCodeEditor) { e.preventDefault(); var r2 = redo(); if (r2 && r2.needsRerender) { renderConfig(getTemplateMAML); toast(r2.message, 'success'); } }
     if (e.key === 'Delete' && S.selIdx >= 0) { e.preventDefault(); removeElement(S.selIdx); renderConfig(getTemplateMAML); }
+    if (e.ctrlKey && e.key === 'l') { e.preventDefault(); toggleLayerPanel(); return; }
     if (e.ctrlKey && e.key === 'd' && S.selIdx >= 0) {
       e.preventDefault(); captureState();
       var clone = JSON.parse(JSON.stringify(S.elements[S.selIdx])); clone.x += 10; clone.y += 10;
@@ -699,6 +702,13 @@ export function initUI() {
     renderConfig: function () { renderConfig(getTemplateMAML); },
   });
 
+  // Init layer panel
+  initLayerPanel({
+    renderConfig: function () { renderConfig(getTemplateMAML); },
+    renderPreview: renderPreview,
+    renderLivePreview: renderLivePreview,
+  });
+
   checkShareURL(stepCallbacks);
   requestAnimationFrame(function () { moveStepSlider(0); });
   window.addEventListener('resize', function () { moveStepSlider(getStep()); });
@@ -725,6 +735,8 @@ function checkLocalDraft() {
 // ─── Expose to JCM global (for HTML onclick handlers) ─────────────
 window.JCM = window.JCM || {};
 Object.assign(window.JCM, {
+  toggleLayerPanel: toggleLayerPanel,
+  renderLayerPanel: renderLayerPanel,
   goStep: function (n) { goStep(n, stepCallbacks); },
   nextStep: function () { goStep(getStep() + 1, stepCallbacks); },
   prevStep: function () { goStep(getStep() - 1, stepCallbacks); },
