@@ -368,8 +368,6 @@ select:focus:not(:focus-visible){
 .toast-item.fade-out{opacity:0;transform:translateY(-10px);transition:opacity .3s,transform .3s}
 @keyframes toast-in{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
 
-
-
 /* ─── Theme Toggle ─── */
 .theme-toggle{
   width:34px;height:34px;border-radius:50%;border:1px solid var(--border);
@@ -501,11 +499,6 @@ kbd{
 .zoom-controls .zoom-label{color:var(--text2);min-width:36px;text-align:center}
 
 /* ─── Batch Export ─── */
-.batch-export-bar{
-  display:flex;gap:8px;margin-top:12px;padding:10px 14px;
-  background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);
-}
-.batch-export-bar .btn{font-size:11px;padding:6px 12px}
 
 /* ─── Desktop ─── */
 @media(min-width:1200px){
@@ -834,9 +827,7 @@ kbd{
     flex-direction: column;
     align-items: center;
   }
-  .batch-export-bar {
-    flex-wrap: wrap;
-  }
+  
 }
 
 @media (max-width: 600px) {
@@ -1280,21 +1271,7 @@ kbd{
 
 /* ─── Simple Mode ────────────────────────────────────────────────── */
 /* 简洁模式: 手机端精简按钮，展开按钮 + 更多区域 */
-.preview-actions-extra {
-  display: contents;
-}
-.app.simple-mode .preview-actions-extra {
-  display: none;
-}
-.app.simple-mode .batch-export-bar {
-  display: none;
-}
-.app.simple-mode .preview-actions-extra.show {
-  display: contents;
-}
-.app.simple-mode .batch-export-bar.show {
-  display: flex;
-}
+
 /* 简洁模式切换按钮 */
 .mode-toggle-btn {
   font-size: 11px;
@@ -1323,37 +1300,15 @@ kbd{
   color: var(--accent2);
 }
 /* 展开/收起更多操作按钮 */
-.more-actions-btn {
-  font-size: 12px;
-  padding: 6px 14px;
-  border-radius: 8px;
-  border: 1px dashed var(--border);
-  background: transparent;
-  color: var(--text2);
-  cursor: pointer;
-  transition: var(--transition);
-  font-family: inherit;
-  width: 100%;
-  text-align: center;
-}
-.more-actions-btn:hover {
-  border-color: var(--accent);
-  color: var(--accent2);
-  background: var(--accent-glow);
-}
+
 /* 桌面端隐藏简洁模式按钮 */
 @media (min-width: 769px) {
   .mode-toggle-btn { display: none; }
 }
 /* 手机端: 简洁模式下预览操作行 */
 @media (max-width: 768px) {
-  .app.simple-mode .preview-actions {
-    gap: 8px;
-  }
-  .app.simple-mode .preview-actions .btn {
-    font-size: 12px;
-    padding: 7px 12px;
-  }
+  
+  
 }
 
 /* ─── Toolbar Responsive ──────────────────────────────────────── */

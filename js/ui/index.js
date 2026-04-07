@@ -1015,16 +1015,12 @@ document.addEventListener('click', function(e) {
   var menu = document.getElementById('moreMenu');
   var btn = document.getElementById('moreMenuBtn');
   if (menu && btn && !menu.contains(e.target) && e.target !== btn) menu.style.display = 'none';
-  // Close share menu
-  var shareMenu = document.getElementById('shareMoreMenu');
-  if (shareMenu && !shareMenu.parentElement.contains(e.target)) shareMenu.style.display = 'none';
+
 });
 
 Object.assign(window.JCM, {
   toggleLayerPanel: toggleLayerPanel,
   toggleMoreMenu: toggleMoreMenu,
-  toggleSimpleMode: toggleSimpleMode,
-  toggleMoreActions: toggleMoreActions,
   undo: function () {
     var r = undo();
     if (r && r.needsRerender) { renderConfig(getTemplateMAML); toast(r.message, 'success'); }
@@ -1034,10 +1030,6 @@ Object.assign(window.JCM, {
     var r = redo();
     if (r && r.needsRerender) { renderConfig(getTemplateMAML); toast(r.message, 'success'); }
     updateUndoRedoState();
-  },
-  toggleShareMenu: function () {
-    var menu = document.getElementById('shareMoreMenu');
-    if (menu) menu.style.display = menu.style.display === 'none' ? '' : 'none';
   },
   renderLayerPanel: renderLayerPanel,
   goStep: function (n) { goStep(n, stepCallbacks); },
