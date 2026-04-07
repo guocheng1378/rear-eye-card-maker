@@ -2,7 +2,7 @@
 // 浏览/导入社区分享的模板，使用 GitHub Gist 作为后端
 
 import * as S from '../state.js';
-import { TEMPLATES } from './templates/index.js';
+import { TEMPLATES } from '../templates/index.js';
 import { resetHistory } from '../history.js';
 import { toast } from './toast.js';
 import { escHtml } from '../utils.js';
