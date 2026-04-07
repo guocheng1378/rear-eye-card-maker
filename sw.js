@@ -1,4 +1,4 @@
-const CACHE_NAME = 'jcm-v9';
+const CACHE_NAME = 'jcm-v10';
 const ASSETS = [
   './',
   './index.html',
