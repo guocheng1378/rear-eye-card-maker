@@ -42,7 +42,12 @@ export function goStep(n, callbacks) {
     btnNext.innerHTML = n === 0 ? '下一步 <span class="btn-icon">→</span>' : '预览 & 导出 <span class="btn-icon">→</span>';
   }
 
-  if (n === 1) { callbacks.renderConfig(); syncDeviceSelect('toCfg'); callbacks.renderLivePreview(); }
+  if (n === 1) { 
+    // Hide preview panel on mobile
+    var clr = document.querySelector('.config-live-right');
+    if (clr) clr.style.display = window.innerWidth <= 900 ? 'none' : '';
+    callbacks.renderConfig(); syncDeviceSelect('toCfg'); callbacks.renderLivePreview(); 
+  }
   if (n === 2) { syncDeviceSelect('toPreview'); callbacks.renderPreview(); }
 
   if (n !== 2) cleanupVideos('previewContent');
