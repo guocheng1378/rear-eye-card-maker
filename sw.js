@@ -1,4 +1,4 @@
-const CACHE_NAME = 'jcm-v11';
+const CACHE_NAME = 'jcm-v12';
 // Core assets precached on install (lightweight)
 const ASSETS = [
   './',
@@ -21,7 +21,12 @@ const ASSETS = [
 ];
 
 self.addEventListener('install', e => {
-  e.waitUntil(caches.open(CACHE_NAME).then(c => c.addAll(ASSETS)).then(() => self.skipWaiting()));
+  e.waitUntil(
+    caches.keys().then(keys =>
+      Promise.all(keys.map(k => caches.delete(k)))
+    ).then(() => caches.open(CACHE_NAME).then(c => c.addAll(ASSETS)))
+    .then(() => self.skipWaiting())
+  );
 });
 
 self.addEventListener('activate', e => {
