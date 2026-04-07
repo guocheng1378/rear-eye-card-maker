@@ -505,6 +505,10 @@ kbd{
   .page-config-live{flex-direction:column}
   .config-live-left{padding:16px;border-right:none;max-height:none;overflow-y:auto;flex:1}
   .config-live-right{display:none}
+  /* Category tabs: horizontal scroll on mobile */
+  .tpl-categories{flex-wrap:nowrap;overflow-x:auto;padding:0 16px 10px;gap:6px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+  .tpl-categories::-webkit-scrollbar{display:none}
+  .tpl-cat{flex-shrink:0}
 }
 
 /* ─── Template Search ─── */

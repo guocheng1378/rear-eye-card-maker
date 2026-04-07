@@ -376,6 +376,159 @@ PreviewRenderer.prototype.renderElements = function (elements, files, selIdx) {
   }).join('');
 };
 
+
+// ─── rawXml Template Previews ────────────────────────────────────
+PreviewRenderer.prototype.renderLyrics = function (c) {
+  var mode = c.lyricMode || 'original';
+  var lx = this.camW + 14;
+  var sw = PREVIEW_W - this.camW - 28;
+  var songS = Math.round((c.songSize || 26) * this.scale);
+  var lyricS = Math.round((c.lyricSize || 22) * this.scale);
+  var subS = Math.max(10, lyricS - 4);
+  var demoLyric = '我已经爱上你\n疯狂地爱上你';
+  var demoTrans = 'I've fallen for you\nCrazy in love with you';
+  var demoRom = 'Wo yi jing ai shang ni';
+
+  var html = this.bg(c.bgColor, '');
+  // Accent bar
+  html += '<div style="position:absolute;left:' + (this.camW + 2) + 'px;top:0;width:2px;height:100%;background:' + (c.accentColor || '#6c5ce7') + ';opacity:0.3"></div>';
+  // Song info
+  html += '<div style="position:absolute;left:' + lx + 'px;top:14px;font-size:' + songS + 'px;color:' + (c.songColor || '#fff') + ';font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:' + sw + 'px">光年之外</div>';
+  html += '<div style="position:absolute;left:' + lx + 'px;top:' + (14 + songS + 4) + 'px;font-size:' + Math.round(10 * this.scale) + 'px;color:' + (c.artistColor || '#888') + '">邓紫棋</div>';
+  // Divider
+  html += '<div style="position:absolute;left:' + lx + 'px;top:' + (14 + songS + 20) + 'px;width:' + sw + 'px;height:1px;background:' + (c.accentColor || '#6c5ce7') + ';opacity:0.2"></div>';
+  // Lyrics
+  var lyY = 14 + songS + 32;
+  if (mode === 'original' || mode === 'translation' || mode === 'romanization') {
+    var text = mode === 'translation' ? demoTrans.replace('\n', '<br>') : mode === 'romanization' ? demoRom : demoLyric.replace('\n', '<br>');
+    html += '<div style="position:absolute;left:' + lx + 'px;top:' + lyY + 'px;font-size:' + lyricS + 'px;color:' + (c.lyricColor || '#fff') + ';line-height:1.6;max-width:' + sw + 'px">' + text + '</div>';
+  } else if (mode === 'dual') {
+    html += '<div style="position:absolute;left:' + lx + 'px;top:' + lyY + 'px;font-size:' + lyricS + 'px;color:' + (c.lyricColor || '#fff') + ';line-height:1.4;max-width:' + sw + 'px">' + demoLyric.replace('\n', '<br>') + '</div>';
+    html += '<div style="position:absolute;left:' + lx + 'px;top:' + (lyY + lyricS * 1.8) + 'px;font-size:' + subS + 'px;color:' + (c.lyricSubColor || '#777') + ';line-height:1.4;max-width:' + sw + 'px">' + demoTrans.replace('\n', '<br>') + '</div>';
+  } else {
+    html += '<div style="position:absolute;left:' + lx + 'px;top:' + lyY + 'px;font-size:' + lyricS + 'px;color:' + (c.lyricColor || '#fff') + ';line-height:1.3;max-width:' + sw + 'px">' + demoLyric.replace('\n', '<br>') + '</div>';
+    html += '<div style="position:absolute;left:' + lx + 'px;top:' + (lyY + lyricS * 1.8) + 'px;font-size:' + subS + 'px;color:' + (c.lyricSubColor || '#777') + ';line-height:1.3;max-width:' + sw + 'px">' + demoTrans.replace('\n', '<br>') + '</div>';
+    html += '<div style="position:absolute;left:' + lx + 'px;top:' + (lyY + lyricS * 1.8 + subS * 1.8 + 4) + 'px;font-size:' + (subS - 2) + 'px;color:' + (c.lyricDimColor || '#444') + ';line-height:1.3;max-width:' + sw + 'px">' + demoRom + '</div>';
+  }
+  // Play indicator
+  html += '<div style="position:absolute;left:' + lx + 'px;bottom:10px;display:flex;align-items:center;gap:4px"><div style="width:5px;height:5px;border-radius:50%;background:' + (c.accentColor || '#6c5ce7') + '"></div><span style="font-size:' + Math.round(9 * this.scale) + 'px;color:' + (c.artistColor || '#888') + '">正在播放</span></div>';
+  return html;
+};
+
+PreviewRenderer.prototype.renderHealth = function (c) {
+  var lx = this.camW + 12;
+  var sw = PREVIEW_W - this.camW - 24;
+  var accent = c.accentColor || '#e74c3c';
+  var items = [];
+  if (c.showHeartRate !== 'false') items.push({ icon: '❤️', label: '心率', value: '72', unit: 'bpm', color: accent });
+  if (c.showBloodOxygen !== 'false') items.push({ icon: '🫁', label: '血氧', value: '98', unit: '%', color: '#0984e3' });
+  if (c.showSteps !== 'false') items.push({ icon: '🚶', label: '步数', value: '6,542', unit: '步', color: '#00b894' });
+  if (c.showSleep !== 'false') items.push({ icon: '😴', label: '睡眠', value: '7h23', unit: '', color: '#6c5ce7' });
+  if (items.length === 0) items.push({ icon: '❤️', label: '心率', value: '72', unit: 'bpm', color: accent });
+
+  var html = this.bg(c.bgColor || '#0a1628', '');
+  html += '<div style="position:absolute;left:' + lx + 'px;top:12px;font-size:' + Math.round(14 * this.scale) + 'px;color:' + (c.titleColor || '#fff') + ';font-weight:600">健康数据</div>';
+  var cols = Math.min(items.length, 2);
+  var cellW = sw / cols;
+  items.forEach(function (item, i) {
+    var col = i % cols, row = Math.floor(i / cols);
+    var cx = lx + col * cellW;
+    var cy = 38 + row * Math.round(64 * this.scale);
+    html += '<div style="position:absolute;left:' + cx + 'px;top:' + cy + 'px">';
+    html += '<div style="font-size:' + Math.round(20 * this.scale) + 'px">' + item.icon + '</div>';
+    html += '<div style="font-size:' + Math.round(28 * this.scale) + 'px;color:' + (c.valueColor || '#fff') + ';font-weight:700;margin-top:2px">' + item.value + '</div>';
+    html += '<div style="font-size:' + Math.round(10 * this.scale) + 'px;color:' + (c.labelColor || '#888') + '">' + item.label + (item.unit ? ' ' + item.unit : '') + '</div>';
+    html += '</div>';
+  }.bind(this));
+  html += '<div style="position:absolute;right:8px;bottom:6px;font-size:8px;color:' + (c.labelColor || '#888') + ';opacity:0.3">需真实设备数据</div>';
+  return html;
+};
+
+PreviewRenderer.prototype.renderSchedule = function (c) {
+  var lx = this.camW + 12;
+  var sw = PREVIEW_W - this.camW - 24;
+  var events = ['09:00 团队会议', '14:30 代码评审', '17:00 健身'];
+  var maxE = c.maxEvents || 3;
+  var html = this.bg(c.bgColor || '#0d1117', '');
+  // Date
+  html += '<div style="position:absolute;left:' + lx + 'px;top:12px;font-size:' + Math.round(12 * this.scale) + 'px;color:' + (c.dateColor || '#fff') + ';opacity:0.6">' + this.fmtDate(new Date(), 'MM/dd EEEE') + '</div>';
+  html += '<div style="position:absolute;left:' + lx + 'px;top:28px;font-size:' + Math.round(18 * this.scale) + 'px;color:' + (c.accentColor || '#6c5ce7') + ';font-weight:600">今日日程</div>';
+  // Divider
+  html += '<div style="position:absolute;left:' + lx + 'px;top:52px;width:' + sw + 'px;height:1px;background:' + (c.accentColor || '#6c5ce7') + ';opacity:0.15"></div>';
+  events.slice(0, maxE).forEach(function (ev, i) {
+    var parts = ev.split(' ');
+    var y = 62 + i * Math.round(36 * this.scale);
+    html += '<div style="position:absolute;left:' + lx + 'px;top:' + y + 'px">';
+    html += '<div style="width:4px;height:4px;border-radius:50%;background:' + (c.dotColor || '#00b894') + ';display:inline-block;margin-right:6px;vertical-align:middle"></div>';
+    if (c.showTime !== 'false') {
+      html += '<span style="font-size:' + Math.round(11 * this.scale) + 'px;color:' + (c.eventTimeColor || '#888') + '">' + parts[0] + '</span> ';
+    }
+    html += '<span style="font-size:' + Math.round(12 * this.scale) + 'px;color:' + (c.eventTitleColor || '#e0e0e0') + '">' + (parts.slice(1).join(' ') || parts[0]) + '</span>';
+    html += '</div>';
+  }.bind(this));
+  return html;
+};
+
+PreviewRenderer.prototype.renderNotification = function (c) {
+  var lx = this.camW + 12;
+  var sw = PREVIEW_W - this.camW - 24;
+  var notifs = [
+    { app: '微信', title: '张三', body: '晚上一起吃饭？', time: '12:30' },
+    { app: '淘宝', title: '物流更新', body: '您的包裹已到达驿站', time: '11:15' },
+    { app: '日历', title: '提醒', body: '30分钟后有会议', time: '08:50' },
+  ];
+  var maxN = c.maxNotifs || 3;
+  var html = this.bg(c.bgColor || '#0a0a0a', '');
+  html += '<div style="position:absolute;left:' + lx + 'px;top:12px;font-size:' + Math.round(14 * this.scale) + 'px;color:' + (c.titleColor || '#fff') + ';font-weight:600">通知</div>';
+  notifs.slice(0, maxN).forEach(function (n, i) {
+    var y = 34 + i * Math.round(52 * this.scale);
+    html += '<div style="position:absolute;left:' + lx + 'px;top:' + y + 'px;max-width:' + sw + 'px">';
+    if (c.showApp !== 'false') {
+      html += '<span style="font-size:' + Math.round(9 * this.scale) + 'px;color:' + (c.appColor || '#6c5ce7') + '">' + n.app + '</span>';
+    }
+    if (c.showTime !== 'false') {
+      html += '<span style="font-size:' + Math.round(9 * this.scale) + 'px;color:' + (c.timeColor || '#555') + ';float:right">' + n.time + '</span>';
+    }
+    html += '<div style="font-size:' + Math.round(12 * this.scale) + 'px;color:' + (c.titleColor || '#fff') + ';font-weight:500;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:' + sw + 'px">' + n.title + '</div>';
+    html += '<div style="font-size:' + Math.round(10 * this.scale) + 'px;color:' + (c.bodyColor || '#aaa') + ';white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:' + sw + 'px">' + n.body + '</div>';
+    html += '</div>';
+  }.bind(this));
+  return html;
+};
+
+PreviewRenderer.prototype.renderQuickSettings = function (c) {
+  var lx = this.camW + 14;
+  var sw = PREVIEW_W - this.camW - 28;
+  var active = c.activeColor || '#6c5ce7';
+  var inactive = c.inactiveColor || '#333';
+  var toggles = [];
+  if (c.showWifi !== 'false') toggles.push({ icon: '📶', label: 'WiFi', on: true });
+  if (c.showBluetooth !== 'false') toggles.push({ icon: '🔵', label: '蓝牙', on: true });
+  if (c.showBrightness !== 'false') toggles.push({ icon: '☀️', label: '亮度', on: false });
+  if (c.showSilent !== 'false') toggles.push({ icon: '🔇', label: '静音', on: false });
+  if (c.showNfc !== 'false') toggles.push({ icon: '📡', label: 'NFC', on: true });
+  if (c.showFlashlight !== 'false') toggles.push({ icon: '🔦', label: '手电', on: false });
+  if (toggles.length === 0) toggles.push({ icon: '📶', label: 'WiFi', on: true });
+
+  var html = this.bg(c.bgColor || '#0a0e1a', '');
+  html += '<div style="position:absolute;left:' + lx + 'px;top:12px;font-size:' + Math.round(14 * this.scale) + 'px;color:' + (c.titleColor || '#fff') + ';font-weight:600">快捷设置</div>';
+  var cols = Math.min(toggles.length, 3);
+  var gap = 8;
+  var cellW = (sw - gap * (cols - 1)) / cols;
+  var iconSz = Math.round((c.iconSize || 40) * this.scale * 0.6);
+  toggles.forEach(function (t, i) {
+    var col = i % cols, row = Math.floor(i / cols);
+    var cx = lx + col * (cellW + gap);
+    var cy = 36 + row * Math.round(60 * this.scale);
+    var bg = t.on ? active : inactive;
+    html += '<div style="position:absolute;left:' + cx + 'px;top:' + cy + 'px;width:' + cellW + 'px;text-align:center">';
+    html += '<div style="width:' + iconSz + 'px;height:' + iconSz + 'px;border-radius:50%;background:' + bg + ';display:flex;align-items:center;justify-content:center;margin:0 auto;font-size:' + Math.round(iconSz * 0.55) + 'px">' + t.icon + '</div>';
+    html += '<div style="font-size:' + Math.round(9 * this.scale) + 'px;color:' + (c.labelColor || '#888') + ';margin-top:3px">' + t.label + '</div>';
+    html += '</div>';
+  }.bind(this));
+  return html;
+};
+
 // ─── Render Template Preview (dispatch) ───────────────────────────
 export function renderTemplatePreview(device, showCam, tpl, cfg) {
   if (tpl.rawXml) {
@@ -404,6 +557,15 @@ export function renderTemplatePreview(device, showCam, tpl, cfg) {
 }
 
 function renderRealDevicePreview(device, showCam, tpl, cfg) {
+  var r = new PreviewRenderer(device, showCam);
+  switch (tpl.id) {
+    case 'lyrics':        return r.renderLyrics(cfg);
+    case 'health':        return r.renderHealth(cfg);
+    case 'schedule':      return r.renderSchedule(cfg);
+    case 'notification':  return r.renderNotification(cfg);
+    case 'quick_settings':return r.renderQuickSettings(cfg);
+  }
+  // Fallback for weather_real / music_real
   var camW = showCam ? 420 * device.cameraZoneRatio : 0;
   var bg = cfg.bgColor || '#0a1628';
   var dc = cfg.descColor || '#888888';
