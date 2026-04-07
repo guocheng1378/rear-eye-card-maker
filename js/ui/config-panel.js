@@ -51,6 +51,7 @@ export function generateTplThumbnail(tpl) {
 }
 
 export function renderTplGrid() {
+  _thumbCache = {}; // clear cache to pick up config changes
   var favs = getFavorites();
   var sorted = TEMPLATES.slice().sort(function (a, b) {
     var aFav = favs.indexOf(a.id) >= 0 ? 0 : 1;

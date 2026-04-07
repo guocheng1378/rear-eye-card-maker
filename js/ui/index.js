@@ -440,8 +440,27 @@ function saveDraftLocal() {
 }
 
 // ─── Build APK ────────────────────────────────────────────────────
-function _encodeToken(t) { try { return btoa(unescape(encodeURIComponent(t))); } catch (e) { return ''; } }
-function _decodeToken(t) { try { return decodeURIComponent(escape(atob(t))); } catch (e) { return ''; } }
+// Simple XOR obfuscation (not real crypto, but prevents casual localStorage snooping)
+var _TOKEN_KEY = navigator.userAgent.length + '_' + screen.width + 'x' + screen.height;
+function _encodeToken(t) {
+  try {
+    var encoded = '';
+    for (var i = 0; i < t.length; i++) {
+      encoded += String.fromCharCode(t.charCodeAt(i) ^ _TOKEN_KEY.charCodeAt(i % _TOKEN_KEY.length));
+    }
+    return btoa(encoded);
+  } catch (e) { return ''; }
+}
+function _decodeToken(t) {
+  try {
+    var decoded = atob(t);
+    var result = '';
+    for (var i = 0; i < decoded.length; i++) {
+      result += String.fromCharCode(decoded.charCodeAt(i) ^ _TOKEN_KEY.charCodeAt(i % _TOKEN_KEY.length));
+    }
+    return result;
+  } catch (e) { return ''; }
+}
 
 function triggerBuild() {
   var raw = localStorage.getItem('jcm-gh-token');

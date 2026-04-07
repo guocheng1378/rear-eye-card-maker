@@ -497,7 +497,7 @@ kbd{
   .step-tab{padding:6px 10px}
   .step-tab .step-label{display:none}
   .page-tpl,.page-preview{padding:20px 16px}
-  .tpl-grid{grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px}
+  .tpl-grid{grid-template-columns:repeat(2,1fr);gap:10px}
   .config-grid{grid-template-columns:1fr}
   .preview-layout{grid-template-columns:1fr}
   .preview-phone{width:320px;height:192px}
@@ -513,11 +513,19 @@ kbd{
 
 /* ─── Template Search ─── */
 .tpl-search { padding: 0 32px 10px; }
+.tpl-search { position: relative; }
 .tpl-search input {
-  width: 100%; padding: 10px 16px;
+  width: 100%; padding: 10px 16px 10px 38px;
   background: var(--surface2); border: 1px solid var(--border);
   border-radius: var(--radius-sm); color: var(--text);
   font-size: 14px; outline: none; transition: var(--transition);
+}
+.tpl-search::before {
+  content: '';
+  position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+  width: 14px; height: 14px;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cline x1='21' y1='21' x2='16.65' y2='16.65'/%3E%3C/svg%3E") center/contain no-repeat;
+  pointer-events: none;
 }
 .tpl-search input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
 
