@@ -32,7 +32,7 @@ function getElementLabel(el, idx) {
   return TYPE_LABELS[el.type] || el.type;
 }
 
-export export function renderLayerPanel(deviceOverride) {
+export function renderLayerPanel(deviceOverride) {
   var container = document.getElementById('layerPanelList');
   if (!container) return;
 
