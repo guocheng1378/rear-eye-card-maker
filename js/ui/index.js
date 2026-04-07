@@ -27,6 +27,8 @@ import { openMarketModal } from './template-market.js';
 import { showQRModal } from './qr-share.js';
 import { t, getLang, setLang, getAvailableLangs, applyI18n } from '../i18n.js';
 import { openDesignTools } from './design-tools.js';
+import { openSnippetsModal } from './snippets.js';
+import { openBatchOpsModal, openSchemeImportModal } from './batch-ops.js';
 import { openBindingWizard } from './binding-wizard.js';
 import { openCommandPalette, isCommandPaletteOpen } from './command-palette.js';
 import { lintMAML, showLintResults, analyzePerformance, showPerfResults, checkAccessibility, showA11yResults } from './linter-tools.js';
@@ -1109,6 +1111,9 @@ Object.assign(window.JCM, {
     });
   },
   openDesignTools: function (tab) { openDesignTools(tab); },
+  openSnippets: function () { openSnippetsModal(stepCallbacks); },
+  openBatchOps: function () { openBatchOpsModal(stepCallbacks); },
+  openSchemeImport: function () { openSchemeImportModal(stepCallbacks); },
   openBindingWizard: function () { openBindingWizard(); },
   openCommandPalette: function () { openCommandPalette(JCM); },
   runMamlLint: function () {
