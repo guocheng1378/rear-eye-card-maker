@@ -1000,8 +1000,7 @@ function initSimpleMode() {
   var saved = null;
   try { saved = localStorage.getItem('jcm-simple-mode'); } catch(e) {}
   // Default to simple on mobile
-  var isMobile = window.innerWidth <= 768;
-  var isSimple = saved !== null ? saved === '1' : isMobile;
+  var isSimple = saved !== null ? saved === '1' : true;
   if (isSimple) {
     var app = document.querySelector('.app');
     var btn = document.getElementById('modeToggleBtn');

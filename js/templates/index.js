@@ -37,19 +37,14 @@ export const TEMPLATES = [
 
 export const TPL_CATEGORIES = [
   { id: 'all', label: '全部' },
-  { id: 'time', label: '⏰ 时间' },
-  { id: 'info', label: '📊 信息' },
-  { id: 'media', label: '🎨 媒体' },
+  { id: 'general', label: '🎨 通用' },
   { id: 'device', label: '📱 设备' },
-  { id: 'custom', label: '🛠️ 自定义' },
 ];
 
 export const TPL_CATEGORY_MAP = {
-  clock: 'time', dualclock: 'time', countdown: 'time',
-  quote: 'info', status: 'info', weather: 'info', steps: 'info',
-  calendar: 'info', dailyquote: 'info', dashboard: 'info',
-  battery: 'info', ring: 'info',
-  music: 'media', gradient: 'media', image: 'media', lyrics: 'media', video_wallpaper: 'media', carousel: 'media',
-  custom: 'custom',
+  clock: 'general', quote: 'general', battery: 'general', status: 'general', countdown: 'general',
+  music: 'general', gradient: 'general', weather: 'general', steps: 'general',
+  calendar: 'general', dualclock: 'general', dailyquote: 'general', ring: 'general', dashboard: 'general',
+  image: 'general', custom: 'general', lyrics: 'general', video_wallpaper: 'general', carousel: 'general', composite: 'general',
   weather_real: 'device', music_real: 'device', health: 'device', schedule: 'device', notification: 'device', quick_settings: 'device',
 };
