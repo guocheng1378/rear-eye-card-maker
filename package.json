@@ -1,0 +1,9 @@
+{
+  "name": "rear-eye-card-maker",
+  "version": "4.0.0",
+  "private": true,
+  "scripts": {
+    "build": "node build.js",
+    "dev": "npx serve ."
+  }
+}

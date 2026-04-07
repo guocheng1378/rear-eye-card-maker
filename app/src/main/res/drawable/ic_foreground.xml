@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Card outline - rounded rectangle -->
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#ffffff"
+        android:strokeWidth="2.5"
+        android:pathData="M30,32 L78,32 Q82,32 82,36 L82,72 Q82,76 78,76 L30,76 Q26,76 26,72 L26,36 Q26,32 30,32 Z" />
+    <!-- Single accent dot -->
+    <path
+        android:fillColor="#ffffff"
+        android:pathData="M34,42 m-3,0 a3,3 0 1,1 6,0 a3,3 0 1,1 -6,0" />
+    <!-- Long line -->
+    <path
+        android:fillColor="#ffffff"
+        android:strokeWidth="0"
+        android:pathData="M42,42 L74,42 L74,45 L42,45 Z" />
+    <!-- Medium line -->
+    <path
+        android:fillColor="#ffffff"
+        android:strokeWidth="0"
+        android:pathData="M34,53 L64,53 L64,56 L34,56 Z" />
+    <!-- Short line -->
+    <path
+        android:fillColor="#ffffff"
+        android:strokeWidth="0"
+        android:pathData="M34,63 L54,63 L54,66 L34,66 Z" />
+</vector>

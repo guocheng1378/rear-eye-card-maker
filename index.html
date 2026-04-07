@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>REAREye 卡片制作器</title>
+<meta name="description" content="为小米背屏（SubScreen）制作 MAML 卡片模板的免费在线工具。支持 15+ 预设模板，自定义元素，一键导出 ZIP。">
+<meta property="og:title" content="REAREye 卡片制作器">
+<meta property="og:description" content="为小米背屏制作 MAML 卡片模板的免费在线工具">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://guocheng1378.github.io/rear-eye-card-maker/">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="REAREye 卡片制作器">
+<meta name="twitter:description" content="为小米背屏制作 MAML 卡片模板的免费在线工具">
+<script src="js/early-init.js"></script>
+<link rel="stylesheet" href="css/style.css">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#6c5ce7">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' blob: data:; script-src 'self' 'unsafe-inline' https://unpkg.com/@ffmpeg/umd@0.12.10/ https://unpkg.com/@ffmpeg/core@0.12.6/; style-src 'self' 'unsafe-inline'; img-src 'self' blob: data: https:; media-src 'self' blob: data:; connect-src 'self' https://api.github.com https://unpkg.com/@ffmpeg/;">
+</head>
+<body>
+
+<input type="file" id="fileImagePick" accept="image/*" style="display:none">
+<input type="file" id="fileVideoPick" accept="video/*" style="display:none">
+
+<div class="app" role="application" aria-label="REAREye 卡片制作器">
+  <!-- Top Bar -->
+  <header class="topbar" role="banner">
+    <div class="topbar-left">
+    </div>
+    <nav class="topbar-right" aria-label="工具栏">
+      <button class="theme-toggle" id="themeToggle" onclick="JCM.toggleTheme()" title="切换主题" aria-label="切换亮色/暗色主题">🌙</button>
+      <button class="theme-toggle" id="libraryBtn" onclick="JCM.openLibrary()" title="我的卡片库" aria-label="我的卡片库">📚</button>
+      <button class="theme-toggle" id="marketBtn" onclick="JCM.openMarket()" title="模板市场" aria-label="模板市场">🏪</button>
+      <button class="theme-toggle" id="designBtn" onclick="JCM.openDesignTools()" title="设计工具" aria-label="设计工具">🎨</button>
+      <button class="theme-toggle" id="snapshotsBtn" onclick="JCM.showSnapshots()" title="版本快照" aria-label="版本快照">📸</button>
+      <button class="theme-toggle" id="helpBtn" onclick="JCM.toggleHelp()" title="快捷键帮助 (Ctrl+K)" aria-label="快捷键帮助">⌨️</button>
+      <button class="theme-toggle" id="historyBtn" onclick="JCM.toggleHistory()" title="操作历史" aria-label="操作历史">📜</button>
+      <button class="theme-toggle" id="changelogBtn" onclick="JCM.toggleChangelog()" title="更新日志" aria-label="更新日志">📝</button>
+      <button class="lang-switch" id="langSwitchBtn" onclick="JCM.switchLang()" title="切换语言">EN</button>
+      <a class="theme-toggle github-link" href="https://github.com/guocheng1378/rear-eye-card-maker" target="_blank" title="GitHub">
+        <svg viewBox="0 0 16 16" width="18" height="18" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+      </a>
+    </nav>
+  </header>
+  <!-- Step Tabs -->
+  <nav class="stepper" aria-label="制作步骤">
+    <div class="steps" id="stepIndicator" role="tablist">
+      <div class="step-tab active" data-step="0" onclick="JCM.goStep(0)" role="tab" aria-selected="true" aria-controls="page0" tabindex="0">
+        <span class="step-num" aria-hidden="true">1</span>
+        <span class="step-label">选择模板</span>
+      </div>
+      <div class="step-tab" data-step="1" onclick="JCM.goStep(1)" role="tab" aria-selected="false" aria-controls="page1" tabindex="0">
+        <span class="step-num" aria-hidden="true">2</span>
+        <span class="step-label">配置参数</span>
+      </div>
+      <div class="step-tab" data-step="2" onclick="JCM.goStep(2)" role="tab" aria-selected="false" aria-controls="page2" tabindex="0">
+        <span class="step-num" aria-hidden="true">3</span>
+        <span class="step-label">预览导出</span>
+      </div>
+      <div class="step-slider" id="stepSlider"></div>
+    </div>
+  </nav>
+
+  <!-- Content -->
+  <main class="content" role="main">
+    <!-- Page 1: Template Selection -->
+    <section class="page page-tpl active" id="page0" role="tabpanel" aria-label="选择模板">
+      <div class="page-title">选择卡片模板</div>
+      <div class="page-subtitle">从预设模板开始，或选择自定义从零创建</div>
+      <div class="tpl-categories" id="tplCategories"></div>
+      <div class="tpl-search"><input type="text" id="tplSearch" placeholder="🔍 搜索模板..." oninput="JCM.filterTemplates(this.value)"></div>
+      <div class="tpl-grid" id="tplGrid" role="list" aria-label="模板列表"></div>
+    </section>
+
+    <!-- Page 2: Configuration with Live Preview -->
+    <section class="page page-config-live" id="page1" role="tabpanel" aria-label="配置参数">
+      <div class="config-live-left">
+        <div class="config-header">
+          <span class="tpl-icon" id="cfgIcon"></span>
+          <div>
+            <h2 id="cfgTitle">配置</h2>
+            <p id="cfgDesc">调整参数以自定义卡片</p>
+          </div>
+        </div>
+        <div class="config-live-device-row">
+          <label>机型</label>
+          <select id="cfgDeviceSelect">
+            <option value="p2">Pro Max — 976×596</option>
+            <option value="q200">Pro — 904×572</option>
+            <option value="q100">标准版 — 840×520</option>
+            <option value="ultra">Ultra — 1020×620</option>
+          </select>
+          <label class="check-label">
+            <input type="checkbox" id="cfgShowCamera" checked> 摄像头
+          </label>
+        </div>
+        <div id="cfgContent"></div>
+      </div>
+      <div class="config-live-right">
+        <div class="config-live-preview-label"><span>📱</span> 实时预览</div>
+        <div class="preview-phone config-preview-phone">
+          <div class="preview-screen">
+            <div class="preview-camera" id="cfgPreviewCamera"></div>
+            <div class="preview-content" id="cfgPreviewContent">
+              <div class="preview-placeholder">
+                <span>📱</span>
+                <p>修改参数即可实时预览</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="preview-device-label" id="cfgDeviceLabel">Pro Max — 976 × 596</div>
+        <div class="cfg-zoom-controls">
+          <button class="cfg-zoom-btn" onclick="JCM.cfgZoomOut()">−</button>
+          <span class="cfg-zoom-label" id="cfgZoomLabel">100%</span>
+          <button class="cfg-zoom-btn" onclick="JCM.cfgZoomIn()">+</button>
+          <button class="cfg-zoom-btn" onclick="JCM.cfgZoomReset()" style="font-size:11px;width:auto;padding:0 8px">重置</button>
+        </div>
+        <div class="config-live-export-row">
+          <button class="btn btn-secondary" onclick="JCM.goStep(2)"><span class="btn-icon">🔍</span> 全屏预览</button>
+          <button class="btn btn-secondary" onclick="JCM.saveToLibrary()" title="保存到卡片库"><span class="btn-icon">📚</span> 保存到库</button>
+          <button class="btn btn-export" onclick="JCM.handleExport()"><span class="btn-icon">📦</span> 导出 ZIP</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Page 3: Preview & Export -->
+    <section class="page page-preview" id="page2" role="tabpanel" aria-label="预览导出">
+      <div class="device-row">
+        <label>机型</label>
+        <select id="deviceSelect">
+          <option value="p2">Pro Max — 976×596</option>
+          <option value="q200">Pro — 904×572</option>
+          <option value="q100">标准版 — 840×520</option>
+          <option value="ultra">Ultra — 1020×620</option>
+        </select>
+        <label class="check-label">
+          <input type="checkbox" id="showCamera" checked> 摄像头遮挡区
+        </label>
+        <label class="check-label">
+          <input type="checkbox" id="showGrid" onchange="JCM.toggleGrid()"> 网格
+          <label class="check-label"><input type="checkbox" id="showThemeCompare" onchange="JCM.toggleThemeCompare()"> 双主题</label>
+        </label>
+        <div class="zoom-controls">
+          <button onclick="JCM.zoomOut()" title="缩小">−</button>
+          <span class="zoom-label" id="zoomLabel">100%</span>
+          <button onclick="JCM.zoomIn()" title="放大">+</button>
+          <button onclick="JCM.zoomReset()" title="重置" style="font-size:11px">↺</button>
+        </div>
+      </div>
+      <div class="preview-layout">
+        <div class="preview-phone-wrap">
+          <div class="preview-phone">
+            <div class="preview-screen">
+              <div class="preview-grid-overlay" id="previewGridOverlay" style="display:none"></div>
+              <div class="preview-camera" id="previewCamera"></div>
+              <div class="preview-content" id="previewContent">
+                <div class="preview-placeholder">
+                  <span>📱</span>
+                  <p>点击下方「生成预览」查看效果</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="preview-device-label" id="deviceLabel">Pro Max — 976 × 596</div>
+        </div>
+        <div class="preview-side">
+          <h3>📄 MAML XML</h3>
+          <div class="code-editor" id="codeEditor">
+            <div class="code-toolbar">
+              <span class="code-lang">XML</span>
+              <button class="code-btn" onclick="JCM.formatXML()" title="格式化">🔧 格式化</button>
+              <button class="code-btn" onclick="JCM.copyXML()" title="复制">📋 复制</button>
+            </div>
+            <div class="code-body">
+              <div class="code-gutter" id="codeGutter"></div>
+              <div class="code-highlight" id="codeHighlight"></div>
+              <textarea id="codeContent" spellcheck="false" wrap="off" aria-label="MAML XML 代码编辑器">选择模板并配置后，点击「生成预览」查看 XML</textarea>
+            </div>
+          </div>
+          <div class="preview-actions">
+            <button class="btn btn-secondary" onclick="JCM.renderPreview()"><span class="btn-icon">🔄</span> 生成预览</button>
+            <button class="btn btn-secondary" onclick="JCM.copyXML()"><span class="btn-icon">📋</span> 复制 XML</button>
+            <button class="btn btn-export" onclick="JCM.handleExport()"><span class="btn-icon">📦</span> 导出 ZIP</button>
+            <button class="btn btn-secondary" onclick="JCM.handleExportPNG()"><span class="btn-icon">🖼</span> 导出 PNG</button>
+            <button class="btn btn-secondary" onclick="JCM.handleExportSVG()"><span class="btn-icon">📐</span> 导出 SVG</button>
+            <button class="btn btn-secondary" onclick="JCM.saveToLibrary()" title="保存到卡片库"><span class="btn-icon">📚</span> 保存到库</button>
+              <button class="btn btn-secondary" onclick="JCM.showQR()" title="扫码分享"><span class="btn-icon">📱</span> 扫码分享</button>
+            <button class="btn btn-secondary" onclick="JCM.showADBPush()" title="ADB 推送"><span class="btn-icon">📲</span> ADB 推送</button>
+          </div>
+          <div class="batch-export-bar">
+            <span style="font-size:11px;color:var(--text2)">批量导出：</span>
+            <button class="btn btn-secondary" onclick="JCM.handleBatchExport()"><span class="btn-icon">📦</span> 全部机型 ZIP</button>
+            <button class="btn btn-secondary" onclick="JCM.handleUniversalExport()"><span class="btn-icon">📱</span> 通用卡片</button>
+            <button class="btn btn-secondary" onclick="JCM.toggleFullscreen()"><span class="btn-icon">⛶</span> 全屏预览</button>
+            <button class="btn btn-secondary" onclick="JCM.triggerBuild()" style="color:var(--green)"><span class="btn-icon">🤖</span> 构建 APK</button>
+          </div>
+          <div class="batch-export-bar" style="margin-top:6px">
+            <span style="font-size:11px;color:var(--text2)">工具：</span>
+            <button class="btn btn-secondary" onclick="JCM.openDesignTools()"><span class="btn-icon">🎨</span> 设计工具</button>
+            <button class="btn btn-secondary" onclick="JCM.openBindingWizard()"><span class="btn-icon">🔗</span> 数据绑定</button>
+            <button class="btn btn-secondary" onclick="JCM.runMamlLint()"><span class="btn-icon">✅</span> 语法检查</button>
+            <button class="btn btn-secondary" onclick="JCM.runPerfCheck()"><span class="btn-icon">📊</span> 性能分析</button>
+            <button class="btn btn-secondary" onclick="JCM.runA11yCheck()"><span class="btn-icon">♿</span> 无障碍</button>
+            <button class="btn btn-secondary" onclick="JCM.exportPDF()"><span class="btn-icon">📄</span> PDF</button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Bottom Bar -->
+  <footer class="bottombar" role="contentinfo">
+    <div class="bottombar-left">
+      <button class="btn btn-back" id="btnBack" onclick="JCM.prevStep()" style="display:none" aria-label="返回上一步">
+        <span class="btn-icon" aria-hidden="true">←</span> 上一步
+      </button>
+    </div>
+    <div class="bottombar-right">
+      <button class="btn btn-primary" id="btnNext" onclick="JCM.nextStep()" aria-label="进入下一步">
+        下一步 <span class="btn-icon" aria-hidden="true">→</span>
+      </button>
+    </div>
+  </footer>
+</div>
+
+<!-- Keyboard Shortcut Help Modal -->
+<div class="modal-overlay" id="helpModal" style="display:none" onclick="JCM.toggleHelp()" role="dialog" aria-modal="true" aria-label="快捷键帮助">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-header">
+      <h3>⌨️ 快捷键</h3>
+      <button class="modal-close" onclick="JCM.toggleHelp()" aria-label="关闭">✕</button>
+    </div>
+    <div class="modal-body">
+      <div style="margin-bottom:12px;font-size:12px;font-weight:600;color:var(--accent)">⌨️ 键盘快捷键</div>
+      <div class="shortcut-list">
+        <div class="shortcut-item"><kbd>Ctrl</kbd>+<kbd>Z</kbd><span>撤销</span></div>
+        <div class="shortcut-item"><kbd>Ctrl</kbd>+<kbd>Y</kbd> / <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>Z</kbd><span>重做</span></div>
+        <div class="shortcut-item"><kbd>Ctrl</kbd>+<kbd>D</kbd><span>复制当前元素</span></div>
+        <div class="shortcut-item"><kbd>Ctrl</kbd>+<kbd>C</kbd><span>复制到剪贴板</span></div>
+        <div class="shortcut-item"><kbd>Ctrl</kbd>+<kbd>V</kbd><span>从剪贴板粘贴</span></div>
+        <div class="shortcut-item"><kbd>Delete</kbd><span>删除当前元素</span></div>
+        <div class="shortcut-item"><kbd>↑↓←→</kbd><span>移动元素 1px</span></div>
+        <div class="shortcut-item"><kbd>Shift</kbd>+<kbd>↑↓←→</kbd><span>移动元素 10px</span></div>
+        <div class="shortcut-item"><kbd>Tab</kbd><span>代码编辑器缩进</span></div>
+        <div class="shortcut-item"><kbd>Shift</kbd>+<kbd>Tab</kbd><span>代码编辑器反缩进</span></div>
+      </div>
+      <div style="margin:16px 0 12px;font-size:12px;font-weight:600;color:var(--accent)">🖱️ 鼠标操作</div>
+      <div class="shortcut-list">
+        <div class="shortcut-item"><span style="font-size:14px">🖱️</span><span>点击元素选中，拖拽移动</span></div>
+        <div class="shortcut-item"><span style="font-size:14px">📐</span><span>拖拽右下角调整大小</span></div>
+        <div class="shortcut-item"><span style="font-size:14px">⌥</span><span>Alt+拖拽 = 复制并拖动</span></div>
+        <div class="shortcut-item"><span style="font-size:14px">🎯</span><span>拖拽时自动对齐辅助线</span></div>
+        <div class="shortcut-item"><span style="font-size:14px">📥</span><span>拖拽文件到预览区上传</span></div>
+      </div>
+      <div style="margin:16px 0 12px;font-size:12px;font-weight:600;color:var(--accent)">📱 触屏操作</div>
+      <div class="shortcut-list">
+        <div class="shortcut-item"><span style="font-size:14px">👆</span><span>点击选中，长按拖拽</span></div>
+        <div class="shortcut-item"><span style="font-size:14px">📏</span><span>拖拽右下角缩放</span></div>
+      </div>
+      <div class="shortcut-tip">对齐辅助线会在拖拽时自动显示，对齐到画布中心和其他元素</div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="historyModal" style="display:none" onclick="JCM.toggleHistory()" role="dialog" aria-modal="true" aria-label="操作历史">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-header">
+      <h3>📜 操作历史</h3>
+      <button class="modal-close" onclick="JCM.toggleHistory()" aria-label="关闭">✕</button>
+    </div>
+    <div class="modal-body" id="historyList"></div>
+  </div>
+</div>
+
+<!-- Changelog Modal -->
+<div class="modal-overlay" id="changelogModal" style="display:none" onclick="JCM.toggleChangelog()" role="dialog" aria-modal="true" aria-label="更新日志">
+  <div class="modal" style="max-width:560px;max-height:80vh" onclick="event.stopPropagation()">
+    <div class="modal-header">
+      <h3>📝 更新日志</h3>
+      <button class="modal-close" onclick="JCM.toggleChangelog()" aria-label="关闭">✕</button>
+    </div>
+    <div class="modal-body" id="changelogList" style="max-height:60vh;overflow-y:auto"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- JSZip + Main App -->
+<script src="lib/jszip.min.js"></script>
+<script type="module" src="js/main.js"></script>
+
+
+<!-- Auto-save indicator -->
+<div class="autosave-indicator" id="autosaveIndicator">💾 已自动保存</div>
+<div class="offline-indicator" id="offlineIndicator" style="display:none">📴 离线模式</div>
+
+<!-- Right-click Context Menu -->
+<div class="context-menu" id="contextMenu" style="display:none" role="menu" aria-label="元素操作">
+  <div class="ctx-item" data-ctx="duplicate">📋 复制元素</div>
+  <div class="ctx-item" data-ctx="delete">🗑️ 删除</div>
+  <div class="ctx-divider"></div>
+  <div class="ctx-item" data-ctx="lock">🔒 锁定/解锁</div>
+  <div class="ctx-item" data-ctx="front">⬆️ 置顶</div>
+  <div class="ctx-item" data-ctx="back">⬇️ 置底</div>
+  <div class="ctx-divider"></div>
+  <div class="ctx-item" data-ctx="align-left">⬅ 左对齐</div>
+  <div class="ctx-item" data-ctx="align-center">↔ 居中</div>
+  <div class="ctx-item" data-ctx="align-right">➡ 右对齐</div>
+</div>
+
+</body>
+</html>

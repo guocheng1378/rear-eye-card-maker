@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.CardMaker" parent="Theme.AppCompat.NoActionBar">
+        <item name="colorPrimary">#6c5ce7</item>
+        <item name="colorPrimaryDark">#0a0a0f</item>
+        <item name="android:windowBackground">#0a0a0f</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+    </style>
+</resources>
