@@ -154,22 +154,34 @@ export function renderConfig(getTemplateMAML) {
     '<label class="check-label"><input type="checkbox" id="snapToggle" checked> 吸附网格 (' + S.SNAP_GRID + 'px)</label>' +
     '</div>';
 
-  // Element list with drag reorder
+  // Element list with layer-panel style: drag reorder, visibility, lock, delete, camera warning
+  var LAYER_ICONS = { text: '🔤', rectangle: '⬜', circle: '⭕', image: '🖼️', video: '🎬', arc: '🌗', progress: '📊', lottie: '✨' };
   elementSectionInner += '<div class="el-list" id="elListDrag">';
-  S.elements.forEach(function (el, i) {
-    var label = el.type === 'text' ? (el.text || '')
-      : el.type === 'image' ? '🖼 ' + (el.fileName || '图片')
-      : el.type === 'video' ? '🎬 ' + (el.fileName || '视频')
-      : (el.type === 'rectangle' && el.h <= 3 && el.radius >= 1) ? 'line'
-      : el.type + ' #' + (i + 1);
+  // Render in reverse order (top layer first) like the layer panel
+  for (var li = S.elements.length - 1; li >= 0; li--) {
+    var el = S.elements[li];
+    var label = el.type === 'text' ? (el.text || '空文字')
+      : el.type === 'image' ? (el.fileName || '图片')
+      : el.type === 'video' ? (el.fileName || '视频')
+      : (el.type === 'rectangle' && el._isLine) ? '线条'
+      : el.type === 'rectangle' ? '矩形 #' + (li + 1)
+      : el.type + ' #' + (li + 1);
     var inCam = isInCameraZone(el, device);
-    elementSectionInner += '<div class="el-item' + (S.selIdx === i ? ' active' : '') + (el.visible === false ? ' hidden-el' : '') + '" draggable="true" data-sel="' + i + '" data-drag-idx="' + i + '">' +
-      '<span class="layer-visibility" data-vis="' + i + '" title="' + (el.visible === false ? '显示' : '隐藏') + '">' + (el.visible === false ? '👁️‍🗨️' : '👁️') + '</span>' +
+    var isHidden = el.visible === false;
+    var isLocked = el.locked === true;
+    var icon = LAYER_ICONS[el.type] || '❓';
+    elementSectionInner += '<div class="el-item' + (S.selIdx === li ? ' active' : '') + (isHidden ? ' hidden-el' : '') + '" draggable="true" data-sel="' + li + '" data-drag-idx="' + li + '">' +
+      '<span class="layer-drag-handle" title="拖拽排序">⠿</span>' +
+      '<span class="layer-icon">' + icon + '</span>' +
       '<span class="el-badge">' + el.type + '</span>' +
       '<span class="el-item-name">' + esc(label) + '</span>' +
       (inCam ? '<span title="在摄像头遮挡区内" style="color:#e17055;font-size:14px">⚠️</span>' : '') +
-      '<button class="el-item-del" data-del="' + i + '">✕</button></div>';
-  });
+      '<span class="el-item-actions">' +
+      '<button class="layer-btn' + (isHidden ? ' active' : '') + '" data-vis="' + li + '" title="' + (isHidden ? '显示' : '隐藏') + '">' + (isHidden ? '🙈' : '👁️') + '</button>' +
+      '<button class="layer-btn' + (isLocked ? ' active' : '') + '" data-lock="' + li + '" title="' + (isLocked ? '解锁' : '锁定') + '">' + (isLocked ? '🔒' : '🔓') + '</button>' +
+      '<button class="el-item-del" data-del="' + li + '" title="删除">✕</button>' +
+      '</span></div>';
+  }
   if (S.elements.length === 0) {
     elementSectionInner += '<div style="text-align:center;padding:20px;color:var(--text3);font-size:12px">点击上方按钮添加元素</div>';
   }

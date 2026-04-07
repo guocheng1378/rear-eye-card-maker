@@ -1,7 +1,8 @@
 // ─── Layer Panel: 图层管理面板 ─────────────────────────────────────
 import * as S from '../state.js';
 import { captureState } from '../history.js';
-import { removeElement, moveElementZ } from './elements.js';
+import { removeElement, moveElementZ, isInCameraZone } from './elements.js';
+import { getDevice } from '../devices.js';
 import { toast } from './toast.js';
 
 var _panelVisible = false;
@@ -26,10 +27,12 @@ function esc(s) {
 function getElementLabel(el, idx) {
   if (el.type === 'text') return el.text || '空文字';
   if (el.type === 'image' || el.type === 'video') return el.originalName || el.fileName || TYPE_LABELS[el.type];
+  if (el.type === 'rectangle' && el._isLine) return '线条';
+  if (el.type === 'rectangle') return '矩形 #' + (idx + 1);
   return TYPE_LABELS[el.type] || el.type;
 }
 
-export function renderLayerPanel() {
+export export function renderLayerPanel(deviceOverride) {
   var container = document.getElementById('layerPanelList');
   if (!container) return;
 
@@ -38,6 +41,10 @@ export function renderLayerPanel() {
     container.innerHTML = '<div class="layer-empty">暂无元素<br><small>点击 + 添加元素</small></div>';
     return;
   }
+
+  // Get device for camera zone check
+  var deviceSelect = document.getElementById('deviceSelect');
+  var device = deviceOverride || (deviceSelect ? getDevice(deviceSelect.value) : null);
 
   // Render in reverse order (top layer first)
   var html = '';
@@ -48,12 +55,15 @@ export function renderLayerPanel() {
     var isLocked = el.locked === true;
     var icon = TYPE_ICONS[el.type] || '❓';
     var label = getElementLabel(el, i);
+    var inCam = device ? isInCameraZone(el, device) : false;
 
     html += '<div class="layer-item' + (isSelected ? ' selected' : '') + (isHidden ? ' hidden-el' : '') + '" ' +
       'data-layer-idx="' + i + '" draggable="true">' +
       '<span class="layer-drag-handle" title="拖拽排序">⠿</span>' +
       '<span class="layer-icon">' + icon + '</span>' +
+      '<span class="layer-type-badge">' + el.type + '</span>' +
       '<span class="layer-label" title="' + esc(label) + '">' + esc(label) + '</span>' +
+      (inCam ? '<span class="layer-cam-warn" title="在摄像头遮挡区内">⚠️</span>' : '') +
       '<span class="layer-actions">' +
         '<button class="layer-btn' + (isHidden ? ' active' : '') + '" data-layer-vis="' + i + '" title="' + (isHidden ? '显示' : '隐藏') + '">' + (isHidden ? '🙈' : '👁️') + '</button>' +
         '<button class="layer-btn' + (isLocked ? ' active' : '') + '" data-layer-lock="' + i + '" title="' + (isLocked ? '解锁' : '锁定') + '">' + (isLocked ? '🔒' : '🔓') + '</button>' +

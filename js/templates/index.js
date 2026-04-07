@@ -4,11 +4,8 @@
 import clock from './clock.js';
 import quote from './quote.js';
 import battery from './battery.js';
-import status from './status.js';
 import countdown from './countdown.js';
-import music from './music.js';
 import gradient from './gradient.js';
-import weather from './weather.js';
 import steps from './steps.js';
 import calendar from './calendar.js';
 import dualclock from './dualclock.js';
@@ -26,13 +23,12 @@ import schedule from './schedule.js';
 import notification from './notification.js';
 import carousel from './carousel.js';
 import quick_settings from './quick_settings.js';
-import composite from './composite.js';
 
 export const TEMPLATES = [
-  clock, quote, battery, status, countdown, music, gradient,
-  weather, steps, calendar, dualclock, dailyquote, ring, dashboard,
+  clock, quote, battery, countdown, gradient,
+  steps, calendar, dualclock, dailyquote, ring, dashboard,
   image, custom, weather_real, music_real, lyrics, video_wallpaper,
-  health, schedule, notification, carousel, quick_settings, composite,
+  health, schedule, notification, carousel, quick_settings,
 ];
 
 export const TPL_CATEGORIES = [
@@ -42,9 +38,9 @@ export const TPL_CATEGORIES = [
 ];
 
 export const TPL_CATEGORY_MAP = {
-  clock: 'general', quote: 'general', battery: 'general', status: 'general', countdown: 'general',
-  music: 'general', gradient: 'general', weather: 'general', steps: 'general',
+  clock: 'general', quote: 'general', battery: 'general', countdown: 'general',
+  gradient: 'general', steps: 'general',
   calendar: 'general', dualclock: 'general', dailyquote: 'general', ring: 'general', dashboard: 'general',
-  image: 'general', custom: 'general', lyrics: 'general', video_wallpaper: 'general', carousel: 'general', composite: 'general',
+  image: 'general', custom: 'general', lyrics: 'general', video_wallpaper: 'general', carousel: 'general',
   weather_real: 'device', music_real: 'device', health: 'device', schedule: 'device', notification: 'device', quick_settings: 'device',
 };

@@ -17,11 +17,8 @@ const JS_FILES = [
   'js/templates/clock.js',
   'js/templates/quote.js',
   'js/templates/battery.js',
-  'js/templates/status.js',
   'js/templates/countdown.js',
-  'js/templates/music.js',
   'js/templates/gradient.js',
-  'js/templates/weather.js',
   'js/templates/steps.js',
   'js/templates/calendar.js',
   'js/templates/dualclock.js',
@@ -61,11 +58,14 @@ const JS_FILES = [
   'js/ui/card-library-ui.js',
   'js/ui/template-market.js',
   'js/ui/design-tools.js',
+  'js/ui/layer-panel.js',
   'js/ui/binding-wizard.js',
   'js/ui/command-palette.js',
   'js/ui/linter-tools.js',
   'js/ui/version-snapshots.js',
   'js/ui/export-adb.js',
+  'js/ui/snippets.js',
+  'js/ui/batch-ops.js',
   'js/ui/index.js',         // UI 入口（依赖所有上面的）
   'js/main.js',             // 应用入口
 ];
