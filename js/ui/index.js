@@ -345,6 +345,8 @@ function handleFilePicked(e) {
         S.uploadedFiles[safeName] = { data: buf, mimeType: isGif ? 'video/gif' : workingFile.type, dataUrl: blobUrl, originalName: workingFile.name };
         captureState();
         if (replaceIdx >= 0 && replaceIdx < S.elements.length) {
+          var oldName = S.elements[replaceIdx].fileName;
+          if (oldName && S.uploadedFiles[oldName] && S.uploadedFiles[oldName].dataUrl && S.uploadedFiles[oldName].dataUrl.indexOf('blob:') === 0) try { URL.revokeObjectURL(S.uploadedFiles[oldName].dataUrl); } catch(e) {}
           S.elements[replaceIdx].fileName = safeName; S.elements[replaceIdx].src = safeName;
         } else {
           S.elements.push({ type: 'video', fileName: safeName, src: safeName, x: 10, y: 60, w: 240, h: 135 });
@@ -366,6 +368,8 @@ function handleFilePicked(e) {
         S.uploadedFiles[safeName] = { data: arr.buffer, mimeType: workingFile.type, dataUrl: dataUrl, originalName: workingFile.name };
         captureState();
         if (replaceIdx >= 0 && replaceIdx < S.elements.length) {
+          var oldName = S.elements[replaceIdx].fileName;
+          if (oldName && S.uploadedFiles[oldName] && S.uploadedFiles[oldName].dataUrl && S.uploadedFiles[oldName].dataUrl.indexOf('blob:') === 0) try { URL.revokeObjectURL(S.uploadedFiles[oldName].dataUrl); } catch(e) {}
           S.elements[replaceIdx].fileName = safeName; S.elements[replaceIdx].src = safeName;
         } else {
           S.elements.push({ type: type, fileName: safeName, src: safeName, x: 10, y: 60, w: 200, h: 200 });
