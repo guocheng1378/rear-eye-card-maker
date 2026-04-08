@@ -26,13 +26,13 @@ export default {
     lines.push('  <Var name="marginL" type="number" expression="(#view_width * 0.30)" />');
     lines.push('  <Var name="m" type="number" expression="#month" />');
     lines.push('  <Var name="d" type="number" expression="#date" />');
-    lines.push('  <Var name="doy_base" type="number" expression="(ifelse((#m == 1), 0, ifelse((#m == 2), 31, ifelse((#m == 3), 59, ifelse((#m == 4), 90, ifelse((#m == 5), 120, ifelse((#m == 6), 151, ifelse((#m == 7), 181, ifelse((#m == 8), 212, ifelse((#m == 9), 243, ifelse((#m == 10), 273, ifelse((#m == 11), 304, 334)))))))))))" />');
+    lines.push('  <Var name="doy_base" type="number" expression="(ifelse((#m == 1), 0, ifelse((#m == 2), 31, ifelse((#m == 3), 59, ifelse((#m == 4), 90, ifelse((#m == 5), 120, ifelse((#m == 6), 151, ifelse((#m == 7), 181, ifelse((#m == 8), 212, ifelse((#m == 9), 243, ifelse((#m == 10), 273, ifelse((#m == 11), 304, 334))))))))))))" />');
     lines.push('  <Var name="doy_leap" type="number" expression="ifelse((#year % 4 == 0), ifelse((#m >= 3), 1, 0), 0)" />');
     lines.push('  <Var name="doy" type="number" expression="(#doy_base + #d + #doy_leap)" />');
     lines.push('  <Var name="target" type="number" expression="' + validTd + '" />');
     lines.push('  <Var name="tMonth" type="number" expression="floor(#target / 100)" />');
     lines.push('  <Var name="tDay" type="number" expression="(#target - #tMonth * 100)" />');
-    lines.push('  <Var name="tdoy_base" type="number" expression="(ifelse((#tMonth == 1), 0, ifelse((#tMonth == 2), 31, ifelse((#tMonth == 3), 59, ifelse((#tMonth == 4), 90, ifelse((#tMonth == 5), 120, ifelse((#tMonth == 6), 151, ifelse((#tMonth == 7), 181, ifelse((#tMonth == 8), 212, ifelse((#tMonth == 9), 243, ifelse((#tMonth == 10), 273, ifelse((#tMonth == 11), 304, 334)))))))))))" />');
+    lines.push('  <Var name="tdoy_base" type="number" expression="(ifelse((#tMonth == 1), 0, ifelse((#tMonth == 2), 31, ifelse((#tMonth == 3), 59, ifelse((#tMonth == 4), 90, ifelse((#tMonth == 5), 120, ifelse((#tMonth == 6), 151, ifelse((#tMonth == 7), 181, ifelse((#tMonth == 8), 212, ifelse((#tMonth == 9), 243, ifelse((#tMonth == 10), 273, ifelse((#tMonth == 11), 304, 334))))))))))))" />');
     lines.push('  <Var name="tdoy_leap" type="number" expression="ifelse((#year % 4 == 0), ifelse((#tMonth >= 3), 1, 0), 0)" />');
     lines.push('  <Var name="tdoy" type="number" expression="(#tdoy_base + #tDay + #tdoy_leap)" />');
     lines.push('  <Var name="daysLeft" type="number" expression="(365 + ifelse((#year % 4 == 0), 1, 0) - #doy)" />');
