@@ -177,6 +177,10 @@ function renderPreview() {
   document.getElementById('deviceLabel').textContent = device.label;
   document.getElementById('previewCamera').style.width = showCam ? (device.cameraZoneRatio * 100) + '%' : '0';
 
+  // Device switch animation
+  var phoneEl = document.querySelector('#page2 .preview-phone');
+  if (phoneEl) { phoneEl.classList.remove('device-switching'); void phoneEl.offsetWidth; phoneEl.classList.add('device-switching'); }
+
   var html = renderTemplatePreview(device, showCam, S.tpl, S.cfg);
   html += new PreviewRenderer(device, showCam).renderElements(S.elements, S.uploadedFiles, S.selIdx);
   if (S.cfg.bgImage) {
@@ -213,6 +217,10 @@ function renderLivePreview() {
   if (labelEl) labelEl.textContent = device.label;
   var camEl = document.getElementById('cfgPreviewCamera');
   if (camEl) camEl.style.width = showCam ? (device.cameraZoneRatio * 100) + '%' : '0';
+
+  // Device switch animation
+  var phoneEl = document.querySelector('#page1 .config-preview-phone');
+  if (phoneEl) { phoneEl.classList.remove('device-switching'); void phoneEl.offsetWidth; phoneEl.classList.add('device-switching'); }
 
   var html = renderTemplatePreview(device, showCam, S.tpl, S.cfg);
   html += new PreviewRenderer(device, showCam).renderElements(S.elements, S.uploadedFiles, S.selIdx);
@@ -256,8 +264,12 @@ function handleExport() {
 
   autoSnapshot('导出 ZIP');
   var p = toastProgress('正在打包 ZIP...');
+  var exportBtn = document.querySelector('.btn-export');
   exportZip(maml, S.cfg.cardName || 'card', S.elements, S.uploadedFiles, S.tpl.id === 'custom', S.cfg.bgImage || '')
-    .then(function () { p.close('✅ ZIP 已导出', 'success'); })
+    .then(function () {
+      p.close('✅ ZIP 已导出', 'success');
+      if (exportBtn) { exportBtn.classList.remove('btn-export-success'); void exportBtn.offsetWidth; exportBtn.classList.add('btn-export-success'); setTimeout(function(){ exportBtn.classList.remove('btn-export-success'); }, 800); }
+    })
     .catch(function (e) { p.close('导出失败: ' + e.message, 'error'); });
 }
 

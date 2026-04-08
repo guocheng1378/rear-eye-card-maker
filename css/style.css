@@ -23,6 +23,8 @@
 }
 
 html,body{height:100%;overflow:hidden}
+/* Selection */
+::selection{background:rgba(124,109,240,.3);color:inherit}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC',sans-serif;background:var(--bg);color:var(--text);transition:background .4s,color .4s}
 
 /* Global Scrollbar */
@@ -112,13 +114,23 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC',sans-
 .tpl-card:hover::before{opacity:.6}
 .tpl-card.active{border-color:var(--accent);background:linear-gradient(135deg,var(--accent-glow),var(--surface));box-shadow:0 0 0 2px var(--accent),0 12px 36px rgba(124,109,240,.25);transform:translateY(-2px)}
 .tpl-card.active::before{opacity:1}
-.tpl-icon{font-size:28px;margin-bottom:10px;display:block;position:relative}
+.tpl-icon{font-size:32px;margin-bottom:10px;display:block;position:relative;filter:drop-shadow(0 2px 4px rgba(0,0,0,.15));transition:transform .3s ease}
+.tpl-card:hover .tpl-icon{transform:scale(1.1) rotate(-3deg)}
 .tpl-card-name{font-size:14px;font-weight:700;margin-bottom:4px;position:relative}
 .tpl-card-desc{font-size:11px;color:var(--text2);line-height:1.4;position:relative}
 
 /* ─── Template Thumbnails ─── */
-.tpl-thumb{margin-bottom:10px;position:relative}
-.tpl-thumb-fallback{width:92px;height:55px;border-radius:6px;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:28px;flex-shrink:0}
+.tpl-thumb{margin-bottom:10px;position:relative;border-radius:8px;overflow:hidden;box-shadow:inset 0 0 0 1px rgba(255,255,255,.06)}
+.tpl-thumb-fallback{width:100%;height:64px;border-radius:6px;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:28px;flex-shrink:0}
+/* Stagger animation for grid cards */
+.tpl-card:nth-child(1){animation-delay:.02s}
+.tpl-card:nth-child(2){animation-delay:.04s}
+.tpl-card:nth-child(3){animation-delay:.06s}
+.tpl-card:nth-child(4){animation-delay:.08s}
+.tpl-card:nth-child(5){animation-delay:.10s}
+.tpl-card:nth-child(6){animation-delay:.12s}
+.tpl-card{animation:card-pop .35s ease backwards}
+@keyframes card-pop{from{opacity:0;transform:translateY(16px) scale(.96)}to{opacity:1;transform:none}}
 
 /* ─── Config Page ─── */
 .page-config{padding:28px 32px;overflow-y:auto}
@@ -208,6 +220,21 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC',sans-
 .color-swatch:hover{transform:scale(1.25);border-color:var(--accent);box-shadow:0 2px 8px rgba(0,0,0,.2)}
 .color-swatch:active{transform:scale(.95)}
 
+/* ─── Gradient Preview Bar ─── */
+.gradient-preview-bar{
+  width:100%;height:28px;border-radius:8px;margin-top:8px;
+  border:1px solid var(--border);position:relative;overflow:hidden;
+  transition:all .2s ease;cursor:pointer;
+}
+.gradient-preview-bar:hover{
+  border-color:var(--accent);transform:scaleY(1.15);
+  box-shadow:0 2px 12px rgba(124,109,240,.2);
+}
+.gradient-preview-bar::after{
+  content:'';position:absolute;inset:0;
+  background:repeating-linear-gradient(45deg,transparent,transparent 4px,rgba(255,255,255,.04) 4px,rgba(255,255,255,.04) 5px);
+}
+
 /* ─── Element Detail ─── */
 .el-detail{
   margin-top:14px;padding:16px;background:var(--surface2);border:1px solid var(--border);
@@ -253,7 +280,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC',sans-
 
 /* ─── Preview Page ─── */
 .page-preview{padding:24px 32px;overflow-y:auto}
-.preview-layout{display:grid;grid-template-columns:1fr 1fr;gap:24px;height:100%}
+.preview-layout{display:grid;grid-template-columns:1.6fr 1fr;gap:24px;height:100%}
 .preview-phone-wrap{display:flex;align-items:center;justify-content:center;flex-direction:column;gap:16px}
 .preview-phone{
   width:420px;height:252px;border-radius:20px;overflow:hidden;position:relative;
@@ -343,6 +370,35 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC',sans-
 .code-highlight .entity{color:#56b6c2}
 .preview-actions{display:flex;gap:10px;flex-wrap:wrap}
 
+/* ─── Device Switch Animation ─── */
+.preview-phone.device-switching{
+  animation:device-swap .4s cubic-bezier(.4,0,.2,1);
+}
+@keyframes device-swap{
+  0%{transform:perspective(800px) scale(.92);opacity:.6}
+  50%{transform:perspective(800px) scale(1.03)}
+  100%{transform:perspective(800px) scale(1);opacity:1}
+}
+
+/* ─── Export Success Animation ─── */
+.btn-export-success{
+  animation:export-pop .5s cubic-bezier(.34,1.56,.64,1);
+  background:var(--green)!important;
+  box-shadow:0 0 0 4px rgba(0,200,160,.2),0 6px 20px rgba(0,200,160,.3)!important;
+}
+@keyframes export-pop{
+  0%{transform:scale(1)}
+  30%{transform:scale(.92)}
+  60%{transform:scale(1.08)}
+  100%{transform:scale(1)}
+}
+/* Ripple on export */
+.export-ripple{
+  position:absolute;border-radius:50%;background:rgba(0,200,160,.3);
+  transform:scale(0);animation:ripple-out .6s ease-out forwards;pointer-events:none;
+}
+@keyframes ripple-out{to{transform:scale(4);opacity:0}}
+
 /* ─── Buttons ─── */
 .btn{
   padding:10px 20px;border-radius:var(--radius-sm);border:none;font-size:13px;font-weight:600;
@@ -425,7 +481,7 @@ select:focus:not(:focus-visible){
   display:flex;align-items:center;justify-content:center;transition:var(--transition);
   flex-shrink:0;
 }
-.theme-toggle:hover{border-color:var(--accent);color:var(--accent);transform:rotate(15deg) scale(1.1)}
+.theme-toggle:hover{border-color:var(--accent);color:var(--accent);transform:rotate(15deg) scale(1.1);box-shadow:0 0 12px rgba(124,109,240,.2)}
 .theme-toggle:active{transform:scale(.95)}
 a.theme-toggle{text-decoration:none}
 .github-link{display:flex;align-items:center;justify-content:center}
@@ -463,19 +519,25 @@ a.theme-toggle{text-decoration:none}
 .shortcut-list{display:flex;flex-direction:column;gap:8px}
 .shortcut-item{
   display:flex;align-items:center;justify-content:space-between;
-  padding:8px 0;border-bottom:1px solid var(--border);font-size:13px;
+  padding:10px 0;border-bottom:1px solid var(--border);font-size:13px;
+  transition:all .15s ease;
 }
+.shortcut-item:hover{padding-left:4px}
 .shortcut-item:last-child{border-bottom:none}
 .shortcut-item span{color:var(--text2)}
 kbd{
-  display:inline-block;padding:2px 7px;border-radius:4px;font-size:11px;font-weight:700;
-  background:var(--surface2);border:1px solid var(--border);color:var(--text);
+  display:inline-block;padding:3px 8px;border-radius:6px;font-size:11px;font-weight:700;
+  background:linear-gradient(180deg,var(--surface3),var(--surface2));border:1px solid var(--border);color:var(--text);
   font-family:'SF Mono',Monaco,monospace;line-height:1.4;
+  box-shadow:0 2px 0 var(--border),0 3px 6px rgba(0,0,0,.15);
+  min-width:22px;text-align:center;
 }
 .shortcut-tip{
-  margin-top:12px;padding:10px 12px;background:var(--accent-glow);border-radius:8px;
-  font-size:12px;color:var(--accent2);border:1px solid rgba(108,92,231,.2);
+  margin-top:12px;padding:12px 14px;background:var(--accent-glow);border-radius:10px;
+  font-size:12px;color:var(--accent2);border:1px solid rgba(124,109,240,.2);
+  line-height:1.5;
 }
+.shortcut-tip::before{content:'💡 ';font-size:14px}
 
 /* ─── Config + Live Preview Split ─── */
 .page-config-live{
@@ -711,9 +773,19 @@ kbd{
 .toast-undo:hover{opacity:1;background:rgba(255,255,255,0.15)}
 
 /* ─── Config Section Collapse ─── */
+.config-section{
+  border:1px solid var(--border);border-radius:var(--radius-sm);
+  padding:12px 14px;margin-bottom:12px;
+  transition:all .3s ease;
+}
+.config-section:hover{border-color:var(--border2)}
+.config-section-title{
+  cursor:pointer;user-select:none;
+  transition:color .2s ease;
+}
 .config-section-title:hover{color:var(--accent)}
 .config-section-title::after{
-  content:'▾';float:right;font-size:10px;transition:transform .2s;
+  content:'▾';float:right;font-size:10px;transition:transform .3s cubic-bezier(.4,0,.2,1);
 }
 .config-section-title.collapsed::after{transform:rotate(-90deg)}
 .config-section .config-grid,
@@ -725,10 +797,13 @@ kbd{
 .config-section .font-preview-item,
 .config-section .field,
 .config-section .field-color {
-  transition: max-height .25s ease, opacity .2s ease;
+  overflow:hidden;
+  transition:max-height .3s cubic-bezier(.4,0,.2,1),opacity .25s ease,transform .25s ease;
+  max-height:600px;opacity:1;transform:translateY(0);
 }
 .config-section.collapsed > :not(.config-section-title) {
-  display: none;
+  max-height:0!important;opacity:0;transform:translateY(-8px);
+  pointer-events:none;
 }
 
 /* ─── Bottom Bar Undo/Redo ─── */
@@ -794,12 +869,16 @@ kbd{
 /* ─── Element List Drag Reorder ─── */
 .el-item.drag-over-top {
   border-top: 2px solid var(--accent);
+  box-shadow:0 -4px 12px rgba(124,109,240,.15);
 }
 .el-item.drag-over-bottom {
   border-bottom: 2px solid var(--accent);
+  box-shadow:0 4px 12px rgba(124,109,240,.15);
 }
 .el-item.dragging-el {
-  opacity: 0.4;
+  opacity: 0.35;
+  transform:scale(.96);
+  transition:all .2s ease;
 }
 
 /* ─── Config Section Collapse ─── */
@@ -849,16 +928,23 @@ kbd{
 
 /* ─── Theme compare mode ─── */
 .theme-compare{
-  display:flex;gap:8px;margin-top:8px;
+  display:flex;gap:12px;margin-top:8px;
 }
 .theme-compare-pane{
   flex:1;border-radius:var(--radius);overflow:hidden;
-  border:1px solid var(--border);position:relative;
+  border:2px solid var(--border);position:relative;
+  transition:all .3s ease;
+}
+.theme-compare-pane:hover{
+  border-color:var(--accent);
+  box-shadow:0 4px 16px rgba(124,109,240,.15);
+  transform:translateY(-2px);
 }
 .theme-compare-label{
-  position:absolute;top:4px;left:4px;font-size:9px;
-  padding:1px 6px;border-radius:3px;z-index:5;
-  background:rgba(0,0,0,0.5);color:#fff;
+  position:absolute;top:6px;left:6px;font-size:10px;font-weight:700;
+  padding:2px 8px;border-radius:4px;z-index:5;
+  background:rgba(0,0,0,0.6);color:#fff;
+  backdrop-filter:blur(4px);
 }
 
 /* ═══ 响应式 ═══ */
@@ -1093,12 +1179,23 @@ kbd{
 /* ─── Syntax Highlighting ─── */
 .code-highlight .tag {
   color: #61afef;
+  font-weight:600;
 }
 .code-highlight .attr-name {
   color: #e5c07b;
 }
 .code-highlight .attr-val {
   color: #98c379;
+}
+.code-highlight .comment {
+  color: #5c6370;
+  font-style: italic;
+}
+.code-highlight .bracket {
+  color: #c678dd;
+}
+.code-highlight .punctuation {
+  color: #abb2bf;
 }
 .code-highlight .comment {
   color: #5c6370;
