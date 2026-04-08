@@ -4,6 +4,7 @@ import { toast } from './toast.js';
 
 var _step = 0;
 var _previewTimer = null;
+var _stepTransitioning = false;
 
 export function getStep() { return _step; }
 
@@ -20,6 +21,10 @@ export function moveStepSlider(n) {
 }
 
 export function goStep(n, callbacks) {
+  if (_stepTransitioning) return; // prevent rapid clicking
+  _stepTransitioning = true;
+  setTimeout(function() { _stepTransitioning = false; }, 300);
+  
   if (n === 1 && !S.tpl) return toast('请先选择一个模板', 'error');
   if (n === 2 && !S.tpl) return toast('请先选择模板并配置', 'error');
   _step = n;
