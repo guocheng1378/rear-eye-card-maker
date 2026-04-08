@@ -57,7 +57,13 @@ export function goStep(n, callbacks) {
     if (clr) clr.style.display = window.innerWidth <= 900 ? 'none' : '';
     callbacks.renderConfig(); syncDeviceSelect('toCfg'); callbacks.renderLivePreview(); 
   }
-  if (n === 2) { syncDeviceSelect('toPreview'); callbacks.renderPreview(); }
+  if (n === 2) { 
+    syncDeviceSelect('toPreview'); 
+    callbacks.renderPreview(); 
+    // Auto-scroll to show preview
+    var previewEl = document.getElementById('previewContent');
+    if (previewEl) previewEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
 
   if (n !== 2) cleanupVideos('previewContent');
   if (n !== 1) cleanupVideos('cfgPreviewContent');
