@@ -1055,6 +1055,14 @@ function setupEvents() {
     var isInCodeEditor = e.target.id === 'codeContent';
     if (e.ctrlKey && e.key === 'z' && !e.shiftKey && !isInCodeEditor) { e.preventDefault(); var r = undo(); if (r && r.needsRerender) { renderConfig(getTemplateMAML); toast(r.message, 'success'); } }
     if (e.ctrlKey && (e.key === 'y' || (e.key === 'z' && e.shiftKey)) && !isInCodeEditor) { e.preventDefault(); var r2 = redo(); if (r2 && r2.needsRerender) { renderConfig(getTemplateMAML); toast(r2.message, 'success'); } }
+
+    // Ctrl+S = Export ZIP
+    if (e.ctrlKey && e.key === 's') {
+      e.preventDefault();
+      if (getStep() === 2 && S.tpl) handleExport();
+      else if (S.tpl) { goStep(2, stepCallbacks); setTimeout(function() { handleExport(); }, 400); }
+      return;
+    }
     if (e.key === 'Delete' && S.selIdx >= 0) { e.preventDefault(); removeElement(S.selIdx); renderConfig(getTemplateMAML); }
     if (e.ctrlKey && e.key === 'l') { e.preventDefault(); toggleLayerPanel(); return; }
     if (e.ctrlKey && e.key === 'd' && S.selIdx >= 0) {
