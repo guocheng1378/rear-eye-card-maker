@@ -155,6 +155,7 @@ function onPreviewMouseMove(e) {
 function onPreviewMouseUp() {
   dragging = null;
   clearGuideLines();
+  document.querySelectorAll('.preview-content').forEach(function(c){ c.classList.remove('dragging'); });
   document.removeEventListener('mousemove', onPreviewMouseMove);
   document.removeEventListener('mouseup', onPreviewMouseUp);
   document.removeEventListener('touchmove', onPreviewMouseMove);
@@ -255,6 +256,13 @@ function handlePointerDown(e, callbacks) {
   S.setSelIdx(idx);
   S.setDirty(true);
   callbacks.renderConfig();
+
+  // Add dragging cursor class
+  var activeScreen = getActiveScreen();
+  if (activeScreen) {
+    var pc = activeScreen.querySelector('.preview-content');
+    if (pc) pc.classList.add('dragging');
+  }
 
   document.addEventListener('mousemove', onPreviewMouseMove);
   document.addEventListener('mouseup', onPreviewMouseUp);

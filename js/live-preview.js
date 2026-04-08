@@ -147,10 +147,10 @@ PreviewRenderer.prototype.renderElements = function (elements, files, selIdx) {
     var py = el.y * self.scale;
     var inCam = el.x < self.device.width * self.device.cameraZoneRatio;
     var bdr = '';
-    if (i === selIdx && inCam) bdr = 'outline:2px solid #e17055;outline-offset:2px;';
-    else if (i === selIdx) bdr = 'outline:1.5px dashed #6c5ce7;outline-offset:2px;';
+    if (i === selIdx && inCam) bdr = 'outline:2px solid #ef7a62;outline-offset:2px;box-shadow:0 0 0 4px rgba(239,122,98,.25),0 0 16px rgba(239,122,98,.15);';
+    else if (i === selIdx) bdr = 'outline:2px solid #7c6df0;outline-offset:2px;box-shadow:0 0 0 4px rgba(124,109,240,.25),0 0 16px rgba(124,109,240,.15);';
     else if (inCam) bdr = 'outline:1.5px dashed rgba(225,112,85,0.6);outline-offset:2px;';
-    var dc = 'cursor:move;' + bdr;
+    var dc = 'cursor:grab;' + bdr;
     var op = (el.opacity !== undefined && el.opacity !== 100) ? 'opacity:' + (el.opacity / 100) + ';' : '';
     var rot = (el.rotation && el.rotation !== 0) ? 'transform:rotate(' + el.rotation + 'deg);transform-origin:center;' : '';
     var sh = '';
@@ -158,11 +158,14 @@ PreviewRenderer.prototype.renderElements = function (elements, files, selIdx) {
     else if (el.shadow === 'dark') sh = 'text-shadow:0 2px 6px rgba(0,0,0,0.8);';
     else if (el.shadow === 'glow') sh = 'text-shadow:0 0 8px ' + el.color + ',0 0 16px ' + el.color + ';';
 
-    // Resize handle
+    // Resize handle - bigger, more visible, more types
     var rh = '';
-    if (i === selIdx && (el.type === 'rectangle' || el.type === 'image' || el.type === 'video' || el.type === 'progress')) {
+    if (i === selIdx && (el.type === 'rectangle' || el.type === 'image' || el.type === 'video' || el.type === 'progress' || el.type === 'text' || el.type === 'lottie')) {
       var ew = (el.w || 100) * self.scale, eh = (el.h || 100) * self.scale;
-      rh = '<div data-resize-idx="' + i + '" style="position:absolute;left:' + (px + ew - 6) + 'px;top:' + (py + eh - 6) + 'px;width:10px;height:10px;background:#6c5ce7;border:1px solid #fff;border-radius:2px;cursor:nwse-resize;z-index:20"></div>';
+      if (el.type === 'text' && !el.w) { ew = 30; eh = (el.size || 20) * self.scale; }
+      rh = '<div data-resize-idx="' + i + '" style="position:absolute;left:' + (px + ew - 5) + 'px;top:' + (py + eh - 5) + 'px;width:12px;height:12px;background:#7c6df0;border:2px solid #fff;border-radius:3px;cursor:nwse-resize;z-index:20;box-shadow:0 1px 4px rgba(0,0,0,.3);transition:transform .15s ease" onmouseenter="this.style.transform=\'scale(1.3)\'" onmouseleave="this.style.transform=\'scale(1)\'"></div>';
+      // Top-left corner handle for move hint
+      rh += '<div style="position:absolute;left:' + (px - 3) + 'px;top:' + (py - 3) + 'px;width:6px;height:6px;background:#7c6df0;border:1.5px solid #fff;border-radius:50%;z-index:20;box-shadow:0 1px 3px rgba(0,0,0,.2)"></div>';
     }
 
     // Size label
@@ -170,7 +173,7 @@ PreviewRenderer.prototype.renderElements = function (elements, files, selIdx) {
     if (i === selIdx) {
       var elW = el.w || (el.r ? el.r * 2 : 0) || 0;
       var elH = el.h || (el.r ? el.r * 2 : 0) || 0;
-      sizeLabel = '<div class="size-label" style="position:absolute;left:' + px + 'px;top:' + (py + elH * self.scale + 4) + 'px;font-size:10px;color:var(--accent);background:rgba(108,92,231,0.15);padding:1px 6px;border-radius:3px;white-space:nowrap;z-index:20">x:' + el.x + ' y:' + el.y + ' · ' + elW + '×' + elH + '</div>';
+      sizeLabel = '<div class="size-label" style="position:absolute;left:' + px + 'px;top:' + (py + elH * self.scale + 6) + 'px;font-size:11px;font-weight:600;color:#eaeaf4;background:rgba(124,109,240,.85);padding:2px 8px;border-radius:4px;white-space:nowrap;z-index:20;backdrop-filter:blur(4px);box-shadow:0 2px 6px rgba(0,0,0,.3)">x:' + el.x + ' y:' + el.y + ' · ' + elW + '×' + elH + '</div>';
     }
 
     switch (el.type) {
