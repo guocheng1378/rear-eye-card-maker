@@ -33,6 +33,13 @@ class MainActivity : AppCompatActivity() {
 
         webView = WebView(this).apply {
             settings.javaScriptEnabled = true
+        settings.mixedContentMode = WebSettings.MIXED_CONTENT_COMPATIBILITY_MODE
+        settings.cacheMode = WebSettings.LOAD_DEFAULT
+        settings.domStorageEnabled = true
+        settings.databaseEnabled = true
+        settings.allowFileAccess = true
+        settings.allowContentAccess = true
+        settings.mediaPlaybackRequiresUserGesture = false
             settings.domStorageEnabled = true
             settings.allowFileAccess = false
             settings.allowContentAccess = true
