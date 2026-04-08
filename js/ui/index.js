@@ -116,7 +116,9 @@ function renderPreview() {
   if (S.cfg.bgImage) {
     html = '<div style="position:absolute;inset:0;background-image:url(\'' + S.cfg.bgImage.replace(/'/g, "\\'") + '\');background-size:cover;background-position:center;z-index:-1"></div>' + html;
   }
-  document.getElementById('previewContent').innerHTML = html;
+  requestAnimationFrame(function () {
+    document.getElementById('previewContent').innerHTML = html;
+  });
 
   var innerXml = getTemplateMAML(S.tpl, S.cfg);
   var maml;
@@ -158,7 +160,9 @@ function renderLivePreview() {
     html = '<div style="position:absolute;inset:0;background-image:url(\'' + S.cfg.bgImage.replace(/'/g, "\\'") + '\');background-size:cover;background-position:center;z-index:-1"></div>' + html;
   }
   var contentEl = document.getElementById('cfgPreviewContent');
-  if (contentEl) contentEl.innerHTML = html;
+  if (contentEl) {
+    requestAnimationFrame(function () { contentEl.innerHTML = html; });
+  }
 }
 
 function getCfgDevice() {
