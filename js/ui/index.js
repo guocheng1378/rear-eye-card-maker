@@ -1078,7 +1078,10 @@ function setupEvents() {
   document.getElementById('fileVideoPick').addEventListener('change', handleFilePicked);
 
   // Device selects
-  document.getElementById('deviceSelect').addEventListener('change', function () { renderPreview(); });
+  document.getElementById('deviceSelect').addEventListener('change', function () { 
+    try { sessionStorage.setItem('jcm-device', this.value); } catch(e) {}
+    renderPreview(); 
+  });
   document.getElementById('showCamera').addEventListener('change', function () { renderPreview(); });
   document.getElementById('cfgDeviceSelect').addEventListener('change', function () { syncDeviceSelect('toPreview'); renderLivePreview(); });
   document.getElementById('cfgShowCamera').addEventListener('change', function () { document.getElementById('showCamera').checked = this.checked; renderLivePreview(); });
@@ -1098,6 +1101,39 @@ function setupEvents() {
     var isInCodeEditor = e.target.id === 'codeContent';
     if (e.ctrlKey && e.key === 'z' && !e.shiftKey && !isInCodeEditor) { e.preventDefault(); var r = undo(); if (r && r.needsRerender) { renderConfig(getTemplateMAML); toast(r.message, 'success'); } }
     if (e.ctrlKey && (e.key === 'y' || (e.key === 'z' && e.shiftKey)) && !isInCodeEditor) { e.preventDefault(); var r2 = redo(); if (r2 && r2.needsRerender) { renderConfig(getTemplateMAML); toast(r2.message, 'success'); } }
+
+
+    // N = Add text element (when not in input)
+    if (e.key === 'n' && !e.ctrlKey && !e.metaKey && e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA' && e.target.tagName !== 'SELECT') {
+      e.preventDefault();
+      if (addElement('text')) {
+        renderConfig(getTemplateMAML);
+        _autoPreview();
+        toast('📝 已添加文字元素', 'success', 1500);
+      }
+      return;
+    }
+
+    // Shift+Tab = cycle selected element (when not in input)
+    if (e.key === 'Tab' && e.shiftKey && e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA' && e.target.tagName !== 'SELECT' && e.target.id !== 'codeContent') {
+      e.preventDefault();
+      if (S.elements.length > 0) {
+        var nextIdx = (S.selIdx + 1) % S.elements.length;
+        S.setSelIdx(nextIdx);
+        renderConfig(getTemplateMAML);
+        if (getStep() === 2) renderPreview();
+        if (getStep() === 1) renderLivePreview();
+      }
+      return;
+    }
+    // Escape = deselect element
+    if (e.key === 'Escape' && S.selIdx >= 0 && !isCommandPaletteOpen()) {
+      S.setSelIdx(-1);
+      renderConfig(getTemplateMAML);
+      if (getStep() === 2) renderPreview();
+      if (getStep() === 1) renderLivePreview();
+      return;
+    }
 
     // Ctrl+S = Export ZIP
     if (e.ctrlKey && e.key === 's') {
