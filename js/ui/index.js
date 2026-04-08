@@ -1061,7 +1061,7 @@ function setupEvents() {
       S.elements.push(paste); S.setSelIdx(S.elements.length - 1); S.setDirty(true);
       renderConfig(getTemplateMAML); toast('📋 已粘贴', 'success');
     }
-    if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].indexOf(e.key) >= 0 && S.selIdx >= 0 && !S.elements[S.selIdx].locked) {
+    if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].indexOf(e.key) >= 0 && S.selIdx >= 0 && !S.elements[S.selIdx].locked && e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA' && e.target.tagName !== 'SELECT') {
       e.preventDefault(); var step = e.shiftKey ? 10 : 1; var el = S.elements[S.selIdx];
       captureState('移动');
       if (e.key === 'ArrowUp') el.y = Math.max(0, el.y - step);
