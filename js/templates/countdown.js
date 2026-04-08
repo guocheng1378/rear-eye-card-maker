@@ -38,9 +38,9 @@ export default {
       '  <Var name="daysLeft" type="number" expression="(365 + ifelse((#year % 4 == 0), 1, 0) - #doy)" />',
       '  <Var name="diff" type="number" expression="ifelse((#tdoy >= #doy), (#tdoy - #doy), (#daysLeft + #tdoy))" />',
       '  <Rectangle w="#view_width" h="#view_height" fillColor="' + c.bgColor + '" />',
-      '  <Group x="#marginL" y="0">',
+      '  <Group name="countdown_display" x="#marginL" y="0">',
       '    <Text text="' + escXml(c.eventName) + '" x="0" y="50" size="18" color="' + c.textColor + '" alpha="153" />',
-      '    <Text textExp="#diff" x="0" y="80" size="72" color="' + c.accentColor + '" />',
+      '    <Text x="0" y="80" size="72" color="' + c.accentColor + '" textExp="#diff" bold="true" fontFamily="mipro-demibold" />',
       '    <Text text="天" x="0" y="160" size="20" color="' + c.textColor + '" alpha="128" />',
       '  </Group>',
     ].join('\n');

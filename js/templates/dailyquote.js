@@ -29,7 +29,6 @@ export default {
   elements(c) {
     var quotes = [c.quote1, c.quote2, c.quote3, c.quote4, c.quote5, c.quote6, c.quote7].filter(Boolean);
     if (quotes.length === 0) quotes = ['每日一句'];
-    // Build ifelse expression for text rotation
     var textExpr = "'" + escXml(quotes[quotes.length - 1]).replace(/\n/g, '\\n') + "'";
     for (var i = quotes.length - 2; i >= 0; i--) {
       textExpr = "ifelse((#dayIdx == " + i + "), '" + escXml(quotes[i]).replace(/\n/g, '\\n') + "', " + textExpr + ")";
@@ -37,7 +36,7 @@ export default {
     var safeW = Math.round(976 * (1 - 0.3)) - 20;
     return [
       { type: 'rectangle', x: 10, y: 42, w: 24, h: 3, color: c.accentColor, radius: 1.5, locked: false },
-      { type: 'text', expression: textExpr, text: quotes[0], x: 10, y: 50, size: Number(c.textSize), color: c.textColor, multiLine: true, w: safeW, lineHeight: 1.5, locked: false },
+      { type: 'text', expression: textExpr, text: quotes[0], x: 10, y: 56, size: Number(c.textSize), color: c.textColor, multiLine: true, w: safeW, lineHeight: 1.5, fontFamily: 'mipro-demibold', locked: false },
       { type: 'text', expression: "formatDate('MM/dd EEEE', #time_sys)", text: '04/08 星期二', x: 10, y: 596 - 50, size: 12, color: c.dayColor, locked: false, opacity: 50 },
     ];
   },

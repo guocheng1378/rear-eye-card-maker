@@ -1,7 +1,7 @@
 import { escXml } from '../maml.js';
 
 export default {
-  id: 'weather_real', icon: '🌤️', name: '天气卡片（真实）', desc: '绑定系统天气数据，实时显示',
+  id: 'weather_real', icon: '🌤️', name: '天气卡片', desc: '绑定系统天气数据，实时显示',
   updater: 'DateTime.Hour,DateTime.Minute',
   config: [
     { group: '基本', fields: [
@@ -14,6 +14,7 @@ export default {
       { key: 'tempColor', label: '温度颜色', type: 'color', default: '#ffffff' },
       { key: 'tempSize', label: '温度字号', type: 'range', min: 36, max: 80, default: 56 },
       { key: 'descColor', label: '描述颜色', type: 'color', default: '#aaaaaa' },
+      { key: 'accentColor', label: '强调色', type: 'color', default: '#4fc3f7' },
     ]},
   ],
   rawXml(c) {
@@ -33,14 +34,19 @@ export default {
     '      <Variable name="weather_templow" type="string[]" column="tmplows" />\n' +
     '    </ContentProviderBinder>\n' +
     '  </VariableBinders>\n' +
-    '  <!-- 自动检测设备 -->\n' +
     '  <Var name="marginL" type="number" expression="(#view_width * 0.30)" />\n' +
+    '\n' +
+    '  <!-- 背景 -->\n' +
     '  <Rectangle w="#view_width" h="#view_height" fillColor="' + c.bgColor + '" />\n' +
-    '  <DateTime x="#marginL" y="40" color="' + c.timeColor + '" size="72" format="HH:mm" fontFamily="mipro-demibold" align="left" />\n' +
-    '  <DateTime x="#marginL" y="120" color="' + c.descColor + '" size="22" format="MM月dd日 E" fontFamily="mipro-normal" align="left" />\n' +
-    '  <Text x="#marginL" y="200" color="' + c.tempColor + '" size="' + ts + '" textExp="@weather_temperature + \'°\'" bold="true" fontFamily="mipro-demibold" />\n' +
-    '  <Text x="#marginL" y="' + (200 + ts + 10) + '" color="' + c.descColor + '" size="20" textExp="@weather_location + \' · \' + @weather_description" fontFamily="mipro-normal" />\n' +
-    '  <Text x="#marginL" y="' + (200 + ts + 50) + '" color="' + c.descColor + '" size="16" textExp="\'最高 \' + @weather_temphigh[0] + \'°  最低 \' + @weather_templow[0] + \'°\'" fontFamily="mipro-normal" />\n' +
+    '\n' +
+    '  <!-- 天气内容组 -->\n' +
+    '  <Group name="weather_content" x="#marginL" y="0" w="(#view_width - #marginL - 40)">\n' +
+    '    <DateTime name="weather_time" x="0" y="40" color="' + c.timeColor + '" size="72" format="HH:mm" fontFamily="mipro-demibold" align="left" />\n' +
+    '    <DateTime name="weather_date" x="0" y="120" color="' + c.descColor + '" size="22" format="MM月dd日 E" fontFamily="mipro-normal" align="left" />\n' +
+    '    <Text x="0" y="200" color="' + c.tempColor + '" size="' + ts + '" textExp="concat(@weather_temperature, \'°\')" bold="true" fontFamily="mipro-demibold" />\n' +
+    '    <Text x="0" y="' + (200 + ts + 10) + '" color="' + c.descColor + '" size="20" textExp="concat(@weather_location, \' · \', @weather_description)" fontFamily="mipro-normal" />\n' +
+    '    <Text x="0" y="' + (200 + ts + 50) + '" color="' + c.descColor + '" size="16" textExp="concat(\'最高 \', @weather_temphigh[0], \'°  最低 \', @weather_templow[0], \'°\')" fontFamily="mipro-normal" />\n' +
+    '  </Group>\n' +
     '</Widget>';
   },
 };

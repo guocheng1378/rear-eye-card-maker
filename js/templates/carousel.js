@@ -13,7 +13,6 @@ export default {
       { key: 'transition', label: '过渡效果', type: 'select', default: 'fade', options: [
         { v: 'fade', l: '🌅 淡入淡出' },
         { v: 'slide', l: '➡️ 滑动' },
-        { v: 'zoom', l: '🔍 缩放' },
         { v: 'none', l: '⚡ 直接切换' },
       ]},
       { key: 'fitMode', label: '填充模式', type: 'select', default: 'cover', options: [
@@ -51,41 +50,37 @@ export default {
     var lines = [];
     lines.push(generateAutoDetectMAML());
     lines.push('');
-    lines.push('  <!-- 照片轮播卡片 -->');
+    lines.push('  <!-- 照片轮播 -->');
     lines.push('  <Var name="slideIndex" type="number" expression="mod(floor(div(#time_sys, ' + interval + ')), 3)" />');
     lines.push('');
     lines.push('  <Rectangle w="#view_width" h="#view_height" fillColor="' + c.bgColor + '" />');
 
-    // Slides (3 slots for user images)
     for (var i = 0; i < 3; i++) {
       lines.push('  <!-- Slide ' + (i + 1) + ' -->');
       if (transition === 'fade') {
         lines.push('  <Image src="images/slide_' + i + '.png" x="0" y="0" w="#view_width" h="#view_height" fitMode="' + fitMode + '" alpha="ifelse(eq(#slideIndex, ' + i + '), 1, 0)" />');
       } else if (transition === 'slide') {
         lines.push('  <Image src="images/slide_' + i + '.png" x="ifelse(eq(#slideIndex, ' + i + '), 0, ifelse(gt(#slideIndex, ' + i + '), neg(#view_width), #view_width))" y="0" w="#view_width" h="#view_height" fitMode="' + fitMode + '" />');
-      } else if (transition === 'zoom') {
-        lines.push('  <Image src="images/slide_' + i + '.png" x="ifelse(eq(#slideIndex, ' + i + '), 0, 0)" y="0" w="#view_width" h="#view_height" fitMode="' + fitMode + '" alpha="ifelse(eq(#slideIndex, ' + i + '), 1, 0)" />');
       } else {
         lines.push('  <Image src="images/slide_' + i + '.png" x="0" y="0" w="#view_width" h="#view_height" fitMode="' + fitMode + '" alpha="ifelse(eq(#slideIndex, ' + i + '), 1, 0)" />');
       }
     }
 
-    // Caption overlay
     if (showCaption && c.caption) {
       lines.push('');
       lines.push('  <!-- 标题 -->');
-      lines.push('  <Rectangle x="0" y="(#view_height - 50)" w="#view_width" h="50" fillColor="#000000" alpha="' + ((c.captionBgAlpha || 50) / 100).toFixed(2) + '" />');
-      lines.push('  <Text text="' + escXml(c.caption) + '" x="#marginL" y="(#view_height - 36)" size="14" color="' + c.captionColor + '" fontFamily="mipro-normal" />');
+      lines.push('  <Group name="caption_group" x="0" y="(#view_height - 50)">');
+      lines.push('    <Rectangle w="#view_width" h="50" fillColor="#000000" alpha="' + ((c.captionBgAlpha || 50) / 100).toFixed(2) + '" />');
+      lines.push('    <Text text="' + escXml(c.caption) + '" x="#marginL" y="14" size="14" color="' + c.captionColor + '" fontFamily="mipro-normal" />');
+      lines.push('  </Group>');
     }
 
-    // Indicators
     if (showIndicator) {
       lines.push('');
       lines.push('  <!-- 指示器 -->');
-      lines.push('  <Group x="((#view_width - 36) / 2)" y="(#view_height - 20)">');
+      lines.push('  <Group name="indicators" x="((#view_width - 36) / 2)" y="(#view_height - 20)">');
       for (var j = 0; j < 3; j++) {
-        var dotX = j * 14;
-        lines.push('    <Circle x="' + (dotX + 4) + '" y="4" r="3" fillColor="' + c.indicatorColor + '" alpha="ifelse(eq(#slideIndex, ' + j + '), 1, 0.3)" />');
+        lines.push('    <Circle x="' + (j * 14 + 4) + '" y="4" r="3" fillColor="' + c.indicatorColor + '" alpha="ifelse(eq(#slideIndex, ' + j + '), 1, 0.3)" />');
       }
       lines.push('  </Group>');
     }

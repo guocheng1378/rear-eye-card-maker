@@ -1,7 +1,7 @@
 import { escXml } from '../maml.js';
 
 export default {
-  id: 'lyrics', icon: '🎤', name: '歌词卡片', desc: '绑定系统音乐，显示歌词（原文/翻译/罗马音）',
+  id: 'lyrics', icon: '🎤', name: '歌词卡片', desc: 'MusicControl + 歌词显示（原文/翻译/罗马音）',
   updater: 'DateTime.Minute',
   config: [
     { group: '基本', fields: [
@@ -15,7 +15,7 @@ export default {
         { v: 'translation', l: '🌐 翻译' },
         { v: 'romanization', l: '🔤 罗马音' },
         { v: 'dual', l: '📝+🌐 原文+翻译' },
-        { v: 'triple', l: '📝+🌐+🔤 三行显示' },
+        { v: 'triple', l: '📝+🌐+🔤 三行' },
       ]},
       { key: 'lyricProvider', label: '歌词来源', type: 'select', default: 'lyricon', options: [
         { v: 'lyricon', l: 'Lyricon' },
@@ -41,24 +41,24 @@ export default {
   rawXml(c) {
     var align = c.lyricAlign || 'left';
     var textAlign = align === 'center' ? 'center' : align;
-    var anchorX = align === 'center' ? '#view_width / 2' : '#marginL';
-    var textW = align === 'center' ? '#view_width' : '(#view_width - #marginL - 40)';
+    var textW = '(#view_width - #marginL - 40)';
     var mode = c.lyricMode || 'original';
     var provider = c.lyricProvider || 'lyricon';
     var lyricSize = c.lyricSize || 22;
     var songSize = c.songSize || 26;
     var subSize = Math.max(14, lyricSize - 4);
 
-    // Build lyric source based on provider
     var lyricSource = provider === 'superlyric' ? 'superlyric_lyric' : 'lyricon_lyric';
     var lyricTransSource = provider === 'superlyric' ? 'superlyric_lyric_trans' : 'lyricon_lyric_trans';
     var lyricRomSource = provider === 'superlyric' ? 'superlyric_lyric_rom' : 'lyricon_lyric_rom';
 
     var lines = [];
     lines.push('<Widget screenWidth="976" frameRate="0" scaleByDensity="false" useVariableUpdater="DateTime.Minute" name="' + escXml(c.cardName || '歌词卡片') + '">');
-    lines.push('  <MusicControl name="music_control" autoShow="false" autoRefresh="true" x="0" y="0" />');
-    lines.push('  <Var name="isPlay" type="number" expression="eqs(#music_control.music_state,\'1\')" />');
     lines.push('  <Var name="marginL" type="number" expression="(#view_width * 0.30)" />');
+    lines.push('  <Var name="isPlay" type="number" expression="eqs(#music_control.music_state,\'1\')" />');
+    lines.push('');
+    lines.push('  <!-- MusicControl -->');
+    lines.push('  <MusicControl name="music_control" autoShow="false" autoRefresh="true" x="0" y="0" enableLyric="true" updateLyricInterval="100" />');
     lines.push('');
     lines.push('  <!-- 歌词绑定 -->');
     lines.push('  <VariableBinders>');
@@ -81,66 +81,53 @@ export default {
     }
     lines.push('  </VariableBinders>');
     lines.push('');
-
-    // Background
+    lines.push('  <!-- 背景 -->');
     lines.push('  <Rectangle w="#view_width" h="#view_height" fillColor="' + c.bgColor + '" />');
-
-    // Accent bar
-    lines.push('  <Rectangle x="#marginL" y="0" w="3" h="#view_height" fillColor="' + c.accentColor + '" alpha="0.3" />');
-
-    // Song info - use MusicControl data as primary, fallback to lyric provider
-    var titleExp = '@music_control.title';
-    var artistExp = '@music_control.artist';
-    if (provider !== 'lyricon') {
-      titleExp = 'ifelse(eq(#music_control.title,\'\'), @' + provider + '_title, #music_control.title)';
-      artistExp = 'ifelse(eq(#music_control.artist,\'\'), @' + provider + '_artist, #music_control.artist)';
-    }
-
     lines.push('');
-    lines.push('  <!-- 歌曲信息 -->');
-    lines.push('  <Group x="(#marginL + 16)" y="20" w="' + textW + '">');
-    lines.push('    <Text x="0" y="0" size="' + songSize + '" color="' + c.songColor + '" textExp="' + titleExp + '" bold="true" fontFamily="mipro-demibold" w="' + textW + '" ellipsis="true" textAlign="' + textAlign + '" />');
-    lines.push('    <Text x="0" y="' + (songSize + 8) + '" size="14" color="' + c.artistColor + '" textExp="' + artistExp + '" fontFamily="mipro-normal" w="' + textW + '" ellipsis="true" textAlign="' + textAlign + '" />');
-    lines.push('    <Rectangle x="0" y="' + (songSize + 32) + '" w="' + textW + '" h="1" fillColor="' + c.accentColor + '" alpha="0.2" />');
-    lines.push('  </Group>');
+    lines.push('  <!-- 歌词内容组 -->');
+    lines.push('  <Group name="lyrics_content" x="#marginL" y="0" w="' + textW + '">');
+    lines.push('    <!-- 强调色竖条 -->');
+    lines.push('    <Rectangle name="accent_bar" x="-16" y="0" w="3" h="#view_height" fillColor="' + c.accentColor + '" alpha="0.3" />');
     lines.push('');
-
-    // Lyrics display area
+    lines.push('    <!-- 歌曲信息 -->');
+    lines.push('    <Group name="song_info" x="0" y="20" w="' + textW + '">');
+    lines.push('      <Text x="0" y="0" size="' + songSize + '" color="' + c.songColor + '" textExp="@music_control.title" bold="true" fontFamily="mipro-demibold" w="' + textW + '" ellipsis="true" textAlign="' + textAlign + '" />');
+    lines.push('      <Text x="0" y="' + (songSize + 8) + '" size="14" color="' + c.artistColor + '" textExp="@music_control.artist" fontFamily="mipro-normal" w="' + textW + '" ellipsis="true" textAlign="' + textAlign + '" />');
+    lines.push('      <Rectangle x="0" y="' + (songSize + 32) + '" w="' + textW + '" h="1" fillColor="' + c.accentColor + '" alpha="0.2" />');
+    lines.push('    </Group>');
+    lines.push('');
+    lines.push('    <!-- 歌词显示 -->');
     var lyricY = songSize + 52;
-    lines.push('  <!-- 歌词显示区域 -->');
-    lines.push('  <Group x="(#marginL + 16)" y="' + lyricY + '" w="' + textW + '">');
+    lines.push('    <Group name="lyric_display" x="0" y="' + lyricY + '" w="' + textW + '">');
 
     switch (mode) {
       case 'original':
-        lines.push('    <Text x="0" y="0" size="' + lyricSize + '" color="' + c.lyricColor + '" textExp="ifelse(eq(@' + lyricSource + ',\'\'), \'♪ 暂无歌词\', @' + lyricSource + ')" fontFamily="mipro-normal" w="' + textW + '" multiLine="true" lineHeight="1.6" textAlign="' + textAlign + '" />');
+        lines.push('      <Text x="0" y="0" size="' + lyricSize + '" color="' + c.lyricColor + '" textExp="ifelse(eq(@' + lyricSource + ',\'\'), \'♪ 暂无歌词\', @' + lyricSource + ')" fontFamily="mipro-normal" w="' + textW + '" multiLine="true" lineHeight="1.6" textAlign="' + textAlign + '" />');
         break;
       case 'translation':
-        lines.push('    <Text x="0" y="0" size="' + lyricSize + '" color="' + c.lyricColor + '" textExp="ifelse(eq(@' + lyricTransSource + ',\'\'), \'♪ 暂无翻译\', @' + lyricTransSource + ')" fontFamily="mipro-normal" w="' + textW + '" multiLine="true" lineHeight="1.6" textAlign="' + textAlign + '" />');
+        lines.push('      <Text x="0" y="0" size="' + lyricSize + '" color="' + c.lyricColor + '" textExp="ifelse(eq(@' + lyricTransSource + ',\'\'), \'♪ 暂无翻译\', @' + lyricTransSource + ')" fontFamily="mipro-normal" w="' + textW + '" multiLine="true" lineHeight="1.6" textAlign="' + textAlign + '" />');
         break;
       case 'romanization':
-        lines.push('    <Text x="0" y="0" size="' + lyricSize + '" color="' + c.lyricColor + '" textExp="ifelse(eq(@' + lyricRomSource + ',\'\'), \'♪ 暂无罗马音\', @' + lyricRomSource + ')" fontFamily="mipro-normal" w="' + textW + '" multiLine="true" lineHeight="1.6" textAlign="' + textAlign + '" />');
+        lines.push('      <Text x="0" y="0" size="' + lyricSize + '" color="' + c.lyricColor + '" textExp="ifelse(eq(@' + lyricRomSource + ',\'\'), \'♪ 暂无罗马音\', @' + lyricRomSource + ')" fontFamily="mipro-normal" w="' + textW + '" multiLine="true" lineHeight="1.6" textAlign="' + textAlign + '" />');
         break;
       case 'dual':
-        lines.push('    <Text x="0" y="0" size="' + lyricSize + '" color="' + c.lyricColor + '" textExp="ifelse(eq(@' + lyricSource + ',\'\'), \'♪ 暂无歌词\', @' + lyricSource + ')" fontFamily="mipro-normal" w="' + textW + '" multiLine="true" lineHeight="1.4" textAlign="' + textAlign + '" />');
-        lines.push('    <Text x="0" y="' + (lyricSize * 1.6 + 8) + '" size="' + subSize + '" color="' + c.lyricSubColor + '" textExp="ifelse(eq(@' + lyricTransSource + ',\'\'), \'\', @' + lyricTransSource + ')" fontFamily="mipro-normal" w="' + textW + '" multiLine="true" lineHeight="1.4" textAlign="' + textAlign + '" />');
+        lines.push('      <Text x="0" y="0" size="' + lyricSize + '" color="' + c.lyricColor + '" textExp="ifelse(eq(@' + lyricSource + ',\'\'), \'♪ 暂无歌词\', @' + lyricSource + ')" fontFamily="mipro-normal" w="' + textW + '" multiLine="true" lineHeight="1.4" textAlign="' + textAlign + '" />');
+        lines.push('      <Text x="0" y="' + (lyricSize * 1.6 + 8) + '" size="' + subSize + '" color="' + c.lyricSubColor + '" textExp="ifelse(eq(@' + lyricTransSource + ',\'\'), \'\', @' + lyricTransSource + ')" fontFamily="mipro-normal" w="' + textW + '" multiLine="true" lineHeight="1.4" textAlign="' + textAlign + '" />');
         break;
       case 'triple':
-        lines.push('    <Text x="0" y="0" size="' + lyricSize + '" color="' + c.lyricColor + '" textExp="ifelse(eq(@' + lyricSource + ',\'\'), \'♪ 暂无歌词\', @' + lyricSource + ')" fontFamily="mipro-normal" w="' + textW + '" multiLine="true" lineHeight="1.3" textAlign="' + textAlign + '" />');
-        lines.push('    <Text x="0" y="' + (lyricSize * 1.5 + 6) + '" size="' + subSize + '" color="' + c.lyricSubColor + '" textExp="ifelse(eq(@' + lyricTransSource + ',\'\'), \'\', @' + lyricTransSource + ')" fontFamily="mipro-normal" w="' + textW + '" multiLine="true" lineHeight="1.3" textAlign="' + textAlign + '" />');
-        lines.push('    <Text x="0" y="' + (lyricSize * 1.5 + subSize * 1.5 + 12) + '" size="' + (subSize - 2) + '" color="' + c.lyricDimColor + '" textExp="ifelse(eq(@' + lyricRomSource + ',\'\'), \'\', @' + lyricRomSource + ')" fontFamily="mipro-normal" w="' + textW + '" multiLine="true" lineHeight="1.3" textAlign="' + textAlign + '" />');
+        lines.push('      <Text x="0" y="0" size="' + lyricSize + '" color="' + c.lyricColor + '" textExp="ifelse(eq(@' + lyricSource + ',\'\'), \'♪ 暂无歌词\', @' + lyricSource + ')" fontFamily="mipro-normal" w="' + textW + '" multiLine="true" lineHeight="1.3" textAlign="' + textAlign + '" />');
+        lines.push('      <Text x="0" y="' + (lyricSize * 1.5 + 6) + '" size="' + subSize + '" color="' + c.lyricSubColor + '" textExp="ifelse(eq(@' + lyricTransSource + ',\'\'), \'\', @' + lyricTransSource + ')" fontFamily="mipro-normal" w="' + textW + '" multiLine="true" lineHeight="1.3" textAlign="' + textAlign + '" />');
+        lines.push('      <Text x="0" y="' + (lyricSize * 1.5 + subSize * 1.5 + 12) + '" size="' + (subSize - 2) + '" color="' + c.lyricDimColor + '" textExp="ifelse(eq(@' + lyricRomSource + ',\'\'), \'\', @' + lyricRomSource + ')" fontFamily="mipro-normal" w="' + textW + '" multiLine="true" lineHeight="1.3" textAlign="' + textAlign + '" />');
         break;
     }
-
-    lines.push('  </Group>');
+    lines.push('    </Group>');
     lines.push('');
-
-    // Play state indicator at bottom
-    lines.push('  <!-- 播放状态 -->');
-    lines.push('  <Group x="(#marginL + 16)" y="(#view_height - 40)">');
-    lines.push('    <Rectangle x="0" y="0" w="6" h="6" fillColor="' + c.accentColor + '" cornerRadius="3" alpha="ifelse(#isPlay, 1, 0.3)" />');
-    lines.push('    <Text x="14" y="-2" size="12" color="' + c.artistColor + '" textExp="ifelse(#isPlay, \'正在播放\', \'已暂停\')" fontFamily="mipro-normal" />');
+    lines.push('    <!-- 播放状态 -->');
+    lines.push('    <Group name="play_indicator" x="0" y="(#view_height - 40)">');
+    lines.push('      <Rectangle x="0" y="2" w="6" h="6" fillColor="' + c.accentColor + '" cornerRadius="3" alpha="ifelse(#isPlay, 1, 0.3)" />');
+    lines.push('      <Text x="14" y="0" size="12" color="' + c.artistColor + '" textExp="ifelse(#isPlay, \'正在播放\', \'已暂停\')" fontFamily="mipro-normal" />');
+    lines.push('    </Group>');
     lines.push('  </Group>');
-
     lines.push('</Widget>');
     return lines.join('\n');
   },

@@ -1,7 +1,8 @@
 import { escXml } from '../maml.js';
+import { generateAutoDetectMAML } from '../devices.js';
 
 export default {
-  id: 'health', icon: '❤️', name: '健康数据卡片', desc: '绑定系统健康数据：心率/血氧/步数/睡眠',
+  id: 'health', icon: '❤️', name: '健康数据卡片', desc: '心率/血氧/步数/睡眠一屏聚合',
   updater: 'DateTime.Minute',
   config: [
     { group: '基本', fields: [
@@ -10,18 +11,10 @@ export default {
       { key: 'bgImage', label: '背景图 URL 或上传', type: 'text', default: '' },
     ]},
     { group: '显示项', fields: [
-      { key: 'showHeartRate', label: '显示心率', type: 'select', default: 'true', options: [
-        { v: 'true', l: '是' }, { v: 'false', l: '否' },
-      ]},
-      { key: 'showBloodOxygen', label: '显示血氧', type: 'select', default: 'true', options: [
-        { v: 'true', l: '是' }, { v: 'false', l: '否' },
-      ]},
-      { key: 'showSteps', label: '显示步数', type: 'select', default: 'true', options: [
-        { v: 'true', l: '是' }, { v: 'false', l: '否' },
-      ]},
-      { key: 'showSleep', label: '显示睡眠', type: 'select', default: 'true', options: [
-        { v: 'true', l: '是' }, { v: 'false', l: '否' },
-      ]},
+      { key: 'showHeartRate', label: '显示心率', type: 'select', default: 'true', options: [{ v: 'true', l: '是' }, { v: 'false', l: '否' }]},
+      { key: 'showBloodOxygen', label: '显示血氧', type: 'select', default: 'true', options: [{ v: 'true', l: '是' }, { v: 'false', l: '否' }]},
+      { key: 'showSteps', label: '显示步数', type: 'select', default: 'true', options: [{ v: 'true', l: '是' }, { v: 'false', l: '否' }]},
+      { key: 'showSleep', label: '显示睡眠', type: 'select', default: 'true', options: [{ v: 'true', l: '是' }, { v: 'false', l: '否' }]},
     ]},
     { group: '样式', fields: [
       { key: 'titleColor', label: '标题颜色', type: 'color', default: '#ffffff' },
@@ -48,57 +41,62 @@ export default {
     lines.push('    </ContentProviderBinder>');
     lines.push('  </VariableBinders>');
     lines.push('');
+    lines.push('  <!-- 背景 -->');
     lines.push('  <Rectangle w="#view_width" h="#view_height" fillColor="' + c.bgColor + '" />');
-    lines.push('  <Group x="#marginL" y="20" w="(#view_width - #marginL - 40)">');
-
-    var showHR = c.showHeartRate !== 'false';
-    var showBO = c.showBloodOxygen !== 'false';
-    var showST = c.showSteps !== 'false';
-    var showSL = c.showSleep !== 'false';
-
+    lines.push('');
+    lines.push('  <!-- 健康内容组 -->');
+    lines.push('  <Group name="health_content" x="#marginL" y="20" w="(#view_width - #marginL - 40)">');
     lines.push('    <Text text="健康数据" x="0" y="0" size="18" color="' + c.titleColor + '" bold="true" fontFamily="mipro-demibold" />');
     lines.push('    <Rectangle x="0" y="28" w="40" h="2" fillColor="' + c.accentColor + '" cornerRadius="1" />');
 
     var colW = '((#view_width - #marginL - 40) / 2)';
     var y = 48;
+    var showHR = c.showHeartRate !== 'false';
+    var showBO = c.showBloodOxygen !== 'false';
+    var showST = c.showSteps !== 'false';
+    var showSL = c.showSleep !== 'false';
 
     if (showHR) {
       lines.push('    <!-- 心率 -->');
-      lines.push('    <Text text="❤️ 心率" x="0" y="' + y + '" size="12" color="' + c.labelColor + '" />');
-      lines.push('    <Text textExp="(#health_heart_rate > 0 ? #health_heart_rate : \'--\')" x="0" y="' + (y + 20) + '" size="28" color="' + c.accentColor + '" bold="true" fontFamily="mipro-demibold" />');
-      lines.push('    <Text text="BPM" x="0" y="' + (y + 52) + '" size="10" color="' + c.labelColor + '" alpha="153" />');
+      lines.push('    <Group name="heart_rate" x="0" y="' + y + '" w="' + colW + '">');
+      lines.push('      <Text text="❤️ 心率" x="0" y="0" size="12" color="' + c.labelColor + '" />');
+      lines.push('      <Text x="0" y="20" size="28" color="' + c.accentColor + '" textExp="ifelse((#health_heart_rate > 0), #health_heart_rate, \'--\')" bold="true" fontFamily="mipro-demibold" />');
+      lines.push('      <Text text="BPM" x="0" y="52" size="10" color="' + c.labelColor + '" alpha="153" />');
+      lines.push('    </Group>');
       y += 75;
     }
-
     if (showBO) {
       lines.push('    <!-- 血氧 -->');
-      lines.push('    <Text text="🩸 血氧" x="' + colW + '" y="' + (showHR ? 48 : y) + '" size="12" color="' + c.labelColor + '" />');
-      lines.push('    <Text textExp="(#health_blood_oxygen > 0 ? concat(#health_blood_oxygen, \'%\') : \'--\')" x="' + colW + '" y="' + ((showHR ? 48 : y) + 20) + '" size="28" color="' + c.valueColor + '" bold="true" fontFamily="mipro-demibold" />');
-      lines.push('    <Text text="SpO₂" x="' + colW + '" y="' + ((showHR ? 48 : y) + 52) + '" size="10" color="' + c.labelColor + '" alpha="153" />');
+      lines.push('    <Group name="blood_oxygen" x="' + colW + '" y="' + (showHR ? 48 : y) + '" w="' + colW + '">');
+      lines.push('      <Text text="🩸 血氧" x="0" y="0" size="12" color="' + c.labelColor + '" />');
+      lines.push('      <Text x="0" y="20" size="28" color="' + c.valueColor + '" textExp="ifelse((#health_blood_oxygen > 0), concat(#health_blood_oxygen, \'%\'), \'--\')" bold="true" fontFamily="mipro-demibold" />');
+      lines.push('      <Text text="SpO₂" x="0" y="52" size="10" color="' + c.labelColor + '" alpha="153" />');
+      lines.push('    </Group>');
       if (showHR) y += 75;
     }
-
     if (showST) {
       lines.push('    <!-- 步数 -->');
       lines.push('    <Rectangle x="0" y="' + y + '" w="(#view_width - #marginL - 40)" h="1" fillColor="#1a2040" />');
       y += 10;
-      lines.push('    <Text text="🏃 步数" x="0" y="' + y + '" size="12" color="' + c.labelColor + '" />');
-      lines.push('    <Text textExp="#step_count" x="0" y="' + (y + 20) + '" size="24" color="' + c.valueColor + '" bold="true" fontFamily="mipro-demibold" />');
-      lines.push('    <Rectangle x="0" y="' + (y + 50) + '" w="(#view_width - #marginL - 40)" h="4" fillColor="#1a2040" cornerRadius="2" />');
-      lines.push('    <Rectangle x="0" y="' + (y + 50) + '" w="clamp((#view_width - #marginL - 40) * #step_count / 10000, 0, (#view_width - #marginL - 40))" h="4" fillColor="' + c.barColor + '" cornerRadius="2" />');
-      lines.push('    <Text text="目标 10,000 步" x="0" y="' + (y + 62) + '" size="10" color="' + c.labelColor + '" alpha="128" />');
+      lines.push('    <Group name="steps" x="0" y="' + y + '">');
+      lines.push('      <Text text="🏃 步数" x="0" y="0" size="12" color="' + c.labelColor + '" />');
+      lines.push('      <Text x="0" y="20" size="24" color="' + c.valueColor + '" textExp="#step_count" bold="true" fontFamily="mipro-demibold" />');
+      lines.push('      <Rectangle x="0" y="50" w="(#view_width - #marginL - 40)" h="4" fillColor="#1a2040" cornerRadius="2" />');
+      lines.push('      <Rectangle x="0" y="50" w="clamp((#view_width - #marginL - 40) * #step_count / 10000, 0, (#view_width - #marginL - 40))" h="4" fillColor="' + c.barColor + '" cornerRadius="2" />');
+      lines.push('      <Text text="目标 10,000 步" x="0" y="62" size="10" color="' + c.labelColor + '" alpha="128" />');
+      lines.push('    </Group>');
       y += 82;
     }
-
     if (showSL) {
       lines.push('    <!-- 睡眠 -->');
       lines.push('    <Rectangle x="0" y="' + y + '" w="(#view_width - #marginL - 40)" h="1" fillColor="#1a2040" />');
       y += 10;
-      lines.push('    <Text text="😴 睡眠" x="0" y="' + y + '" size="12" color="' + c.labelColor + '" />');
-      lines.push('    <Text textExp="(#health_sleep_hours > 0 ? concat(floor(#health_sleep_hours), \'h\', floor((#health_sleep_hours - floor(#health_sleep_hours)) * 60), \'m\') : \'--\')" x="0" y="' + (y + 20) + '" size="24" color="' + c.valueColor + '" bold="true" fontFamily="mipro-demibold" />');
-      lines.push('    <Text textExp="#health_sleep_quality" x="0" y="' + (y + 50) + '" size="12" color="' + c.barColor + '" />');
+      lines.push('    <Group name="sleep" x="0" y="' + y + '">');
+      lines.push('      <Text text="😴 睡眠" x="0" y="0" size="12" color="' + c.labelColor + '" />');
+      lines.push('      <Text x="0" y="20" size="24" color="' + c.valueColor + '" textExp="ifelse((#health_sleep_hours > 0), concat(floor(#health_sleep_hours), \'h\', floor((#health_sleep_hours - floor(#health_sleep_hours)) * 60), \'m\'), \'--\')" bold="true" fontFamily="mipro-demibold" />');
+      lines.push('      <Text x="0" y="50" size="12" color="' + c.barColor + '" textExp="#health_sleep_quality" />');
+      lines.push('    </Group>');
     }
-
     lines.push('  </Group>');
     lines.push('</Widget>');
     return lines.join('\n');

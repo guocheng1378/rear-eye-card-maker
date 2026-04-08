@@ -15,7 +15,6 @@ export default {
         { v: 'battery', l: '电量' },
       ], default: 'step' },
       { key: 'goal', label: '目标值 (步数模式)', type: 'text', default: '10000' },
-      { key: 'demoValue', label: '预览值', type: 'range', min: 0, max: 100, default: 65 },
     ]},
     { group: '样式', fields: [
       { key: 'ringColor', label: '进度环颜色', type: 'color', default: '#6c5ce7' },
@@ -29,10 +28,10 @@ export default {
     var isBattery = c.source === 'battery';
     var unit = isBattery ? '%' : '步';
     var label = isBattery ? '电量' : '步数';
-    var demoText = isBattery ? String(c.demoValue) : '6542';
-    var expr = isBattery ? '#battery_level' : '#step_count';
+    var demoText = isBattery ? '78' : '6542';
+    var expr = isBattery ? "concat(#battery_level, '%')" : "#step_count";
     return [
-      { type: 'text', expression: expr, text: demoText, x: 380, y: 70, size: 48, color: c.textColor, bold: true, textAlign: 'center', w: 100, locked: false },
+      { type: 'text', expression: expr, text: demoText, x: 380, y: 80, size: 48, color: c.textColor, bold: true, textAlign: 'center', w: 100, fontFamily: 'mipro-demibold', locked: false },
       { type: 'text', text: unit, x: 420, y: 130, size: 16, color: c.labelColor, locked: false, opacity: 60 },
       { type: 'text', text: label, x: 400, y: 220, size: 14, color: c.labelColor, textAlign: 'center', w: 60, locked: false, opacity: 50 },
     ];
@@ -48,8 +47,10 @@ export default {
       '  <Var name="ringR" type="number" expression="80" />',
       '  <Var name="ringW" type="number" expression="' + c.ringSize + '" />',
       '  <Rectangle w="#view_width" h="#view_height" fillColor="' + c.bgColor + '" />',
-      '  <Circle x="#cx" y="120" r="#ringR" fillColor="' + c.trackColor + '" />',
-      '  <Circle x="#cx" y="120" r="(#ringR - #ringW)" fillColor="' + c.bgColor + '" />',
+      '  <Group name="ring_track" x="#cx" y="120" align="center" alignV="center">',
+      '    <Circle x="0" y="0" r="#ringR" fillColor="' + c.trackColor + '" />',
+      '    <Circle x="0" y="0" r="(#ringR - #ringW)" fillColor="' + c.bgColor + '" />',
+      '  </Group>',
     ].join('\n');
   },
 };

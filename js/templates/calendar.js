@@ -1,4 +1,3 @@
-import { escXml } from '../maml.js';
 import { generateAutoDetectMAML } from '../devices.js';
 
 export default {
@@ -26,7 +25,7 @@ export default {
     var els = [
       { type: 'text', expression: "formatDate('MM/dd', #time_sys)", text: '04/08', x: 10, y: 20, size: 14, color: c.textColor, locked: false, opacity: 50 },
       { type: 'text', expression: "formatDate('EEEE', #time_sys)", text: '星期二', x: 10, y: 40, size: 18, color: c.accentColor, locked: false },
-      { type: 'text', expression: "formatDate('dd', #time_sys)", text: '08', x: 10, y: 55, size: Number(c.daySize), color: c.dayColor, bold: true, locked: false },
+      { type: 'text', expression: "formatDate('dd', #time_sys)", text: '08', x: 10, y: 55, size: Number(c.daySize), color: c.dayColor, bold: true, fontFamily: 'mipro-demibold', locked: false },
     ];
     [c.event1, c.event2, c.event3].filter(Boolean).forEach(function (e, i) {
       els.push({ type: 'text', text: e, x: 10, y: 150 + i * 28, size: 14, color: c.textColor, locked: false });

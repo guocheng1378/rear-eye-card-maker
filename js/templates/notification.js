@@ -11,12 +11,8 @@ export default {
     ]},
     { group: '显示设置', fields: [
       { key: 'maxNotifs', label: '最大通知数', type: 'range', min: 1, max: 5, default: 3 },
-      { key: 'showApp', label: '显示应用名', type: 'select', default: 'true', options: [
-        { v: 'true', l: '是' }, { v: 'false', l: '否' },
-      ]},
-      { key: 'showTime', label: '显示时间', type: 'select', default: 'true', options: [
-        { v: 'true', l: '是' }, { v: 'false', l: '否' },
-      ]},
+      { key: 'showApp', label: '显示应用名', type: 'select', default: 'true', options: [{ v: 'true', l: '是' }, { v: 'false', l: '否' }]},
+      { key: 'showTime', label: '显示时间', type: 'select', default: 'true', options: [{ v: 'true', l: '是' }, { v: 'false', l: '否' }]},
     ]},
     { group: '样式', fields: [
       { key: 'titleColor', label: '标题颜色', type: 'color', default: '#ffffff' },
@@ -43,25 +39,29 @@ export default {
     lines.push('    </ContentProviderBinder>');
     lines.push('  </VariableBinders>');
     lines.push('');
+    lines.push('  <!-- 背景 -->');
     lines.push('  <Rectangle w="#view_width" h="#view_height" fillColor="' + c.bgColor + '" />');
-    lines.push('  <Group x="#marginL" y="16" w="(#view_width - #marginL - 40)">');
+    lines.push('');
+    lines.push('  <!-- 通知内容组 -->');
+    lines.push('  <Group name="notif_content" x="#marginL" y="16" w="(#view_width - #marginL - 40)">');
     lines.push('    <Text text="通知" x="0" y="0" size="18" color="' + c.titleColor + '" bold="true" fontFamily="mipro-demibold" />');
     lines.push('    <Rectangle x="0" y="26" w="24" h="2" fillColor="' + c.accentColor + '" cornerRadius="1" />');
 
     for (var i = 0; i < maxN; i++) {
       var yBase = 40 + i * 68;
-      lines.push('    <!-- Notification ' + i + ' -->');
-      lines.push('    <Rectangle x="0" y="' + yBase + '" w="(#view_width - #marginL - 40)" h="56" fillColor="#141418" cornerRadius="8" />');
+      lines.push('    <!-- 通知 ' + (i + 1) + ' -->');
+      lines.push('    <Group name="notif_item_' + i + '" x="0" y="' + yBase + '" w="(#view_width - #marginL - 40)">');
+      lines.push('      <Rectangle x="0" y="0" w="(#view_width - #marginL - 40)" h="56" fillColor="#141418" cornerRadius="8" />');
       if (showApp) {
-        lines.push('    <Text textExp="@notif_app_' + i + '" x="10" y="' + (yBase + 8) + '" size="10" color="' + c.appColor + '" w="(#view_width - #marginL - 60)" ellipsis="true" />');
+        lines.push('      <Text x="10" y="8" size="10" color="' + c.appColor + '" textExp="@notif_app_' + i + '" w="(#view_width - #marginL - 60)" ellipsis="true" />');
       }
-      lines.push('    <Text textExp="@notif_title_' + i + '" x="10" y="' + (yBase + (showApp ? 22 : 10)) + '" size="13" color="' + c.titleColor + '" bold="true" w="(#view_width - #marginL - 60)" ellipsis="true" />');
-      lines.push('    <Text textExp="@notif_body_' + i + '" x="10" y="' + (yBase + (showApp ? 38 : 28)) + '" size="11" color="' + c.bodyColor + '" w="(#view_width - #marginL - 60)" ellipsis="true" />');
+      lines.push('      <Text x="10" y="' + (showApp ? 22 : 10) + '" size="13" color="' + c.titleColor + '" textExp="@notif_title_' + i + '" bold="true" w="(#view_width - #marginL - 60)" ellipsis="true" />');
+      lines.push('      <Text x="10" y="' + (showApp ? 38 : 28) + '" size="11" color="' + c.bodyColor + '" textExp="@notif_body_' + i + '" w="(#view_width - #marginL - 60)" ellipsis="true" />');
       if (showTime) {
-        lines.push('    <Text textExp="formatDate(\'HH:mm\', #notif_time_' + i + ')" x="(#view_width - #marginL - 70)" y="' + (yBase + 8) + '" size="10" color="' + c.timeColor + '" textAlign="right" />');
+        lines.push('      <Text x="(#view_width - #marginL - 70)" y="8" size="10" color="' + c.timeColor + '" textExp="formatDate(\'HH:mm\', #notif_time_' + i + ')" textAlign="right" />');
       }
+      lines.push('    </Group>');
     }
-
     lines.push('  </Group>');
     lines.push('</Widget>');
     return lines.join('\n');

@@ -19,7 +19,7 @@ export default {
     var safeW = Math.round(976 * (1 - 0.3)) - 40;
     return [
       { type: 'text', text: '电量', x: 10, y: 50, size: 18, color: c.textColor, locked: false, opacity: 60 },
-      { type: 'text', expression: "(#battery_level + '%')", text: c.demoLevel + '%', x: 10, y: 80, size: 56, color: c.textColor, bold: true, locked: false },
+      { type: 'text', expression: "concat(#battery_level, '%')", text: c.demoLevel + '%', x: 10, y: 80, size: 56, color: c.textColor, bold: true, fontFamily: 'mipro-demibold', locked: false },
       { type: 'text', expression: "ifelse((#battery_level >= 80), '电量充足', ifelse((#battery_level >= 20), '电量偏低', '电量极低'))", text: '电量充足', x: 10, y: 200, size: 16, color: c.textColor, locked: false, opacity: 50 },
     ];
   },
@@ -30,8 +30,10 @@ export default {
       '  <Var name="safeW" type="number" expression="(#view_width - #marginL - 40)" />',
       '  <Var name="barW" type="number" expression="(#safeW * #battery_level / 100)" />',
       '  <Rectangle w="#view_width" h="#view_height" fillColor="' + c.bgColor + '" />',
-      '  <Rectangle x="#marginL" y="160" w="#safeW" h="12" fillColor="#333333" cornerRadius="6" />',
-      '  <Rectangle x="#marginL" y="160" w="#barW" h="12" fillColor="' + c.barColor + '" cornerRadius="6" />',
+      '  <Group name="battery_bar" x="#marginL" y="160" w="#safeW">',
+      '    <Rectangle x="0" y="0" w="#safeW" h="12" fillColor="#333333" cornerRadius="6" />',
+      '    <Rectangle x="0" y="0" w="#barW" h="12" fillColor="' + c.barColor + '" cornerRadius="6" />',
+      '  </Group>',
     ].join('\n');
   },
 };

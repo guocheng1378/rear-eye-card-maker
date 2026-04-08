@@ -17,10 +17,11 @@ export default {
     ]},
   ],
   elements(c) {
-    var safeW = 976 * (1 - 0.3) - 20; // approx safe width
+    var safeW = 976 * (1 - 0.3) - 20;
     return [
-      { type: 'text', text: c.text, x: 10, y: 40, size: Number(c.textSize), color: c.textColor, multiLine: true, w: safeW, lineHeight: 1.4, locked: false },
-      { type: 'text', text: c.author, x: 10, y: 596 - 80, size: 16, color: c.authorColor, w: safeW, locked: false },
+      { type: 'rectangle', x: 10, y: 30, w: 3, h: 40, color: c.authorColor, radius: 1.5, locked: false },
+      { type: 'text', text: c.text, x: 22, y: 40, size: Number(c.textSize), color: c.textColor, multiLine: true, w: safeW - 12, lineHeight: 1.4, locked: false },
+      { type: 'text', text: c.author, x: 22, y: 596 - 80, size: 16, color: c.authorColor, w: safeW, locked: false },
     ];
   },
   gen(c) {

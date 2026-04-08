@@ -34,11 +34,11 @@ export default {
     var dateY2 = timeY2 + ts * 0.8;
     return [
       { type: 'text', text: c.city1, x: 10, y: cityY1, size: 13, color: c.dateColor, locked: false },
-      { type: 'text', expression: "formatDate('HH:mm', #utcNow)", text: '08:00', x: 10, y: timeY1, size: ts, color: c.timeColor1, bold: true, locked: false },
+      { type: 'text', expression: "formatDate('HH:mm', #utcNow)", text: '08:00', x: 10, y: timeY1, size: ts, color: c.timeColor1, bold: true, fontFamily: 'mipro-demibold', locked: false },
       { type: 'text', expression: "formatDate('MM/dd EEEE', #utcNow)", text: '04/08 星期二', x: 10, y: Math.round(dateY1), size: 13, color: c.dateColor, locked: false, opacity: 60 },
       { type: 'rectangle', x: 10, y: divY, w: 300, h: 1, color: c.dividerColor, locked: false },
       { type: 'text', text: c.city2, x: 10, y: cityY2, size: 13, color: c.dateColor, locked: false },
-      { type: 'text', expression: "formatDate('HH:mm', #utcNow2)", text: '19:00', x: 10, y: timeY2, size: ts, color: c.timeColor2, bold: true, locked: false },
+      { type: 'text', expression: "formatDate('HH:mm', #utcNow2)", text: '19:00', x: 10, y: timeY2, size: ts, color: c.timeColor2, bold: true, fontFamily: 'mipro-demibold', locked: false },
       { type: 'text', expression: "formatDate('MM/dd EEEE', #utcNow2)", text: '04/07 星期一', x: 10, y: Math.round(dateY2), size: 13, color: c.dateColor, locked: false, opacity: 60 },
     ];
   },

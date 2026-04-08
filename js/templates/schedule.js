@@ -1,7 +1,7 @@
 import { escXml } from '../maml.js';
 
 export default {
-  id: 'schedule', icon: '📅', name: '日程卡片', desc: '绑定系统日历，显示今日/近期日程',
+  id: 'schedule', icon: '📅', name: '日程卡片', desc: '绑定系统日历，显示今日日程',
   updater: 'DateTime.Hour,DateTime.Minute',
   config: [
     { group: '基本', fields: [
@@ -11,9 +11,7 @@ export default {
     ]},
     { group: '显示设置', fields: [
       { key: 'maxEvents', label: '最大显示数', type: 'range', min: 1, max: 5, default: 3 },
-      { key: 'showTime', label: '显示时间', type: 'select', default: 'true', options: [
-        { v: 'true', l: '是' }, { v: 'false', l: '否' },
-      ]},
+      { key: 'showTime', label: '显示时间', type: 'select', default: 'true', options: [{ v: 'true', l: '是' }, { v: 'false', l: '否' }]},
     ]},
     { group: '样式', fields: [
       { key: 'dateColor', label: '日期颜色', type: 'color', default: '#ffffff' },
@@ -38,27 +36,28 @@ export default {
     lines.push('    </ContentProviderBinder>');
     lines.push('  </VariableBinders>');
     lines.push('');
+    lines.push('  <!-- 背景 -->');
     lines.push('  <Rectangle w="#view_width" h="#view_height" fillColor="' + c.bgColor + '" />');
-    lines.push('  <Group x="#marginL" y="20" w="(#view_width - #marginL - 40)">');
-
-    // Date header
-    lines.push('    <Text textExp="formatDate(\'MM月dd日\', #time_sys)" x="0" y="0" size="14" color="' + c.eventTimeColor + '" />');
-    lines.push('    <Text textExp="formatDate(\'EEEE\', #time_sys)" x="0" y="20" size="26" color="' + c.dateColor + '" bold="true" fontFamily="mipro-demibold" />');
+    lines.push('');
+    lines.push('  <!-- 日程内容组 -->');
+    lines.push('  <Group name="schedule_content" x="#marginL" y="20" w="(#view_width - #marginL - 40)">');
+    lines.push('    <Text x="0" y="0" size="14" color="' + c.eventTimeColor + '" textExp="formatDate(\'MM月dd日\', #time_sys)" />');
+    lines.push('    <Text x="0" y="20" size="26" color="' + c.dateColor + '" textExp="formatDate(\'EEEE\', #time_sys)" bold="true" fontFamily="mipro-demibold" />');
     lines.push('    <Rectangle x="0" y="54" w="30" h="2" fillColor="' + c.accentColor + '" cornerRadius="1" />');
 
-    // Events
     for (var i = 0; i < maxEvents; i++) {
       var yBase = 72 + i * 60;
-      lines.push('    <!-- Event ' + i + ' -->');
-      lines.push('    <Rectangle x="0" y="' + yBase + '" w="4" h="4" fillColor="' + c.dotColor + '" cornerRadius="2" />');
+      lines.push('    <!-- 事件 ' + (i + 1) + ' -->');
+      lines.push('    <Group name="event_' + i + '" x="0" y="' + yBase + '">');
+      lines.push('      <Rectangle x="0" y="2" w="4" h="4" fillColor="' + c.dotColor + '" cornerRadius="2" />');
       if (showTime) {
-        lines.push('    <Text textExp="formatDate(\'HH:mm\', #event_start_' + i + ')" x="14" y="' + (yBase - 2) + '" size="12" color="' + c.eventTimeColor + '" />');
-        lines.push('    <Text textExp="@event_title_' + i + '" x="70" y="' + (yBase - 2) + '" size="14" color="' + c.eventTitleColor + '" w="(#view_width - #marginL - 110)" ellipsis="true" />');
+        lines.push('      <Text x="14" y="0" size="12" color="' + c.eventTimeColor + '" textExp="formatDate(\'HH:mm\', #event_start_' + i + ')" />');
+        lines.push('      <Text x="70" y="0" size="14" color="' + c.eventTitleColor + '" textExp="@event_title_' + i + '" w="(#view_width - #marginL - 110)" ellipsis="true" />');
       } else {
-        lines.push('    <Text textExp="@event_title_' + i + '" x="14" y="' + (yBase - 2) + '" size="14" color="' + c.eventTitleColor + '" w="(#view_width - #marginL - 54)" ellipsis="true" />');
+        lines.push('      <Text x="14" y="0" size="14" color="' + c.eventTitleColor + '" textExp="@event_title_' + i + '" w="(#view_width - #marginL - 54)" ellipsis="true" />');
       }
+      lines.push('    </Group>');
     }
-
     lines.push('  </Group>');
     lines.push('</Widget>');
     return lines.join('\n');

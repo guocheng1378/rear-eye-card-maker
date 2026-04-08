@@ -1,7 +1,7 @@
 import { escXml } from '../maml.js';
 
 export default {
-  id: 'quick_settings', icon: '⚡', name: '快捷开关卡片', desc: '显示 WiFi/蓝牙/亮度等系统开关状态',
+  id: 'quick_settings', icon: '⚡', name: '快捷开关卡片', desc: 'WiFi/蓝牙/亮度等系统开关状态',
   updater: 'DateTime.Minute',
   config: [
     { group: '基本', fields: [
@@ -41,8 +41,11 @@ export default {
     lines.push('    </ContentProviderBinder>');
     lines.push('  </VariableBinders>');
     lines.push('');
+    lines.push('  <!-- 背景 -->');
     lines.push('  <Rectangle w="#view_width" h="#view_height" fillColor="' + c.bgColor + '" />');
-    lines.push('  <Group x="#marginL" y="20" w="(#view_width - #marginL - 40)">');
+    lines.push('');
+    lines.push('  <!-- 快捷设置内容组 -->');
+    lines.push('  <Group name="qs_content" x="#marginL" y="20" w="(#view_width - #marginL - 40)">');
     lines.push('    <Text text="快捷设置" x="0" y="0" size="16" color="' + c.titleColor + '" bold="true" fontFamily="mipro-demibold" />');
 
     var toggles = [];
@@ -62,18 +65,19 @@ export default {
       var x = '(' + cellW + ' * ' + col + ')';
       var y = 30 + row * 72;
 
+      lines.push('    <!-- ' + t.label + ' -->');
+      lines.push('    <Group name="qs_' + t.label + '" x="' + x + '" y="' + y + '" w="' + cellW + '">');
       if (t.isSlider) {
-        lines.push('    <!-- ' + t.label + ' (slider) -->');
-        lines.push('    <Text text="' + t.icon + '" x="' + x + '" y="' + y + '" size="20" />');
-        lines.push('    <Rectangle x="' + x + '" y="' + (y + 30) + '" w="(' + cellW + ' - 16)" h="3" fillColor="' + c.inactiveColor + '" cornerRadius="1.5" />');
-        lines.push('    <Rectangle x="' + x + '" y="' + (y + 30) + '" w="((' + cellW + ' - 16) * ' + t.var + ' / 255)" h="3" fillColor="' + c.activeColor + '" cornerRadius="1.5" />');
-        lines.push('    <Text text="亮度" x="' + x + '" y="' + (y + 40) + '" size="10" color="' + c.labelColor + '" />');
+        lines.push('      <Text text="' + t.icon + '" x="0" y="0" size="20" />');
+        lines.push('      <Rectangle x="0" y="30" w="(' + cellW + ' - 16)" h="3" fillColor="' + c.inactiveColor + '" cornerRadius="1.5" />');
+        lines.push('      <Rectangle x="0" y="30" w="((' + cellW + ' - 16) * ' + t.var + ' / 255)" h="3" fillColor="' + c.activeColor + '" cornerRadius="1.5" />');
+        lines.push('      <Text text="亮度" x="0" y="40" size="10" color="' + c.labelColor + '" />');
       } else {
-        lines.push('    <!-- ' + t.label + ' -->');
-        lines.push('    <Circle x="(' + x + ' + ' + (iconSize / 2) + ')" y="' + (y + iconSize / 2) + '" r="' + (iconSize / 2) + '" fillColor="ifelse(' + t.var + ', ' + c.activeColor + ', ' + c.inactiveColor + ')" />');
-        lines.push('    <Text text="' + t.icon + '" x="(' + x + ' + ' + ((iconSize - 20) / 2) + ')" y="' + (y + ((iconSize - 20) / 2)) + '" size="18" />');
-        lines.push('    <Text text="' + t.label + '" x="' + x + '" y="' + (y + iconSize + 6) + '" size="10" color="' + c.labelColor + '" textAlign="center" w="' + cellW + '" />');
+        lines.push('      <Circle x="' + (iconSize / 2) + '" y="' + (iconSize / 2) + '" r="' + (iconSize / 2) + '" fillColor="ifelse(' + t.var + ', ' + c.activeColor + ', ' + c.inactiveColor + ')" />');
+        lines.push('      <Text text="' + t.icon + '" x="' + ((iconSize - 20) / 2) + '" y="' + ((iconSize - 20) / 2) + '" size="18" />');
+        lines.push('      <Text text="' + t.label + '" x="0" y="' + (iconSize + 6) + '" size="10" color="' + c.labelColor + '" textAlign="center" w="' + cellW + '" />');
       }
+      lines.push('    </Group>');
     });
 
     lines.push('  </Group>');
