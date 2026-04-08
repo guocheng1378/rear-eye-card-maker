@@ -733,6 +733,8 @@ kbd{
 
 .tpl-fav{position:absolute;top:6px;right:6px;background:none;border:none;font-size:16px;cursor:pointer;z-index:2;opacity:0.4;transition:var(--transition);padding:4px;line-height:1}
 .tpl-fav:hover,.tpl-fav.active{opacity:1}
+.tpl-info-btn{position:absolute;top:6px;right:32px;background:none;border:none;font-size:14px;cursor:pointer;z-index:2;opacity:0.3;transition:var(--transition);padding:4px;line-height:1;border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center}
+.tpl-info-btn:hover{opacity:1;background:rgba(124,109,240,.15)}
 
 /* ─── Lottie element ─── */
 .el-badge[data-type="lottie"]{background:#9b59b6}

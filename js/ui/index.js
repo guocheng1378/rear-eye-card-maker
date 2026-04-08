@@ -20,7 +20,7 @@ import {
 } from './elements.js';
 import {
   COLOR_PRESETS, renderTplGrid, filterTemplates, renderConfig,
-  getActiveCategory, setActiveCategory
+  getActiveCategory, setActiveCategory, showUsageModal
 } from './config-panel.js';
 import { shareTemplate, checkShareURL, showDraftRecovery } from './share.js';
 import { openLibraryModal } from './card-library-ui.js';
@@ -474,6 +474,13 @@ var _autoPreview = debounce(function () {
 function setupEvents() {
   // Template grid click + drag reorder
   document.getElementById('tplGrid').addEventListener('click', function (e) {
+    // Usage info button
+    var usageBtn = e.target.closest('[data-usage]');
+    if (usageBtn) {
+      e.stopPropagation();
+      showUsageModal(usageBtn.dataset.usage);
+      return;
+    }
     var card = e.target.closest('.tpl-card');
     if (card) selectTemplate(card.dataset.tpl);
   });

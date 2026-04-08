@@ -7,6 +7,7 @@ import { escHtml, getRecentColors, addRecentColor, getFavorites, toggleFavorite 
 import { isInCameraZone } from './elements.js';
 import { renderElementEditor } from './editors/index.js';
 import { COLOR_PRESETS, THEME_PRESETS, LAYER_ICONS, renderColorPresets } from './editors/common.js';
+import { TPL_USAGE } from '../templates/usage.js';
 export { COLOR_PRESETS };
 
 var _activeCategory = 'all';
@@ -63,6 +64,7 @@ export function renderTplGrid() {
     var isFav = favs.indexOf(t.id) >= 0;
     return '<div class="tpl-card' + (S.tpl && S.tpl.id === t.id ? ' active' : '') + '" data-tpl="' + t.id + '">' +
       '<button class="tpl-fav' + (isFav ? ' active' : '') + '" data-fav="' + t.id + '">' + (isFav ? '⭐' : '☆') + '</button>' +
+      (TPL_USAGE[t.id] ? '<button class="tpl-info-btn" data-usage="' + t.id + '" title="使用说明">❓</button>' : '') +
       '<div class="tpl-thumb">' + thumb + '</div>' +
       '<div class="tpl-card-name">' + t.name + '</div>' +
       '<div class="tpl-card-desc">' + t.desc + '</div></div>';
@@ -259,4 +261,75 @@ function renderField(f) {
 }
 function getSelectedDevice() {
   return getDevice(document.getElementById('deviceSelect').value);
+}
+
+// ─── 模板使用说明弹窗 ───────────────────────────────────────────
+var _usageModal = null;
+
+export function showUsageModal(tplId) {
+  var usage = TPL_USAGE[tplId];
+  if (!usage) return;
+
+  if (_usageModal) { _usageModal.remove(); _usageModal = null; }
+
+  var overlay = document.createElement('div');
+  overlay.className = 'modal-overlay';
+  overlay.style.display = '';
+  overlay.onclick = function () { closeUsageModal(); };
+
+  var modal = document.createElement('div');
+  modal.className = 'modal';
+  modal.style.maxWidth = '520px';
+  modal.style.maxHeight = '75vh';
+  modal.onclick = function (e) { e.stopPropagation(); };
+
+  var html = '<div class="modal-header">';
+  html += '<h3>' + esc(usage.title) + '</h3>';
+  html += '<button class="modal-close" id="usageCloseBtn">✕</button>';
+  html += '</div>';
+  html += '<div class="modal-body" style="max-height:60vh;overflow-y:auto;padding:16px 20px">';
+
+  // 使用步骤
+  html += '<div style="margin-bottom:16px">';
+  html += '<div style="font-size:13px;font-weight:600;color:var(--accent);margin-bottom:8px">📋 使用步骤</div>';
+  html += '<ol style="margin:0;padding-left:20px;color:var(--text2);font-size:13px;line-height:1.8">';
+  usage.steps.forEach(function (s) {
+    html += '<li>' + esc(s) + '</li>';
+  });
+  html += '</ol></div>';
+
+  // 使用技巧
+  html += '<div style="margin-bottom:16px">';
+  html += '<div style="font-size:13px;font-weight:600;color:var(--accent);margin-bottom:8px">💡 使用技巧</div>';
+  html += '<ul style="margin:0;padding-left:20px;color:var(--text2);font-size:13px;line-height:1.8">';
+  usage.tips.forEach(function (t) {
+    html += '<li>' + esc(t) + '</li>';
+  });
+  html += '</ul></div>';
+
+  // 导出说明
+  if (usage.export) {
+    html += '<div style="background:var(--surface2);border-radius:8px;padding:10px 14px;font-size:12px;color:var(--text3)">';
+    html += '📦 <strong>导出说明：</strong>' + esc(usage.export);
+    html += '</div>';
+  }
+
+  html += '</div>';
+
+  // 底部按钮
+  html += '<div style="padding:12px 20px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:8px">';
+  html += '<button class="btn" id="usageOkBtn" style="background:var(--accent);color:#fff;border:none;padding:8px 24px;border-radius:8px;cursor:pointer;font-size:13px">知道了</button>';
+  html += '</div>';
+
+  modal.innerHTML = html;
+  overlay.appendChild(modal);
+  document.body.appendChild(overlay);
+  _usageModal = overlay;
+
+  overlay.querySelector('#usageCloseBtn').onclick = closeUsageModal;
+  overlay.querySelector('#usageOkBtn').onclick = closeUsageModal;
+}
+
+export function closeUsageModal() {
+  if (_usageModal) { _usageModal.remove(); _usageModal = null; }
 }
