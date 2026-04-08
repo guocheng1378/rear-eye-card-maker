@@ -5,8 +5,8 @@ import { getDevice, cameraZoneWidth } from '../devices.js';
 import { toast } from './toast.js';
 
 export var ElementDefaults = {
-  text: function () { return { type: 'text', text: '新文字', x: 10, y: 60, size: 24, color: '#ffffff', fontFamily: 'default', textAlign: 'left', bold: false, underline: false, strikethrough: false, letterSpacing: 0, multiLine: false, w: 200, shadow: 'none', opacity: 100, rotation: 0, lineHeight: 1.4, textGradient: 'none', gradientColor2: '#ff6b6b', textStroke: 0, textStrokeColor: '#000000', expression: '', locked: false }; },
-  rectangle: function () { return { type: 'rectangle', x: 10, y: 60, w: 100, h: 40, color: '#333333', radius: 0, opacity: 100, rotation: 0, fillColor2: '', blur: 0, strokeWidth: 0, strokeColor: '#ffffff', brightness: 100, saturate: 100, hueRotate: 0, locked: false }; },
+  text: function () { return { type: 'text', text: '新文字', x: Math.round(device.width * device.cameraZoneRatio) + 10, y: 60, size: 24, color: '#ffffff', fontFamily: 'default', textAlign: 'left', bold: false, underline: false, strikethrough: false, letterSpacing: 0, multiLine: false, w: 200, shadow: 'none', opacity: 100, rotation: 0, lineHeight: 1.4, textGradient: 'none', gradientColor2: '#ff6b6b', textStroke: 0, textStrokeColor: '#000000', expression: '', locked: false }; },
+  rectangle: function () { return { type: 'rectangle', x: Math.round(device.width * device.cameraZoneRatio) + 10, y: 60, w: 100, h: 40, color: '#333333', radius: 0, opacity: 100, rotation: 0, fillColor2: '', blur: 0, strokeWidth: 0, strokeColor: '#ffffff', brightness: 100, saturate: 100, hueRotate: 0, locked: false }; },
   circle: function () { return { type: 'circle', x: 50, y: 100, r: 30, color: '#6c5ce7', opacity: 100, rotation: 0, strokeWidth: 0, strokeColor: '#ffffff', locked: false }; },
   line: function () { return { type: 'rectangle', x: 10, y: 100, w: 200, h: 2, color: '#555555', radius: 1, opacity: 60, rotation: 0, _isLine: true, locked: false }; },
   arc: function () { return { type: 'arc', x: 50, y: 50, r: 40, startAngle: 0, endAngle: 270, color: '#6c5ce7', strokeWidth: 6, locked: false }; },
