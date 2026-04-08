@@ -1262,21 +1262,21 @@ kbd{
 }
 
 /* ─── Syntax Highlighting ─── */
-.code-highlight .tag {
+.code-highlight .xml-tag {
   color: #61afef;
   font-weight:600;
 }
-.code-highlight .attr-name {
+.code-highlight .xml-attr {
   color: #e5c07b;
 }
-.code-highlight .attr-val {
+.code-highlight .xml-val {
   color: #98c379;
 }
-.code-highlight .comment {
+.code-highlight .xml-comment {
   color: #5c6370;
   font-style: italic;
 }
-.code-highlight .bracket {
+.code-highlight .xml-bracket {
   color: #c678dd;
 }
 .code-highlight .punctuation {
@@ -1671,4 +1671,18 @@ input[type=range]::-moz-range-track{
   font-size:9px;font-weight:700;padding:2px 8px;border-radius:10px;
   background:var(--accent);color:#fff;opacity:.8;
   animation:fadeIn .3s ease;
+}
+
+
+/* ─── Code Editor Enhancements ─── */
+.code-body textarea::selection{background:rgba(124,109,240,.3)}
+.code-body textarea::-moz-selection{background:rgba(124,109,240,.3)}
+/* Active line number highlight */
+.code-gutter span{transition:color .1s}
+.code-highlight{min-height:100%}
+
+/* ─── Code Editor Hint ─── */
+.code-hint{
+  font-size:10px;color:var(--text3);margin-left:auto;
+  white-space:nowrap;opacity:.6;
 }
