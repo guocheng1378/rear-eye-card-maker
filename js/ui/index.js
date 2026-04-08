@@ -632,6 +632,23 @@ function setupEvents() {
       }
       return;
     }
+
+    // Reset to defaults
+    var resetBtn = e.target.closest('[data-reset-defaults]');
+    if (resetBtn) {
+      e.stopPropagation();
+      if (confirm('确定恢复所有参数为默认值？')) {
+        var newCfg = {};
+        S.tpl.config.forEach(function (g) { g.fields.forEach(function (f) { newCfg[f.key] = f.default; }); });
+        S.setCfg(newCfg);
+        S.setDirty(true);
+        captureState('恢复默认');
+        renderConfig(getTemplateMAML);
+        _autoPreview();
+        toast('✅ 已恢复默认设置', 'success');
+      }
+      return;
+    }
     var addBtn = e.target.closest('[data-add]');
     if (addBtn) { if (addElement(addBtn.dataset.add)) renderConfig(getTemplateMAML); return; }
     var pickBtn = e.target.closest('[data-pick]');
