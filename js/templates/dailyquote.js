@@ -1,5 +1,4 @@
 import { escXml } from '../maml.js';
-import { generateAutoDetectMAML } from '../devices.js';
 
 export default {
   id: 'dailyquote', icon: '💊', name: '每日一句', desc: '每天自动切换一条语录',
@@ -40,13 +39,37 @@ export default {
       { type: 'text', expression: "formatDate('MM/dd EEEE', #time_sys)", text: '04/08 星期二', x: 10, y: 596 - 50, size: 12, color: c.dayColor, locked: false, opacity: 50 },
     ];
   },
-  gen(c) {
+  rawXml(c) {
     var quotes = [c.quote1, c.quote2, c.quote3, c.quote4, c.quote5, c.quote6, c.quote7].filter(Boolean);
     if (quotes.length === 0) quotes = ['每日一句'];
-    return [
-      generateAutoDetectMAML(),
-      '  <Var name="dayIdx" type="number" expression="((#year * 366 + #month * 31 + #date) % ' + quotes.length + ')" />',
-      '  <Rectangle w="#view_width" h="#view_height" fillColor="' + c.bgColor + '" />',
-    ].join('\n');
+    var ts = Number(c.textSize) || 26;
+    var safeW = '(#view_width - #marginL - 40)';
+
+    // Build text expression for switching quotes
+    var textExpr = "'" + escXml(quotes[quotes.length - 1]).replace(/\n/g, '\\n') + "'";
+    for (var i = quotes.length - 2; i >= 0; i--) {
+      textExpr = "ifelse((#dayIdx == " + i + "), '" + escXml(quotes[i]).replace(/\n/g, '\\n') + "', " + textExpr + ")";
+    }
+
+    var lines = [];
+    lines.push('<Widget screenWidth="976" frameRate="0" scaleByDensity="false" useVariableUpdater="DateTime.Day" name="' + escXml(c.cardName || '每日一句') + '">');
+    lines.push('  <Var name="marginL" type="number" expression="(#view_width * 0.30)" />');
+    lines.push('  <Var name="dayIdx" type="number" expression="((#year * 366 + #month * 31 + #date) % ' + quotes.length + ')" />');
+    lines.push('');
+    lines.push('  <!-- 背景 -->');
+    lines.push('  <Rectangle w="#view_width" h="#view_height" fillColor="' + c.bgColor + '" />');
+    lines.push('');
+    lines.push('  <!-- 每日一句内容组 -->');
+    lines.push('  <Group name="dailyquote_content" x="#marginL" y="0" w="' + safeW + '">');
+    lines.push('    <!-- 强调色标记 -->');
+    lines.push('    <Rectangle x="0" y="42" w="24" h="3" fillColor="' + c.accentColor + '" cornerRadius="1.5" />');
+    lines.push('    <!-- 语录文字 -->');
+    lines.push('    <Text x="0" y="56" size="' + ts + '" color="' + c.textColor + '" textExp="' + textExpr + '" w="' + safeW + '" multiLine="true" lineHeight="1.5" fontFamily="mipro-demibold" />');
+    lines.push('    <!-- 日期 -->');
+    lines.push('    <Text x="0" y="(#view_height - 50)" size="12" color="' + c.dayColor + '" textExp="formatDate(\'MM/dd EEEE\', #time_sys)" alpha="0.5" />');
+    lines.push('  </Group>');
+    lines.push('</Widget>');
+
+    return lines.join('\n');
   },
 };

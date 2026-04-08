@@ -1,5 +1,4 @@
 import { escXml } from '../maml.js';
-import { generateAutoDetectMAML } from '../devices.js';
 
 export default {
   id: 'carousel', icon: '🖼️', name: '照片轮播卡片', desc: '多张图片定时切换，自动轮播',
@@ -40,7 +39,7 @@ export default {
     }
     return els;
   },
-  gen(c) {
+  rawXml(c) {
     var interval = (c.interval || 5) * 1000;
     var transition = c.transition || 'fade';
     var fitMode = c.fitMode || 'cover';
@@ -48,13 +47,15 @@ export default {
     var showCaption = c.showCaption === 'true';
 
     var lines = [];
-    lines.push(generateAutoDetectMAML());
-    lines.push('');
-    lines.push('  <!-- 照片轮播 -->');
+    lines.push('<Widget screenWidth="976" frameRate="0" scaleByDensity="false" name="' + escXml(c.cardName || '照片轮播') + '">');
+    lines.push('  <Var name="marginL" type="number" expression="(#view_width * 0.30)" />');
     lines.push('  <Var name="slideIndex" type="number" expression="mod(floor(div(#time_sys, ' + interval + ')), 3)" />');
     lines.push('');
+    lines.push('  <!-- 背景 -->');
     lines.push('  <Rectangle w="#view_width" h="#view_height" fillColor="' + c.bgColor + '" />');
+    lines.push('');
 
+    // Slides
     for (var i = 0; i < 3; i++) {
       lines.push('  <!-- Slide ' + (i + 1) + ' -->');
       if (transition === 'fade') {
@@ -66,15 +67,17 @@ export default {
       }
     }
 
+    // Caption
     if (showCaption && c.caption) {
       lines.push('');
-      lines.push('  <!-- 标题 -->');
+      lines.push('  <!-- 标题栏 -->');
       lines.push('  <Group name="caption_group" x="0" y="(#view_height - 50)">');
       lines.push('    <Rectangle w="#view_width" h="50" fillColor="#000000" alpha="' + ((c.captionBgAlpha || 50) / 100).toFixed(2) + '" />');
-      lines.push('    <Text text="' + escXml(c.caption) + '" x="#marginL" y="14" size="14" color="' + c.captionColor + '" fontFamily="mipro-normal" />');
+      lines.push('    <Text text="' + escXml(c.caption) + '" x="#marginL" y="14" size="14" color="' + c.captionColor + '" />');
       lines.push('  </Group>');
     }
 
+    // Indicators
     if (showIndicator) {
       lines.push('');
       lines.push('  <!-- 指示器 -->');
@@ -85,6 +88,7 @@ export default {
       lines.push('  </Group>');
     }
 
+    lines.push('</Widget>');
     return lines.join('\n');
   },
 };

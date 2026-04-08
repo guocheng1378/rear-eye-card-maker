@@ -1,5 +1,4 @@
 import { escXml } from '../maml.js';
-import { generateAutoDetectMAML } from '../devices.js';
 
 export default {
   id: 'video_wallpaper', icon: '🎬', name: '视频壁纸卡片', desc: '增强视频壁纸：音频、循环、音量控制',
@@ -55,7 +54,7 @@ export default {
     }
     return els;
   },
-  gen(c) {
+  rawXml(c) {
     var loop = c.loopMode || 'loop';
     var autoPlay = c.autoPlay !== 'false';
     var volume = c.volume !== undefined ? c.volume : 0;
@@ -65,12 +64,12 @@ export default {
     var removeMute = c.removeMuteLimit !== 'false';
 
     var lines = [];
-    lines.push(generateAutoDetectMAML());
+    lines.push('<Widget screenWidth="976" frameRate="0" scaleByDensity="false" name="' + escXml(c.cardName || '视频壁纸') + '">');
+    lines.push('  <Var name="marginL" type="number" expression="(#view_width * 0.30)" />');
     lines.push('');
-    lines.push('  <!-- 增强视频壁纸 -->');
+    lines.push('  <!-- 视频壁纸 -->');
 
-    var videoAttrs = [];
-    videoAttrs.push('src="videos/user_video.mp4"');
+    var videoAttrs = ['src="videos/user_video.mp4"'];
     videoAttrs.push('x="0" y="0" w="#view_width" h="#view_height"');
     videoAttrs.push('autoPlay="' + autoPlay + '"');
     if (loop === 'loop') videoAttrs.push('loop="true"');
@@ -90,6 +89,11 @@ export default {
       lines.push('  <Rectangle w="#view_width" h="#view_height" fillColor="' + (c.overlayColor || '#000000') + '" alpha="' + alpha + '" />');
     }
 
+    if (c.showOverlayText === 'true' && c.overlayText) {
+      lines.push('  <Text text="' + escXml(c.overlayText) + '" x="#marginL" y="(#view_height - 60)" size="' + (c.overlayTextSize || 24) + '" color="' + (c.overlayTextColor || '#ffffff') + '" bold="true" />');
+    }
+
+    lines.push('</Widget>');
     return lines.join('\n');
   },
 };

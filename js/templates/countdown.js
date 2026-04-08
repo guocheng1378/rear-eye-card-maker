@@ -1,5 +1,4 @@
 import { escXml } from '../maml.js';
-import { generateAutoDetectMAML } from '../devices.js';
 
 export default {
   id: 'countdown', icon: '⏳', name: '倒计时卡片', desc: '倒计时到指定日期',
@@ -19,30 +18,37 @@ export default {
       { key: 'textColor', label: '文字颜色', type: 'color', default: '#ffffff' },
     ]},
   ],
-  gen(c) {
+  rawXml(c) {
     var td = String(c.targetDate || '0101');
     var validTd = /^\d{4}$/.test(td) ? td : '0101';
-    return [
-      generateAutoDetectMAML(),
-      '  <Var name="m" type="number" expression="#month" />',
-      '  <Var name="d" type="number" expression="#date" />',
-      '  <Var name="doy_base" type="number" expression="(ifelse((#m == 1), 0, ifelse((#m == 2), 31, ifelse((#m == 3), 59, ifelse((#m == 4), 90, ifelse((#m == 5), 120, ifelse((#m == 6), 151, ifelse((#m == 7), 181, ifelse((#m == 8), 212, ifelse((#m == 9), 243, ifelse((#m == 10), 273, ifelse((#m == 11), 304, 334)))))))))))" />',
-      '  <Var name="doy_leap" type="number" expression="ifelse((#year % 4 == 0), ifelse((#m >= 3), 1, 0), 0)" />',
-      '  <Var name="doy" type="number" expression="(#doy_base + #d + #doy_leap)" />',
-      '  <Var name="target" type="number" expression="' + validTd + '" />',
-      '  <Var name="tMonth" type="number" expression="floor(#target / 100)" />',
-      '  <Var name="tDay" type="number" expression="(#target - #tMonth * 100)" />',
-      '  <Var name="tdoy_base" type="number" expression="(ifelse((#tMonth == 1), 0, ifelse((#tMonth == 2), 31, ifelse((#tMonth == 3), 59, ifelse((#tMonth == 4), 90, ifelse((#tMonth == 5), 120, ifelse((#tMonth == 6), 151, ifelse((#tMonth == 7), 181, ifelse((#tMonth == 8), 212, ifelse((#tMonth == 9), 243, ifelse((#tMonth == 10), 273, ifelse((#tMonth == 11), 304, 334)))))))))))" />',
-      '  <Var name="tdoy_leap" type="number" expression="ifelse((#year % 4 == 0), ifelse((#tMonth >= 3), 1, 0), 0)" />',
-      '  <Var name="tdoy" type="number" expression="(#tdoy_base + #tDay + #tdoy_leap)" />',
-      '  <Var name="daysLeft" type="number" expression="(365 + ifelse((#year % 4 == 0), 1, 0) - #doy)" />',
-      '  <Var name="diff" type="number" expression="ifelse((#tdoy >= #doy), (#tdoy - #doy), (#daysLeft + #tdoy))" />',
-      '  <Rectangle w="#view_width" h="#view_height" fillColor="' + c.bgColor + '" />',
-      '  <Group name="countdown_display" x="#marginL" y="0">',
-      '    <Text text="' + escXml(c.eventName) + '" x="0" y="50" size="18" color="' + c.textColor + '" alpha="153" />',
-      '    <Text x="0" y="80" size="72" color="' + c.accentColor + '" textExp="#diff" bold="true" fontFamily="mipro-demibold" />',
-      '    <Text text="天" x="0" y="160" size="20" color="' + c.textColor + '" alpha="128" />',
-      '  </Group>',
-    ].join('\n');
+    var lines = [];
+    lines.push('<Widget screenWidth="976" frameRate="0" scaleByDensity="false" useVariableUpdater="DateTime.Day" name="' + escXml(c.cardName || '倒计时卡片') + '">');
+    lines.push('  <Var name="marginL" type="number" expression="(#view_width * 0.30)" />');
+    lines.push('  <Var name="m" type="number" expression="#month" />');
+    lines.push('  <Var name="d" type="number" expression="#date" />');
+    lines.push('  <Var name="doy_base" type="number" expression="(ifelse((#m == 1), 0, ifelse((#m == 2), 31, ifelse((#m == 3), 59, ifelse((#m == 4), 90, ifelse((#m == 5), 120, ifelse((#m == 6), 151, ifelse((#m == 7), 181, ifelse((#m == 8), 212, ifelse((#m == 9), 243, ifelse((#m == 10), 273, ifelse((#m == 11), 304, 334)))))))))))" />');
+    lines.push('  <Var name="doy_leap" type="number" expression="ifelse((#year % 4 == 0), ifelse((#m >= 3), 1, 0), 0)" />');
+    lines.push('  <Var name="doy" type="number" expression="(#doy_base + #d + #doy_leap)" />');
+    lines.push('  <Var name="target" type="number" expression="' + validTd + '" />');
+    lines.push('  <Var name="tMonth" type="number" expression="floor(#target / 100)" />');
+    lines.push('  <Var name="tDay" type="number" expression="(#target - #tMonth * 100)" />');
+    lines.push('  <Var name="tdoy_base" type="number" expression="(ifelse((#tMonth == 1), 0, ifelse((#tMonth == 2), 31, ifelse((#tMonth == 3), 59, ifelse((#tMonth == 4), 90, ifelse((#tMonth == 5), 120, ifelse((#tMonth == 6), 151, ifelse((#tMonth == 7), 181, ifelse((#tMonth == 8), 212, ifelse((#tMonth == 9), 243, ifelse((#tMonth == 10), 273, ifelse((#tMonth == 11), 304, 334)))))))))))" />');
+    lines.push('  <Var name="tdoy_leap" type="number" expression="ifelse((#year % 4 == 0), ifelse((#tMonth >= 3), 1, 0), 0)" />');
+    lines.push('  <Var name="tdoy" type="number" expression="(#tdoy_base + #tDay + #tdoy_leap)" />');
+    lines.push('  <Var name="daysLeft" type="number" expression="(365 + ifelse((#year % 4 == 0), 1, 0) - #doy)" />');
+    lines.push('  <Var name="diff" type="number" expression="ifelse((#tdoy >= #doy), (#tdoy - #doy), (#daysLeft + #tdoy))" />');
+    lines.push('');
+    lines.push('  <!-- 背景 -->');
+    lines.push('  <Rectangle w="#view_width" h="#view_height" fillColor="' + c.bgColor + '" />');
+    lines.push('');
+    lines.push('  <!-- 倒计时内容组 -->');
+    lines.push('  <Group name="countdown_display" x="#marginL" y="0" w="(#view_width - #marginL - 40)">');
+    lines.push('    <Text text="' + escXml(c.eventName || '距离新年') + '" x="0" y="50" size="18" color="' + c.textColor + '" alpha="0.6" />');
+    lines.push('    <Text x="0" y="80" size="72" color="' + c.accentColor + '" textExp="#diff" bold="true" fontFamily="mipro-demibold" />');
+    lines.push('    <Text text="天" x="0" y="160" size="20" color="' + c.textColor + '" alpha="0.5" />');
+    lines.push('  </Group>');
+    lines.push('</Widget>');
+
+    return lines.join('\n');
   },
 };

@@ -1,4 +1,4 @@
-import { generateAutoDetectMAML } from '../devices.js';
+import { escXml } from '../maml.js';
 
 export default {
   id: 'steps', icon: '🏃', name: '步数卡片', desc: '今日步数和运动数据',
@@ -26,19 +26,37 @@ export default {
       { type: 'text', expression: "concat('消耗 ', #step_calorie, ' kcal')", text: '消耗 256 kcal', x: 130, y: 190, size: 14, color: c.accentColor, locked: false, opacity: 70 },
     ];
   },
-  gen(c) {
+  rawXml(c) {
     var goalN = parseInt(c.goal) || 10000;
-    return [
-      generateAutoDetectMAML(),
-      '  <Var name="safeW" type="number" expression="(#view_width - #marginL - 40)" />',
-      '  <Var name="goalN" type="number" expression="' + goalN + '" />',
-      '  <Var name="pct" type="number" expression="ifelse((#step_count > #goalN), 100, (#step_count * 100 / #goalN))" />',
-      '  <Var name="barW" type="number" expression="(#safeW * #pct / 100)" />',
-      '  <Rectangle w="#view_width" h="#view_height" fillColor="' + c.bgColor + '" />',
-      '  <Group name="step_progress" x="#marginL" y="140" w="#safeW">',
-      '    <Rectangle x="0" y="0" w="#safeW" h="8" fillColor="#222222" cornerRadius="4" />',
-      '    <Rectangle x="0" y="0" w="#barW" h="8" fillColor="' + c.barColor + '" cornerRadius="4" />',
-      '  </Group>',
-    ].join('\n');
+    var safeW = '(#view_width - #marginL - 40)';
+    var lines = [];
+    lines.push('<Widget screenWidth="976" frameRate="0" scaleByDensity="false" useVariableUpdater="Step" name="' + escXml(c.cardName || '步数卡片') + '">');
+    lines.push('  <Var name="marginL" type="number" expression="(#view_width * 0.30)" />');
+    lines.push('  <Var name="safeW" type="number" expression="' + safeW + '" />');
+    lines.push('  <Var name="goalN" type="number" expression="' + goalN + '" />');
+    lines.push('  <Var name="pct" type="number" expression="ifelse((#step_count > #goalN), 100, (#step_count * 100 / #goalN))" />');
+    lines.push('  <Var name="barW" type="number" expression="(#safeW * #pct / 100)" />');
+    lines.push('');
+    lines.push('  <!-- 背景 -->');
+    lines.push('  <Rectangle w="#view_width" h="#view_height" fillColor="' + c.bgColor + '" />');
+    lines.push('');
+    lines.push('  <!-- 步数内容组 -->');
+    lines.push('  <Group name="steps_content" x="#marginL" y="0" w="#safeW">');
+    lines.push('    <Text text="今日步数" x="0" y="30" size="14" color="' + c.textColor + '" alpha="0.5" />');
+    lines.push('    <Text x="0" y="50" size="52" color="' + c.textColor + '" textExp="#step_count" bold="true" fontFamily="mipro-demibold" />');
+    lines.push('    <Text text="步" x="0" y="112" size="16" color="' + c.textColor + '" alpha="0.5" />');
+    lines.push('    <!-- 进度条 -->');
+    lines.push('    <Group name="step_progress" x="0" y="140" w="#safeW">');
+    lines.push('      <Rectangle x="0" y="0" w="#safeW" h="8" fillColor="#222222" cornerRadius="4" />');
+    lines.push('      <Rectangle x="0" y="0" w="#barW" h="8" fillColor="' + c.barColor + '" cornerRadius="4" />');
+    lines.push('    </Group>');
+    lines.push('    <!-- 统计信息 -->');
+    lines.push('    <Text x="0" y="160" size="12" color="' + c.textColor + '" textExp="concat(\'目标 \', #goalN, \' · \', #pct, \'%\')" alpha="0.4" />');
+    lines.push('    <Text x="0" y="190" size="14" color="' + c.accentColor + '" textExp="concat(\'距离 \', #step_distance, \' km\')" alpha="0.7" />');
+    lines.push('    <Text x="130" y="190" size="14" color="' + c.accentColor + '" textExp="concat(\'消耗 \', #step_calorie, \' kcal\')" alpha="0.7" />');
+    lines.push('  </Group>');
+    lines.push('</Widget>');
+
+    return lines.join('\n');
   },
 };

@@ -1,4 +1,4 @@
-import { generateAutoDetectMAML } from '../devices.js';
+import { escXml } from '../maml.js';
 
 export default {
   id: 'battery', icon: '🔋', name: '电池卡片', desc: '显示电池电量和状态',
@@ -16,24 +16,36 @@ export default {
     ]},
   ],
   elements(c) {
-    var safeW = Math.round(976 * (1 - 0.3)) - 40;
     return [
       { type: 'text', text: '电量', x: 10, y: 50, size: 18, color: c.textColor, locked: false, opacity: 60 },
       { type: 'text', expression: "concat(#battery_level, '%')", text: c.demoLevel + '%', x: 10, y: 80, size: 56, color: c.textColor, bold: true, fontFamily: 'mipro-demibold', locked: false },
       { type: 'text', expression: "ifelse((#battery_level >= 80), '电量充足', ifelse((#battery_level >= 20), '电量偏低', '电量极低'))", text: '电量充足', x: 10, y: 200, size: 16, color: c.textColor, locked: false, opacity: 50 },
     ];
   },
-  gen(c) {
-    var safeW = Math.round(976 * (1 - 0.3)) - 40;
-    return [
-      generateAutoDetectMAML(),
-      '  <Var name="safeW" type="number" expression="(#view_width - #marginL - 40)" />',
-      '  <Var name="barW" type="number" expression="(#safeW * #battery_level / 100)" />',
-      '  <Rectangle w="#view_width" h="#view_height" fillColor="' + c.bgColor + '" />',
-      '  <Group name="battery_bar" x="#marginL" y="160" w="#safeW">',
-      '    <Rectangle x="0" y="0" w="#safeW" h="12" fillColor="#333333" cornerRadius="6" />',
-      '    <Rectangle x="0" y="0" w="#barW" h="12" fillColor="' + c.barColor + '" cornerRadius="6" />',
-      '  </Group>',
-    ].join('\n');
+  rawXml(c) {
+    var lines = [];
+    lines.push('<Widget screenWidth="976" frameRate="0" scaleByDensity="false" useVariableUpdater="Battery" name="' + escXml(c.cardName || '电池卡片') + '">');
+    lines.push('  <Var name="marginL" type="number" expression="(#view_width * 0.30)" />');
+    lines.push('  <Var name="safeW" type="number" expression="(#view_width - #marginL - 40)" />');
+    lines.push('  <Var name="barW" type="number" expression="(#safeW * #battery_level / 100)" />');
+    lines.push('');
+    lines.push('  <!-- 背景 -->');
+    lines.push('  <Rectangle w="#view_width" h="#view_height" fillColor="' + c.bgColor + '" />');
+    lines.push('');
+    lines.push('  <!-- 电池内容组 -->');
+    lines.push('  <Group name="battery_content" x="#marginL" y="0" w="#safeW">');
+    lines.push('    <Text text="电量" x="0" y="50" size="18" color="' + c.textColor + '" alpha="0.6" />');
+    lines.push('    <Text x="0" y="80" size="56" color="' + c.textColor + '" textExp="concat(#battery_level, \'%\')" bold="true" fontFamily="mipro-demibold" />');
+    lines.push('    <!-- 电量条背景 -->');
+    lines.push('    <Group name="battery_bar" x="0" y="160" w="#safeW">');
+    lines.push('      <Rectangle x="0" y="0" w="#safeW" h="12" fillColor="#333333" cornerRadius="6" />');
+    lines.push('      <Rectangle x="0" y="0" w="#barW" h="12" fillColor="' + c.barColor + '" cornerRadius="6" />');
+    lines.push('    </Group>');
+    lines.push('    <!-- 状态文字 -->');
+    lines.push('    <Text x="0" y="200" size="16" color="' + c.textColor + '" textExp="ifelse((#battery_level >= 80), \'电量充足\', ifelse((#battery_level >= 20), \'电量偏低\', \'电量极低\'))" alpha="0.5" />');
+    lines.push('  </Group>');
+    lines.push('</Widget>');
+
+    return lines.join('\n');
   },
 };

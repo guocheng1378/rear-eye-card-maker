@@ -1,4 +1,4 @@
-import { generateAutoDetectMAML } from '../devices.js';
+import { escXml } from '../maml.js';
 
 export default {
   id: 'clock', icon: '⏰', name: '时钟卡片', desc: '深色极简时钟，带动画过渡',
@@ -31,9 +31,9 @@ export default {
     ]},
   ],
   elements(c) {
-    var ts = Number(c.timeSize);
-    var dateY = 80 + ts * 0.9;
-    var secY = 80 + ts * 0.15;
+    var ts = Number(c.timeSize) || 64;
+    var dateY = 80 + Math.round(ts * 0.9);
+    var secY = 80 + Math.round(ts * 0.15);
     var els = [
       { type: 'text', expression: "formatDate('" + c.timeFormat + "', #time_sys)", text: '12:34', x: 10, y: 80, size: ts, color: c.timeColor, bold: true, fontFamily: 'mipro-demibold', locked: false },
       { type: 'text', expression: "formatDate('" + c.dateFormat + "', #time_sys)", text: '2026/04/04 星期五', x: 10, y: Math.round(dateY), size: 18, color: c.dateColor, locked: false },
@@ -44,10 +44,30 @@ export default {
     }
     return els;
   },
-  gen(c) {
-    return [
-      generateAutoDetectMAML(),
-      '  <Rectangle w="#view_width" h="#view_height" fillColor="' + c.bgColor + '" />',
-    ].join('\n');
+  rawXml(c) {
+    var ts = Number(c.timeSize) || 64;
+    var dateY = 80 + Math.round(ts * 0.9);
+    var secY = 80 + Math.round(ts * 0.15);
+    var showSec = c.showSeconds === 'true';
+    var lines = [];
+
+    lines.push('<Widget screenWidth="976" frameRate="0" scaleByDensity="false" useVariableUpdater="DateTime.Minute" name="' + escXml(c.cardName || '时钟卡片') + '">');
+    lines.push('  <Var name="marginL" type="number" expression="(#view_width * 0.30)" />');
+    lines.push('');
+    lines.push('  <!-- 背景 -->');
+    lines.push('  <Rectangle w="#view_width" h="#view_height" fillColor="' + c.bgColor + '" />');
+    lines.push('');
+    lines.push('  <!-- 时钟内容组 -->');
+    lines.push('  <Group name="clock_content" x="#marginL" y="0" w="(#view_width - #marginL - 40)">');
+    lines.push('    <Text x="0" y="80" size="' + ts + '" color="' + c.timeColor + '" textExp="formatDate(\'' + c.timeFormat + '\', #time_sys)" bold="true" fontFamily="mipro-demibold" />');
+    if (showSec) {
+      lines.push('    <Text x="0" y="' + secY + '" size="' + Math.round(ts * 0.4) + '" color="' + c.accentColor + '" textExp="formatDate(\'ss\', #time_sys)" alpha="0.6" />');
+    }
+    lines.push('    <Text x="0" y="' + dateY + '" size="18" color="' + c.dateColor + '" textExp="formatDate(\'' + c.dateFormat + '\', #time_sys)" />');
+    lines.push('    <Rectangle x="0" y="' + (dateY + 28) + '" w="32" h="2" fillColor="' + c.accentColor + '" cornerRadius="1" />');
+    lines.push('  </Group>');
+    lines.push('</Widget>');
+
+    return lines.join('\n');
   },
 };

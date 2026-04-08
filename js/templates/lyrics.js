@@ -57,10 +57,10 @@ export default {
     lines.push('  <Var name="marginL" type="number" expression="(#view_width * 0.30)" />');
     lines.push('  <Var name="isPlay" type="number" expression="eqs(#music_control.music_state,\'1\')" />');
     lines.push('');
-    lines.push('  <!-- MusicControl -->');
+    lines.push('  <!-- MusicControl 控件 -->');
     lines.push('  <MusicControl name="music_control" autoShow="false" autoRefresh="true" x="0" y="0" enableLyric="true" updateLyricInterval="100" />');
     lines.push('');
-    lines.push('  <!-- 歌词绑定 -->');
+    lines.push('  <!-- 歌词数据绑定 -->');
     lines.push('  <VariableBinders>');
     if (provider === 'lyricon') {
       lines.push('    <ContentProviderBinder name="lyricon_binder" uri="content://com.xiaomi.lrc/lyric" columns="title,artist,lrc,lrc_trans,lrc_rom">');
@@ -122,13 +122,14 @@ export default {
     }
     lines.push('    </Group>');
     lines.push('');
-    lines.push('    <!-- 播放状态 -->');
+    lines.push('    <!-- 播放指示器 -->');
     lines.push('    <Group name="play_indicator" x="0" y="(#view_height - 40)">');
     lines.push('      <Rectangle x="0" y="2" w="6" h="6" fillColor="' + c.accentColor + '" cornerRadius="3" alpha="ifelse(#isPlay, 1, 0.3)" />');
-    lines.push('      <Text x="14" y="0" size="12" color="' + c.artistColor + '" textExp="ifelse(#isPlay, \'正在播放\', \'已暂停\')" fontFamily="mipro-normal" />');
+    lines.push('      <Text x="14" y="0" size="12" color="' + c.artistColor + '" textExp="ifelse(#isPlay, \'正在播放\', \'已暂停\')" />');
     lines.push('    </Group>');
     lines.push('  </Group>');
     lines.push('</Widget>');
+
     return lines.join('\n');
   },
 };

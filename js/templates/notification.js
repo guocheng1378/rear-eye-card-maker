@@ -26,9 +26,13 @@ export default {
     var maxN = c.maxNotifs || 3;
     var showApp = c.showApp !== 'false';
     var showTime = c.showTime !== 'false';
+    var safeW = '(#view_width - #marginL - 40)';
     var lines = [];
+
     lines.push('<Widget screenWidth="976" frameRate="0" scaleByDensity="false" useVariableUpdater="DateTime.Minute" name="' + escXml(c.cardName || '通知卡片') + '">');
     lines.push('  <Var name="marginL" type="number" expression="(#view_width * 0.30)" />');
+    lines.push('');
+    lines.push('  <!-- 通知数据绑定 -->');
     lines.push('  <VariableBinders>');
     lines.push('    <ContentProviderBinder name="notification_provider" uri="content://com.android.notification/history" columns="app,title,body,pkg,time" sortOrder="time DESC" limit="' + maxN + '">');
     lines.push('      <Variable name="notif_app_0" type="string" column="app" />');
@@ -43,27 +47,28 @@ export default {
     lines.push('  <Rectangle w="#view_width" h="#view_height" fillColor="' + c.bgColor + '" />');
     lines.push('');
     lines.push('  <!-- 通知内容组 -->');
-    lines.push('  <Group name="notif_content" x="#marginL" y="16" w="(#view_width - #marginL - 40)">');
+    lines.push('  <Group name="notif_content" x="#marginL" y="16" w="' + safeW + '">');
     lines.push('    <Text text="通知" x="0" y="0" size="18" color="' + c.titleColor + '" bold="true" fontFamily="mipro-demibold" />');
     lines.push('    <Rectangle x="0" y="26" w="24" h="2" fillColor="' + c.accentColor + '" cornerRadius="1" />');
 
     for (var i = 0; i < maxN; i++) {
       var yBase = 40 + i * 68;
       lines.push('    <!-- 通知 ' + (i + 1) + ' -->');
-      lines.push('    <Group name="notif_item_' + i + '" x="0" y="' + yBase + '" w="(#view_width - #marginL - 40)">');
-      lines.push('      <Rectangle x="0" y="0" w="(#view_width - #marginL - 40)" h="56" fillColor="#141418" cornerRadius="8" />');
+      lines.push('    <Group name="notif_item_' + i + '" x="0" y="' + yBase + '" w="' + safeW + '">');
+      lines.push('      <Rectangle x="0" y="0" w="' + safeW + '" h="56" fillColor="#141418" cornerRadius="8" />');
       if (showApp) {
-        lines.push('      <Text x="10" y="8" size="10" color="' + c.appColor + '" textExp="@notif_app_' + i + '" w="(#view_width - #marginL - 60)" ellipsis="true" />');
+        lines.push('      <Text x="10" y="8" size="10" color="' + c.appColor + '" textExp="@notif_app_' + i + '" w="(' + safeW + ' - 50)" ellipsis="true" />');
       }
-      lines.push('      <Text x="10" y="' + (showApp ? 22 : 10) + '" size="13" color="' + c.titleColor + '" textExp="@notif_title_' + i + '" bold="true" w="(#view_width - #marginL - 60)" ellipsis="true" />');
-      lines.push('      <Text x="10" y="' + (showApp ? 38 : 28) + '" size="11" color="' + c.bodyColor + '" textExp="@notif_body_' + i + '" w="(#view_width - #marginL - 60)" ellipsis="true" />');
+      lines.push('      <Text x="10" y="' + (showApp ? 22 : 10) + '" size="13" color="' + c.titleColor + '" textExp="@notif_title_' + i + '" bold="true" w="(' + safeW + ' - 50)" ellipsis="true" />');
+      lines.push('      <Text x="10" y="' + (showApp ? 38 : 28) + '" size="11" color="' + c.bodyColor + '" textExp="@notif_body_' + i + '" w="(' + safeW + ' - 50)" ellipsis="true" />');
       if (showTime) {
-        lines.push('      <Text x="(#view_width - #marginL - 70)" y="8" size="10" color="' + c.timeColor + '" textExp="formatDate(\'HH:mm\', #notif_time_' + i + ')" textAlign="right" />');
+        lines.push('      <Text x="(' + safeW + ' - 60)" y="8" size="10" color="' + c.timeColor + '" textExp="formatDate(\'HH:mm\', #notif_time_' + i + ')" textAlign="right" />');
       }
       lines.push('    </Group>');
     }
     lines.push('  </Group>');
     lines.push('</Widget>');
+
     return lines.join('\n');
   },
 };

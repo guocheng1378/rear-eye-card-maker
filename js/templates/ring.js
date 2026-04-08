@@ -1,4 +1,4 @@
-import { generateAutoDetectMAML } from '../devices.js';
+import { escXml } from '../maml.js';
 
 export default {
   id: 'ring', icon: '🎯', name: '环形进度', desc: '环形进度条显示步数或电量',
@@ -36,21 +36,41 @@ export default {
       { type: 'text', text: label, x: 400, y: 220, size: 14, color: c.labelColor, textAlign: 'center', w: 60, locked: false, opacity: 50 },
     ];
   },
-  gen(c) {
+  rawXml(c) {
     var isBattery = c.source === 'battery';
     var goalN = parseInt(c.goal) || 10000;
     var pctExpr = isBattery ? '#battery_level' : 'ifelse((#step_count > ' + goalN + '), 100, (#step_count * 100 / ' + goalN + '))';
-    return [
-      generateAutoDetectMAML(),
-      '  <Var name="cx" type="number" expression="(#marginL + (#view_width - #marginL) / 2)" />',
-      '  <Var name="pct" type="number" expression="' + pctExpr + '" />',
-      '  <Var name="ringR" type="number" expression="80" />',
-      '  <Var name="ringW" type="number" expression="' + c.ringSize + '" />',
-      '  <Rectangle w="#view_width" h="#view_height" fillColor="' + c.bgColor + '" />',
-      '  <Group name="ring_track" x="#cx" y="120" align="center" alignV="center">',
-      '    <Circle x="0" y="0" r="#ringR" fillColor="' + c.trackColor + '" />',
-      '    <Circle x="0" y="0" r="(#ringR - #ringW)" fillColor="' + c.bgColor + '" />',
-      '  </Group>',
-    ].join('\n');
+    var valueExpr = isBattery ? "concat(#battery_level, '%')" : "#step_count";
+    var unit = isBattery ? '%' : '步';
+    var label = isBattery ? '电量' : '步数';
+    var ringR = 80;
+    var ringW = Number(c.ringSize) || 12;
+    var lines = [];
+
+    lines.push('<Widget screenWidth="976" frameRate="0" scaleByDensity="false" useVariableUpdater="Step,Battery" name="' + escXml(c.cardName || '环形进度') + '">');
+    lines.push('  <Var name="marginL" type="number" expression="(#view_width * 0.30)" />');
+    lines.push('  <Var name="cx" type="number" expression="(#marginL + (#view_width - #marginL) / 2)" />');
+    lines.push('  <Var name="pct" type="number" expression="' + pctExpr + '" />');
+    lines.push('  <Var name="ringR" type="number" expression="' + ringR + '" />');
+    lines.push('  <Var name="ringW" type="number" expression="' + ringW + '" />');
+    lines.push('');
+    lines.push('  <!-- 背景 -->');
+    lines.push('  <Rectangle w="#view_width" h="#view_height" fillColor="' + c.bgColor + '" />');
+    lines.push('');
+    lines.push('  <!-- 环形轨道 (同心圆模拟) -->');
+    lines.push('  <Group name="ring_track" x="#cx" y="120" align="center" alignV="center">');
+    lines.push('    <Circle x="0" y="0" r="#ringR" fillColor="' + c.trackColor + '" />');
+    lines.push('    <Circle x="0" y="0" r="(#ringR - #ringW)" fillColor="' + c.bgColor + '" />');
+    lines.push('  </Group>');
+    lines.push('');
+    lines.push('  <!-- 中心文字 -->');
+    lines.push('  <Group name="ring_center" x="#cx" y="120" align="center" alignV="center">');
+    lines.push('    <Text x="0" y="-10" size="48" color="' + c.textColor + '" textExp="' + valueExpr + '" bold="true" fontFamily="mipro-demibold" textAlign="center" w="120" />');
+    lines.push('    <Text text="' + unit + '" x="0" y="30" size="16" color="' + c.labelColor + '" textAlign="center" w="120" alpha="0.6" />');
+    lines.push('    <Text text="' + label + '" x="0" y="100" size="14" color="' + c.labelColor + '" textAlign="center" w="120" alpha="0.5" />');
+    lines.push('  </Group>');
+    lines.push('</Widget>');
+
+    return lines.join('\n');
   },
 };

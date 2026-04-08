@@ -1,4 +1,4 @@
-import { generateAutoDetectMAML } from '../devices.js';
+import { escXml } from '../maml.js';
 
 export default {
   id: 'gradient', icon: '🌈', name: '渐变文字卡片', desc: '渐变背景 + 居中文字',
@@ -16,18 +16,24 @@ export default {
       { key: 'textSize', label: '字号', type: 'range', min: 16, max: 72, default: 36 },
     ]},
   ],
-  elements(c) {
-    var safeW = Math.round(976 * (1 - 0.3)) - 30;
+  rawXml(c) {
+    var ts = Number(c.textSize) || 36;
+    var safeW = '(#view_width - #marginL - 40)';
     var textY = Math.round(596 * 0.3);
-    return [
-      { type: 'text', text: c.text, x: 10, y: textY, size: Number(c.textSize), color: c.textColor, multiLine: true, w: safeW, textAlign: 'center', lineHeight: 1.4, locked: false },
-    ];
-  },
-  gen(c) {
-    return [
-      generateAutoDetectMAML(),
-      '  <Rectangle w="#view_width" h="#view_height" fillColor="' + c.bgColor1 + '" />',
-      '  <Rectangle x="(#view_width * 0.5)" w="(#view_width * 0.5)" h="#view_height" fillColor="' + c.bgColor2 + '" alpha="179" />',
-    ].join('\n');
+    var lines = [];
+    lines.push('<Widget screenWidth="976" frameRate="0" scaleByDensity="false" name="' + escXml(c.cardName || '渐变卡片') + '">');
+    lines.push('  <Var name="marginL" type="number" expression="(#view_width * 0.30)" />');
+    lines.push('');
+    lines.push('  <!-- 渐变背景 -->');
+    lines.push('  <Rectangle w="#view_width" h="#view_height" fillColor="' + c.bgColor1 + '" />');
+    lines.push('  <Rectangle x="(#view_width * 0.5)" w="(#view_width * 0.5)" h="#view_height" fillColor="' + c.bgColor2 + '" alpha="0.7" />');
+    lines.push('');
+    lines.push('  <!-- 居中文字 -->');
+    lines.push('  <Group name="gradient_text" x="#marginL" y="0" w="' + safeW + '">');
+    lines.push('    <Text x="0" y="' + textY + '" size="' + ts + '" color="' + c.textColor + '" text="' + escXml(c.text || '') + '" w="' + safeW + '" multiLine="true" textAlign="center" lineHeight="1.5" />');
+    lines.push('  </Group>');
+    lines.push('</Widget>');
+
+    return lines.join('\n');
   },
 };

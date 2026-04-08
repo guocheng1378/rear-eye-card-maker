@@ -19,34 +19,39 @@ export default {
   ],
   rawXml(c) {
     var ts = c.tempSize || 56;
-    return '<Widget screenWidth="976" frameRate="0" scaleByDensity="false" useVariableUpdater="DateTime.Hour,DateTime.Minute" name="' + escXml(c.cardName || '天气卡片') + '">\n' +
-    '  <VariableBinders>\n' +
-    '    <ContentProviderBinder name="weather_version_provider" uri="content://weather/weatherVersionData" columns="weather_version">\n' +
-    '      <Variable name="weather_version" type="string" column="weather_version" />\n' +
-    '    </ContentProviderBinder>\n' +
-    '    <ContentProviderBinder name="weather_provider" uriFormat="content://weather/weatherData/4/%s" uriParas="@localId" columns="city_id,temperature,weather_type,description,city_name,tmphighs,tmplows" countName="hasweather">\n' +
-    '      <Variable name="cityId" type="string" column="city_id" />\n' +
-    '      <Variable name="weather_location" type="string" column="city_name" />\n' +
-    '      <Variable name="weather_id" type="int" column="weather_type" />\n' +
-    '      <Variable name="weather_temperature" type="int" column="temperature" />\n' +
-    '      <Variable name="weather_description" type="string" column="description" />\n' +
-    '      <Variable name="weather_temphigh" type="string[]" column="tmphighs" />\n' +
-    '      <Variable name="weather_templow" type="string[]" column="tmplows" />\n' +
-    '    </ContentProviderBinder>\n' +
-    '  </VariableBinders>\n' +
-    '  <Var name="marginL" type="number" expression="(#view_width * 0.30)" />\n' +
-    '\n' +
-    '  <!-- 背景 -->\n' +
-    '  <Rectangle w="#view_width" h="#view_height" fillColor="' + c.bgColor + '" />\n' +
-    '\n' +
-    '  <!-- 天气内容组 -->\n' +
-    '  <Group name="weather_content" x="#marginL" y="0" w="(#view_width - #marginL - 40)">\n' +
-    '    <DateTime name="weather_time" x="0" y="40" color="' + c.timeColor + '" size="72" format="HH:mm" fontFamily="mipro-demibold" align="left" />\n' +
-    '    <DateTime name="weather_date" x="0" y="120" color="' + c.descColor + '" size="22" format="MM月dd日 E" fontFamily="mipro-normal" align="left" />\n' +
-    '    <Text x="0" y="200" color="' + c.tempColor + '" size="' + ts + '" textExp="concat(@weather_temperature, \'°\')" bold="true" fontFamily="mipro-demibold" />\n' +
-    '    <Text x="0" y="' + (200 + ts + 10) + '" color="' + c.descColor + '" size="20" textExp="concat(@weather_location, \' · \', @weather_description)" fontFamily="mipro-normal" />\n' +
-    '    <Text x="0" y="' + (200 + ts + 50) + '" color="' + c.descColor + '" size="16" textExp="concat(\'最高 \', @weather_temphigh[0], \'°  最低 \', @weather_templow[0], \'°\')" fontFamily="mipro-normal" />\n' +
-    '  </Group>\n' +
-    '</Widget>';
+    var lines = [];
+    lines.push('<Widget screenWidth="976" frameRate="0" scaleByDensity="false" useVariableUpdater="DateTime.Hour,DateTime.Minute" name="' + escXml(c.cardName || '天气卡片') + '">');
+    lines.push('  <Var name="marginL" type="number" expression="(#view_width * 0.30)" />');
+    lines.push('');
+    lines.push('  <!-- 天气数据绑定 -->');
+    lines.push('  <VariableBinders>');
+    lines.push('    <ContentProviderBinder name="weather_version_provider" uri="content://weather/weatherVersionData" columns="weather_version">');
+    lines.push('      <Variable name="weather_version" type="string" column="weather_version" />');
+    lines.push('    </ContentProviderBinder>');
+    lines.push('    <ContentProviderBinder name="weather_provider" uriFormat="content://weather/weatherData/4/%s" uriParas="@localId" columns="city_id,temperature,weather_type,description,city_name,tmphighs,tmplows" countName="hasweather">');
+    lines.push('      <Variable name="cityId" type="string" column="city_id" />');
+    lines.push('      <Variable name="weather_location" type="string" column="city_name" />');
+    lines.push('      <Variable name="weather_id" type="int" column="weather_type" />');
+    lines.push('      <Variable name="weather_temperature" type="int" column="temperature" />');
+    lines.push('      <Variable name="weather_description" type="string" column="description" />');
+    lines.push('      <Variable name="weather_temphigh" type="string[]" column="tmphighs" />');
+    lines.push('      <Variable name="weather_templow" type="string[]" column="tmplows" />');
+    lines.push('    </ContentProviderBinder>');
+    lines.push('  </VariableBinders>');
+    lines.push('');
+    lines.push('  <!-- 背景 -->');
+    lines.push('  <Rectangle w="#view_width" h="#view_height" fillColor="' + c.bgColor + '" />');
+    lines.push('');
+    lines.push('  <!-- 天气内容组 -->');
+    lines.push('  <Group name="weather_content" x="#marginL" y="0" w="(#view_width - #marginL - 40)">');
+    lines.push('    <Text x="0" y="40" size="72" color="' + c.timeColor + '" textExp="formatDate(\'HH:mm\', #time_sys)" bold="true" fontFamily="mipro-demibold" />');
+    lines.push('    <Text x="0" y="120" size="22" color="' + c.descColor + '" textExp="formatDate(\'MM月dd日 E\', #time_sys)" />');
+    lines.push('    <Text x="0" y="200" size="' + ts + '" color="' + c.tempColor + '" textExp="concat(@weather_temperature, \'°\')" bold="true" fontFamily="mipro-demibold" />');
+    lines.push('    <Text x="0" y="' + (200 + ts + 10) + '" size="20" color="' + c.descColor + '" textExp="concat(@weather_location, \' · \', @weather_description)" />');
+    lines.push('    <Text x="0" y="' + (200 + ts + 50) + '" size="16" color="' + c.descColor + '" textExp="concat(\'最高 \', @weather_temphigh[0], \'°  最低 \', @weather_templow[0], \'°\')" />');
+    lines.push('  </Group>');
+    lines.push('</Widget>');
+
+    return lines.join('\n');
   },
 };

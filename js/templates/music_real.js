@@ -22,7 +22,9 @@ export default {
   rawXml(c) {
     var artSize = c.artworkSize || 64;
     var showArt = c.showArtwork !== 'false';
+    var safeW = '(#view_width - #marginL - 40)';
     var lines = [];
+
     lines.push('<Widget screenWidth="976" frameRate="0" scaleByDensity="false" useVariableUpdater="DateTime.Minute" name="' + escXml(c.cardName || '音乐卡片') + '">');
     lines.push('  <Var name="marginL" type="number" expression="(#view_width * 0.30)" />');
     lines.push('  <Var name="isPlay" type="number" expression="eqs(#music_control.music_state,\'1\')" />');
@@ -30,19 +32,19 @@ export default {
     lines.push('  <!-- 背景 -->');
     lines.push('  <Rectangle w="#view_width" h="#view_height" fillColor="' + c.bgColor + '" />');
     lines.push('');
-    lines.push('  <!-- MusicControl -->');
+    lines.push('  <!-- MusicControl 控件 -->');
     lines.push('  <MusicControl name="music_control" autoShow="false" autoRefresh="true" x="0" y="0" />');
     lines.push('');
     lines.push('  <!-- 音乐内容组 -->');
-    lines.push('  <Group name="music_content" x="#marginL" y="0" w="(#view_width - #marginL - 40)">');
+    lines.push('  <Group name="music_content" x="#marginL" y="0" w="' + safeW + '">');
+
     if (showArt) {
       lines.push('    <!-- 专辑封面 -->');
-      lines.push('    <Group name="artwork_group" x="0" y="30" w="' + artSize + '" h="' + artSize + '">');
-      lines.push('      <Image x="0" y="0" w="' + artSize + '" h="' + artSize + '" cornerRadius="12" src="music_control.artwork" srcType="BitmapVar" />');
-      lines.push('    </Group>');
+      lines.push('    <Image x="0" y="30" w="' + artSize + '" h="' + artSize + '" cornerRadius="12" src="music_control.artwork" srcType="BitmapVar" />');
     }
+
     var infoX = showArt ? (artSize + 16) : 0;
-    var infoW = showArt ? '(#view_width - #marginL - 40 - ' + (artSize + 16) + ')' : '(#view_width - #marginL - 40)';
+    var infoW = showArt ? '(' + safeW + ' - ' + (artSize + 16) + ')' : safeW;
     lines.push('    <!-- 歌曲信息 -->');
     lines.push('    <Group name="song_info" x="' + infoX + '" y="30" w="' + infoW + '">');
     lines.push('      <Text x="0" y="0" size="20" color="' + c.titleColor + '" textExp="@music_control.title" bold="true" fontFamily="mipro-demibold" w="' + infoW + '" ellipsis="true" />');
@@ -51,12 +53,13 @@ export default {
     lines.push('');
     lines.push('    <!-- 播放状态 -->');
     lines.push('    <Group name="play_status" x="0" y="' + (showArt ? (artSize + 44) : 80) + '">');
-    lines.push('      <Rectangle x="0" y="0" w="(#view_width - #marginL - 40)" h="3" fillColor="#222222" cornerRadius="1.5" />');
+    lines.push('      <Rectangle x="0" y="0" w="' + safeW + '" h="3" fillColor="#222222" cornerRadius="1.5" />');
     lines.push('      <Rectangle x="0" y="0" w="5" h="5" fillColor="' + c.accentColor + '" cornerRadius="2.5" />');
-    lines.push('      <Text x="12" y="-3" size="12" color="' + c.accentColor + '" textExp="ifelse(#isPlay, \'正在播放\', \'已暂停\')" fontFamily="mipro-normal" />');
+    lines.push('      <Text x="12" y="-3" size="12" color="' + c.accentColor + '" textExp="ifelse(#isPlay, \'正在播放\', \'已暂停\')" />');
     lines.push('    </Group>');
     lines.push('  </Group>');
     lines.push('</Widget>');
+
     return lines.join('\n');
   },
 };

@@ -27,9 +27,13 @@ export default {
   ],
   rawXml(c) {
     var iconSize = c.iconSize || 40;
+    var safeW = '(#view_width - #marginL - 40)';
     var lines = [];
+
     lines.push('<Widget screenWidth="976" frameRate="0" scaleByDensity="false" useVariableUpdater="DateTime.Minute" name="' + escXml(c.cardName || '快捷开关') + '">');
     lines.push('  <Var name="marginL" type="number" expression="(#view_width * 0.30)" />');
+    lines.push('');
+    lines.push('  <!-- 系统设置数据绑定 -->');
     lines.push('  <VariableBinders>');
     lines.push('    <ContentProviderBinder name="settings_provider" uri="content://com.android.systemui/settings" columns="wifi_state,bluetooth_state,brightness_level,silent_mode,nfc_state,flashlight_state">');
     lines.push('      <Variable name="qs_wifi" type="int" column="wifi_state" />');
@@ -45,7 +49,7 @@ export default {
     lines.push('  <Rectangle w="#view_width" h="#view_height" fillColor="' + c.bgColor + '" />');
     lines.push('');
     lines.push('  <!-- 快捷设置内容组 -->');
-    lines.push('  <Group name="qs_content" x="#marginL" y="20" w="(#view_width - #marginL - 40)">');
+    lines.push('  <Group name="qs_content" x="#marginL" y="20" w="' + safeW + '">');
     lines.push('    <Text text="快捷设置" x="0" y="0" size="16" color="' + c.titleColor + '" bold="true" fontFamily="mipro-demibold" />');
 
     var toggles = [];
@@ -57,7 +61,7 @@ export default {
     if (c.showFlashlight !== 'false') toggles.push({ icon: '🔦', label: '手电', var: '#qs_flash' });
 
     var cols = 3;
-    var cellW = '((#view_width - #marginL - 40) / ' + cols + ')';
+    var cellW = '(' + safeW + ' / ' + cols + ')';
 
     toggles.forEach(function (t, i) {
       var col = i % cols;
@@ -82,6 +86,7 @@ export default {
 
     lines.push('  </Group>');
     lines.push('</Widget>');
+
     return lines.join('\n');
   },
 };

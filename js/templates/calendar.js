@@ -1,4 +1,4 @@
-import { generateAutoDetectMAML } from '../devices.js';
+import { escXml } from '../maml.js';
 
 export default {
   id: 'calendar', icon: '📅', name: '日历卡片', desc: '显示日期和简要日程',
@@ -32,10 +32,30 @@ export default {
     });
     return els;
   },
-  gen(c) {
-    return [
-      generateAutoDetectMAML(),
-      '  <Rectangle w="#view_width" h="#view_height" fillColor="' + c.bgColor + '" />',
-    ].join('\n');
+  rawXml(c) {
+    var ds = Number(c.daySize) || 72;
+    var safeW = '(#view_width - #marginL - 40)';
+    var events = [c.event1, c.event2, c.event3].filter(Boolean);
+    var lines = [];
+    lines.push('<Widget screenWidth="976" frameRate="0" scaleByDensity="false" useVariableUpdater="DateTime.Day" name="' + escXml(c.cardName || '日历卡片') + '">');
+    lines.push('  <Var name="marginL" type="number" expression="(#view_width * 0.30)" />');
+    lines.push('');
+    lines.push('  <!-- 背景 -->');
+    lines.push('  <Rectangle w="#view_width" h="#view_height" fillColor="' + c.bgColor + '" />');
+    lines.push('');
+    lines.push('  <!-- 日历内容组 -->');
+    lines.push('  <Group name="calendar_content" x="#marginL" y="0" w="' + safeW + '">');
+    lines.push('    <Text x="0" y="20" size="14" color="' + c.textColor + '" textExp="formatDate(\'MM/dd\', #time_sys)" alpha="0.5" />');
+    lines.push('    <Text x="0" y="40" size="18" color="' + c.accentColor + '" textExp="formatDate(\'EEEE\', #time_sys)" />');
+    lines.push('    <Text x="0" y="55" size="' + ds + '" color="' + c.dayColor + '" textExp="formatDate(\'dd\', #time_sys)" bold="true" fontFamily="mipro-demibold" />');
+
+    events.forEach(function (e, i) {
+      lines.push('    <Text text="' + escXml(e) + '" x="0" y="' + (150 + i * 28) + '" size="14" color="' + c.textColor + '" />');
+    });
+
+    lines.push('  </Group>');
+    lines.push('</Widget>');
+
+    return lines.join('\n');
   },
 };

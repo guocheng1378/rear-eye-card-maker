@@ -24,9 +24,13 @@ export default {
   rawXml(c) {
     var maxEvents = c.maxEvents || 3;
     var showTime = c.showTime !== 'false';
+    var safeW = '(#view_width - #marginL - 40)';
     var lines = [];
+
     lines.push('<Widget screenWidth="976" frameRate="0" scaleByDensity="false" useVariableUpdater="DateTime.Hour,DateTime.Minute" name="' + escXml(c.cardName || '日程卡片') + '">');
     lines.push('  <Var name="marginL" type="number" expression="(#view_width * 0.30)" />');
+    lines.push('');
+    lines.push('  <!-- 日历数据绑定 -->');
     lines.push('  <VariableBinders>');
     lines.push('    <ContentProviderBinder name="calendar_provider" uri="content://com.android.calendar/events" columns="title,dtstart,dtend,allDay" sortOrder="dtstart ASC" limit="' + maxEvents + '">');
     lines.push('      <Variable name="event_title_0" type="string" column="title" />');
@@ -40,7 +44,7 @@ export default {
     lines.push('  <Rectangle w="#view_width" h="#view_height" fillColor="' + c.bgColor + '" />');
     lines.push('');
     lines.push('  <!-- 日程内容组 -->');
-    lines.push('  <Group name="schedule_content" x="#marginL" y="20" w="(#view_width - #marginL - 40)">');
+    lines.push('  <Group name="schedule_content" x="#marginL" y="20" w="' + safeW + '">');
     lines.push('    <Text x="0" y="0" size="14" color="' + c.eventTimeColor + '" textExp="formatDate(\'MM月dd日\', #time_sys)" />');
     lines.push('    <Text x="0" y="20" size="26" color="' + c.dateColor + '" textExp="formatDate(\'EEEE\', #time_sys)" bold="true" fontFamily="mipro-demibold" />');
     lines.push('    <Rectangle x="0" y="54" w="30" h="2" fillColor="' + c.accentColor + '" cornerRadius="1" />');
@@ -48,18 +52,19 @@ export default {
     for (var i = 0; i < maxEvents; i++) {
       var yBase = 72 + i * 60;
       lines.push('    <!-- 事件 ' + (i + 1) + ' -->');
-      lines.push('    <Group name="event_' + i + '" x="0" y="' + yBase + '">');
+      lines.push('    <Group name="event_' + i + '" x="0" y="' + yBase + '" w="' + safeW + '">');
       lines.push('      <Rectangle x="0" y="2" w="4" h="4" fillColor="' + c.dotColor + '" cornerRadius="2" />');
       if (showTime) {
         lines.push('      <Text x="14" y="0" size="12" color="' + c.eventTimeColor + '" textExp="formatDate(\'HH:mm\', #event_start_' + i + ')" />');
-        lines.push('      <Text x="70" y="0" size="14" color="' + c.eventTitleColor + '" textExp="@event_title_' + i + '" w="(#view_width - #marginL - 110)" ellipsis="true" />');
+        lines.push('      <Text x="70" y="0" size="14" color="' + c.eventTitleColor + '" textExp="@event_title_' + i + '" w="(' + safeW + ' - 70)" ellipsis="true" />');
       } else {
-        lines.push('      <Text x="14" y="0" size="14" color="' + c.eventTitleColor + '" textExp="@event_title_' + i + '" w="(#view_width - #marginL - 54)" ellipsis="true" />');
+        lines.push('      <Text x="14" y="0" size="14" color="' + c.eventTitleColor + '" textExp="@event_title_' + i + '" w="(' + safeW + ' - 14)" ellipsis="true" />');
       }
       lines.push('    </Group>');
     }
     lines.push('  </Group>');
     lines.push('</Widget>');
+
     return lines.join('\n');
   },
 };

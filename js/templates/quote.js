@@ -1,4 +1,4 @@
-import { generateAutoDetectMAML } from '../devices.js';
+import { escXml } from '../maml.js';
 
 export default {
   id: 'quote', icon: '💬', name: '名言卡片', desc: '显示一段文字或名言',
@@ -24,10 +24,27 @@ export default {
       { type: 'text', text: c.author, x: 22, y: 596 - 80, size: 16, color: c.authorColor, w: safeW, locked: false },
     ];
   },
-  gen(c) {
-    return [
-      generateAutoDetectMAML(),
-      '  <Rectangle w="#view_width" h="#view_height" fillColor="' + c.bgColor + '" />',
-    ].join('\n');
+  rawXml(c) {
+    var ts = Number(c.textSize) || 28;
+    var safeW = '(#view_width - #marginL - 40)';
+    var lines = [];
+    lines.push('<Widget screenWidth="976" frameRate="0" scaleByDensity="false" name="' + escXml(c.cardName || '名言卡片') + '">');
+    lines.push('  <Var name="marginL" type="number" expression="(#view_width * 0.30)" />');
+    lines.push('');
+    lines.push('  <!-- 背景 -->');
+    lines.push('  <Rectangle w="#view_width" h="#view_height" fillColor="' + c.bgColor + '" />');
+    lines.push('');
+    lines.push('  <!-- 名言内容组 -->');
+    lines.push('  <Group name="quote_content" x="#marginL" y="0" w="' + safeW + '">');
+    lines.push('    <!-- 强调色竖条 -->');
+    lines.push('    <Rectangle x="0" y="40" w="3" h="40" fillColor="' + c.authorColor + '" cornerRadius="1.5" />');
+    lines.push('    <!-- 引用文字 -->');
+    lines.push('    <Text x="14" y="48" size="' + ts + '" color="' + c.textColor + '" text="' + escXml(c.text || '') + '" w="' + safeW + '" multiLine="true" lineHeight="1.5" />');
+    lines.push('    <!-- 作者 -->');
+    lines.push('    <Text x="14" y="(#view_height - 80)" size="16" color="' + c.authorColor + '" text="' + escXml(c.author || '') + '" w="' + safeW + '" />');
+    lines.push('  </Group>');
+    lines.push('</Widget>');
+
+    return lines.join('\n');
   },
 };
