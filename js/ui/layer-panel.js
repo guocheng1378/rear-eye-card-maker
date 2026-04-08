@@ -10,12 +10,12 @@ var _dragSrcIdx = -1;
 
 var TYPE_ICONS = {
   text: '🔤', rectangle: '⬜', circle: '⭕', image: '🖼️', video: '🎬',
-  arc: '🌗', progress: '📊', lottie: '✨',
+  arc: '🌗', progress: '📊', lottie: '✨', group: '📦', layer: '🎨', musiccontrol: '🎵',
 };
 
 var TYPE_LABELS = {
   text: '文字', rectangle: '矩形', circle: '圆形', image: '图片', video: '视频',
-  arc: '弧形', progress: '进度条', lottie: 'Lottie',
+  arc: '弧形', progress: '进度条', lottie: 'Lottie', group: '容器组', layer: '材质层', musiccontrol: '音乐控件',
 };
 
 function esc(s) {

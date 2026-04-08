@@ -16,8 +16,39 @@ function alphaAttr(el) {
     : '';
 }
 
-function renderEl(el, files) {
-  var p = '    ';
+// ── MAML 框架标签白名单（原样透传） ──
+var FRAMEWORK_TAGS = {
+  'Var': true, 'Variable': true, 'Permanence': true,
+  'VariableBinders': true, 'MiPaletteBinder': true,
+  'FolmeState': true, 'FolmeConfig': true,
+  'Function': true, 'FunctionCommand': true,
+  'IfCommand': true, 'Consequent': true, 'Alternate': true,
+  'MultiCommand': true,
+  'VariableCommand': true, 'PermanenceCommand': true,
+  'BinderCommand': true, 'MusicCommand': true,
+  'LottieCommand': true, 'FrameRateCommand': true,
+  'ExternalCommand': true, 'ExternalCommands': true,
+  'Trigger': true, 'Triggers': true,
+  'Layer': true,
+};
+
+// 递归渲染子元素（支持 Group/Layer/MusicControl 嵌套）
+function renderChildren(children, files, indent) {
+  var lines = [];
+  children.forEach(function (child) {
+    lines.push(renderEl(child, files, indent));
+  });
+  return lines.filter(Boolean).join('\n');
+}
+
+function renderEl(el, files, indent) {
+  var p = indent || '    ';
+
+  // ── 框架标签：从 Group 的 children 中透传 ──
+  if (el._rawXml) {
+    return p + el._rawXml;
+  }
+
   switch (el.type) {
     case 'text': {
       var t = el.expression ? 'textExp="' + el.expression + '"' : 'text="' + escXml(el.text || '') + '"';
@@ -77,8 +108,85 @@ function renderEl(el, files) {
       return p + '<Rectangle x="' + el.x + '" y="' + el.y + '" w="' + pw + '" h="' + ph + '" fillColor="' + (el.bgColor || '#333333') + '" cornerRadius="' + pr + '" />\n' +
         p + '<Rectangle x="' + el.x + '" y="' + el.y + '" w="' + barW + '" h="' + ph + '" fillColor="' + el.color + '" cornerRadius="' + pr + '" />';
     }
-    case 'lottie':
-      return p + '<!-- Lottie 动画: MAML 引擎不支持此格式，请替换为 Image/Video -->';
+    case 'lottie': {
+      // MAML 原生支持 <Lottie> 标签
+      var lottieSrc = el.src || el.fileName || '';
+      var lottieName = el.name || '';
+      var lottieAlign = el.align || 'center';
+      var lottieLoop = el.loop !== undefined ? el.loop : 0;
+      var lottieAuto = el.autoplay !== false ? 'true' : 'false';
+      var lottieW = ' w="' + (el.w || 120) + '"';
+      var lottieH = ' h="' + (el.h || 120) + '"';
+      var lottieX = el.x !== undefined ? ' x="' + el.x + '"' : '';
+      var lottieY = el.y !== undefined ? ' y="' + el.y + '"' : '';
+      var lottieNameAttr = lottieName ? ' name="' + escXml(lottieName) + '"' : '';
+      return p + '<Lottie src="' + escXml(lottieSrc) + '"' + lottieX + lottieY + lottieW + lottieH + ' align="' + lottieAlign + '" autoplay="' + lottieAuto + '" loop="' + lottieLoop + '"' + lottieNameAttr + ' />';
+    }
+
+    // ── Group：容器元素，支持递归子元素 ──
+    case 'group': {
+      var attrs = '';
+      if (el.name) attrs += ' name="' + escXml(el.name) + '"';
+      if (el.x !== undefined) attrs += ' x="' + el.x + '"';
+      if (el.y !== undefined) attrs += ' y="' + el.y + '"';
+      if (el.w !== undefined) attrs += ' w="' + el.w + '"';
+      if (el.h !== undefined) attrs += ' h="' + el.h + '"';
+      if (el.alpha !== undefined) attrs += ' alpha="' + el.alpha + '"';
+      if (el.visibility) attrs += ' visibility="' + el.visibility + '"';
+      if (el.folmeMode) attrs += ' folmeMode="true"';
+      if (el.align) attrs += ' align="' + el.align + '"';
+      if (el.alignV) attrs += ' alignV="' + el.alignV + '"';
+      if (el.contentDescription) attrs += ' contentDescriptionExp="' + escXml(el.contentDescription) + '"';
+      if (el.interceptTouch) attrs += ' interceptTouch="true"';
+      if (el.touchable) attrs += ' touchable="true"';
+      if (!attrs) attrs = '';
+
+      var children = (el.children && el.children.length > 0)
+        ? '\n' + renderChildren(el.children, files, p + '  ') + '\n' + p
+        : '';
+      return p + '<Group' + attrs + '>' + children + '</Group>';
+    }
+
+    // ── Layer：超级材质层 ──
+    case 'layer': {
+      var layerAttrs = '';
+      if (el.name) layerAttrs += ' name="' + escXml(el.name) + '"';
+      if (el.alpha !== undefined) layerAttrs += ' alpha="' + el.alpha + '"';
+      if (el.visibility) layerAttrs += ' visibility="' + el.visibility + '"';
+      if (el.layerType) layerAttrs += ' layerType="' + el.layerType + '"';
+      if (el.blurRadius !== undefined) layerAttrs += ' blurRadius="' + el.blurRadius + '"';
+      if (el.blurColors) layerAttrs += ' blurColors="' + escXml(el.blurColors) + '"';
+      if (el.colorModes !== undefined) layerAttrs += ' colorModes="' + el.colorModes + '"';
+      if (el.frameRate !== undefined) layerAttrs += ' frameRate="' + el.frameRate + '"';
+      if (el.updatePosition === false) layerAttrs += ' updatePosition="false"';
+      if (el.updateSize === false) layerAttrs += ' updateSize="false"';
+      if (el.updateTranslation === false) layerAttrs += ' updateTranslation="false"';
+
+      var layerChildren = (el.children && el.children.length > 0)
+        ? '\n' + renderChildren(el.children, files, p + '  ') + '\n' + p
+        : '';
+      return p + '<Layer' + layerAttrs + '>' + layerChildren + '</Layer>';
+    }
+
+    // ── MusicControl：音乐控件 ──
+    case 'musiccontrol': {
+      var mcAttrs = '';
+      if (el.name) mcAttrs += ' name="' + escXml(el.name) + '"';
+      mcAttrs += ' w="' + (el.w || '(#view_width - #viewMarginLeft)') + '"';
+      mcAttrs += ' h="' + (el.h || '#view_height') + '"';
+      if (el.x !== undefined) mcAttrs += ' x="' + el.x + '"';
+      if (el.y !== undefined) mcAttrs += ' y="' + el.y + '"';
+      if (el.autoShow === false) mcAttrs += ' autoShow="false"';
+      if (el.autoRefresh !== false) mcAttrs += ' autoRefresh="true"';
+      if (el.enableLyric) mcAttrs += ' enableLyric="true"';
+      if (el.updateLyricInterval) mcAttrs += ' updateLyricInterval="' + el.updateLyricInterval + '"';
+
+      var mcChildren = (el.children && el.children.length > 0)
+        ? '\n' + renderChildren(el.children, files, p + '  ') + '\n' + p
+        : '';
+      return p + '<MusicControl' + mcAttrs + '>' + mcChildren + '</MusicControl>';
+    }
+
     default:
       return '';
   }

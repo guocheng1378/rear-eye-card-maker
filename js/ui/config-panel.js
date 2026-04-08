@@ -164,6 +164,9 @@ export function renderConfig(getTemplateMAML) {
     '<button class="el-btn" data-add="arc"><span class="el-btn-icon">◠</span> 弧形</button>' +
     '<button class="el-btn" data-add="progress"><span class="el-btn-icon">▰</span> 进度条</button>' +
     '<button class="el-btn" data-add="lottie"><span class="el-btn-icon">🎭</span> Lottie</button>' +
+    '<button class="el-btn" data-add="group"><span class="el-btn-icon">📦</span> Group</button>' +
+    '<button class="el-btn" data-add="layer"><span class="el-btn-icon">🎨</span> Layer</button>' +
+    '<button class="el-btn" data-add="musiccontrol"><span class="el-btn-icon">🎵</span> Music</button>' +
     '<button class="el-btn" data-action="importZip"><span class="el-btn-icon">📦</span> 导入ZIP</button>';
 
   var elementSectionInner = '<div class="el-toolbar">' + coreAddBtns +
@@ -176,7 +179,7 @@ export function renderConfig(getTemplateMAML) {
     '</div>';
 
   // Element list with layer-panel style: drag reorder, visibility, lock, delete, camera warning
-  var LAYER_ICONS = { text: '🔤', rectangle: '⬜', circle: '⭕', image: '🖼️', video: '🎬', arc: '🌗', progress: '📊', lottie: '✨' };
+  var LAYER_ICONS = { text: '🔤', rectangle: '⬜', circle: '⭕', image: '🖼️', video: '🎬', arc: '🌗', progress: '📊', lottie: '✨', group: '📦', layer: '🎨', musiccontrol: '🎵' };
   elementSectionInner += '<div class="el-list" id="elListDrag">';
   // Render in reverse order (top layer first) like the layer panel
   for (var li = S.elements.length - 1; li >= 0; li--) {
@@ -561,8 +564,38 @@ function renderElementEditorInline(el, idx, device) {
     html += fieldHtml('圆角', '<input type="number" value="' + (el.radius || 4) + '" data-prop="radius" data-idx="' + idx + '" min="0" max="50">');
 
   } else if (el.type === 'lottie') {
-    html += '<div style="grid-column:1/-1;padding:12px;background:rgba(155,89,182,0.1);border-radius:8px;font-size:12px;color:#9b59b6">🎭 Lottie 仅浏览器预览可用，建议替换为 Image 或 Video。</div>';
+    html += fieldHtml('资源', '<input type="text" value="' + esc(el.src || el.fileName || '') + '" data-prop="src" data-idx="' + idx + '" placeholder="如 assets/play.json">');
+    html += fieldHtml('名称', '<input type="text" value="' + esc(el.name || '') + '" data-prop="name" data-idx="' + idx + '" placeholder="MAML name 属性">');
+    html += fieldHtml('对齐', '<select data-prop="align" data-idx="' + idx + '">' +
+      ['center', 'left', 'right', 'top', 'bottom'].map(function (a) { return '<option value="' + a + '"' + ((el.align || 'center') === a ? ' selected' : '') + '>' + a + '</option>'; }).join('') + '</select>');
+    html += fieldHtml('循环', '<input type="number" value="' + (el.loop !== undefined ? el.loop : 0) + '" data-prop="loop" data-idx="' + idx + '" min="0" max="999"><span style="font-size:10px;color:var(--text3)">0=无限</span>');
     html += fieldHtml('速度', '<input type="range" min="1" max="50" value="' + Math.round((el.speed || 1) * 10) + '" data-prop="speed" data-idx="' + idx + '"><span style="font-size:10px;color:var(--text3)">' + (el.speed || 1).toFixed(1) + 'x</span>');
+
+  } else if (el.type === 'group') {
+    html += fieldHtml('名称', '<input type="text" value="' + esc(el.name || '') + '" data-prop="name" data-idx="' + idx + '" placeholder="MAML name">');
+    html += fieldHtml('可见性', '<input type="text" value="' + esc(el.visibility || '') + '" data-prop="visibility" data-idx="' + idx + '" placeholder="如 !#enable_hyper_material">');
+    html += fieldHtml('Folme', '<label class="toggle-switch"><input type="checkbox" data-prop="folmeMode" data-idx="' + idx + '"' + (el.folmeMode ? ' checked' : '') + '><span class="toggle-slider"></span></label>');
+    html += fieldHtml('水平对齐', '<select data-prop="align" data-idx="' + idx + '">' +
+      ['', 'left', 'center', 'right'].map(function (a) { return '<option value="' + a + '"' + ((el.align || '') === a ? ' selected' : '') + '>' + (a || '无') + '</option>'; }).join('') + '</select>');
+    html += fieldHtml('垂直对齐', '<select data-prop="alignV" data-idx="' + idx + '">' +
+      ['', 'top', 'center', 'bottom'].map(function (a) { return '<option value="' + a + '"' + ((el.alignV || '') === a ? ' selected' : '') + '>' + (a || '无') + '</option>'; }).join('') + '</select>');
+    html += fieldHtml('描述', '<input type="text" value="' + esc(el.contentDescription || '') + '" data-prop="contentDescription" data-idx="' + idx + '" placeholder="contentDescriptionExp">');
+
+  } else if (el.type === 'layer') {
+    html += fieldHtml('名称', '<input type="text" value="' + esc(el.name || '') + '" data-prop="name" data-idx="' + idx + '" placeholder="MAML name">');
+    html += fieldHtml('层类型', '<select data-prop="layerType" data-idx="' + idx + '">' +
+      ['bottom', 'top', 'overlay'].map(function (t) { return '<option value="' + t + '"' + ((el.layerType || 'bottom') === t ? ' selected' : '') + '>' + t + '</option>'; }).join('') + '</select>');
+    html += fieldHtml('可见性', '<input type="text" value="' + esc(el.visibility || '') + '" data-prop="visibility" data-idx="' + idx + '" placeholder="如 #enable_hyper_material">');
+    html += fieldHtml('模糊半径', '<input type="number" value="' + (el.blurRadius || 0) + '" data-prop="blurRadius" data-idx="' + idx + '" min="0" max="500">');
+    html += fieldHtml('模糊色', '<input type="text" value="' + esc(el.blurColors || '') + '" data-prop="blurColors" data-idx="' + idx + '" placeholder="如 #00000000">');
+    html += fieldHtml('颜色模式', '<input type="number" value="' + (el.colorModes || 0) + '" data-prop="colorModes" data-idx="' + idx + '">');
+    html += fieldHtml('帧率', '<input type="number" value="' + (el.frameRate !== undefined ? el.frameRate : -1) + '" data-prop="frameRate" data-idx="' + idx + '"><span style="font-size:10px;color:var(--text3)">-1=跟随</span>');
+
+  } else if (el.type === 'musiccontrol') {
+    html += fieldHtml('名称', '<input type="text" value="' + esc(el.name || 'music_control') + '" data-prop="name" data-idx="' + idx + '">');
+    html += fieldHtml('歌词', '<label class="toggle-switch"><input type="checkbox" data-prop="enableLyric" data-idx="' + idx + '"' + (el.enableLyric !== false ? ' checked' : '') + '><span class="toggle-slider"></span></label>');
+    html += fieldHtml('刷新', '<label class="toggle-switch"><input type="checkbox" data-prop="autoRefresh" data-idx="' + idx + '"' + (el.autoRefresh !== false ? ' checked' : '') + '><span class="toggle-slider"></span></label>');
+    html += fieldHtml('歌词间隔', '<input type="number" value="' + (el.updateLyricInterval || 100) + '" data-prop="updateLyricInterval" data-idx="' + idx + '" min="50" max="5000"><span style="font-size:10px;color:var(--text3)">ms</span>');
   }
   html += '</div></div>';
 
@@ -684,7 +717,7 @@ function renderMamlVarBinding(el, idx) {
 
 // Helper: element type labels
 function getElementTypeLabel(el) {
-  var labels = { text: '文字', rectangle: '矩形', circle: '圆形', arc: '弧形', image: '图片', video: '视频', progress: '进度条', lottie: 'Lottie 动画' };
+  var labels = { text: '文字', rectangle: '矩形', circle: '圆形', arc: '弧形', image: '图片', video: '视频', progress: '进度条', lottie: 'Lottie 动画', group: '容器组', layer: '材质层', musiccontrol: '音乐控件' };
   return labels[el.type] || el.type;
 }
 

@@ -259,6 +259,26 @@ PreviewRenderer.prototype.renderElements = function (elements, files, selIdx) {
         var pw = (el.w || 200) * self.scale, ph = (el.h || 8) * self.scale;
         return '<div data-el-idx="' + i + '" style="position:absolute;left:' + (self.camW + el.x * self.scale) + 'px;top:' + (el.y * self.scale) + 'px;width:' + pw + 'px;height:' + ph + 'px;background:' + (el.bgColor || '#333') + ';border-radius:' + ((el.radius || 4) * self.scale) + 'px;' + dc + '"><div style="width:' + ((el.value || 60)) + '%;height:100%;background:' + el.color + ';border-radius:inherit"></div></div>' + rh + sizeLabel;
       }
+      case 'group': {
+        var gOp = el.alpha !== undefined && el.alpha !== 1 ? 'opacity:' + el.alpha + ';' : '';
+        var gW = (el.w || 200) * self.scale;
+        var gH = (el.h || 200) * self.scale;
+        var childHtml = '';
+        if (el.children && el.children.length > 0) {
+          childHtml = self.renderElements(el.children, files, -1);
+        }
+        return '<div data-el-idx="' + i + '" style="position:absolute;left:' + px + 'px;top:' + py + 'px;width:' + gW + 'px;height:' + gH + 'px;border:1px dashed rgba(124,109,240,0.4);border-radius:4px;' + gOp + dc + '">' +
+          '<div style="position:absolute;top:-16px;left:0;font-size:9px;color:rgba(124,109,240,0.7);white-space:nowrap">📦 ' + (el.name || 'Group') + '</div>' +
+          childHtml + '</div>' + rh + sizeLabel;
+      }
+      case 'layer': {
+        var lVis = el.visibility ? 'opacity:0.5;' : '';
+        return '<div data-el-idx="' + i + '" style="position:absolute;left:0;top:0;width:100%;height:100%;background:rgba(108,92,231,0.08);border:1px dashed rgba(108,92,231,0.3);' + lVis + dc + '">' +
+          '<div style="position:absolute;top:4px;left:4px;font-size:9px;color:rgba(108,92,231,0.6)">🎨 Layer: ' + (el.name || '') + ' [' + (el.layerType || 'bottom') + ']</div></div>' + sizeLabel;
+      }
+      case 'musiccontrol': {
+        return '<div data-el-idx="' + i + '" style="position:absolute;left:' + px + 'px;top:' + py + 'px;width:' + (el.w || 200) * self.scale + 'px;height:' + (el.h || 120) * self.scale + 'px;background:rgba(46,204,113,0.1);border:1px dashed rgba(46,204,113,0.4);border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:10px;color:#2ecc71;gap:4px;' + dc + '">🎵<span style="font-size:8px;opacity:0.7">MusicControl</span></div>' + sizeLabel;
+      }
       default: return sizeLabel;
     }
   }).join('');
