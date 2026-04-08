@@ -72,6 +72,36 @@ export function renderTplGrid() {
       '<div class="tpl-card-desc">' + t.desc + '</div></div>';
   }).join('');
   renderTplCategories();
+  
+  // Lazy thumbnail rendering via IntersectionObserver
+  if ('IntersectionObserver' in window) {
+    var thumbObserver = new IntersectionObserver(function(entries) {
+      entries.forEach(function(entry) {
+        if (entry.isIntersecting) {
+          var card = entry.target;
+          var tplId = card.dataset.tpl;
+          var thumbEl = card.querySelector('.tpl-thumb');
+          if (thumbEl && thumbEl.classList.contains('tpl-thumb-loading')) {
+            var tpl = TEMPLATES.find(function(t) { return t.id === tplId; });
+            if (tpl) {
+              thumbEl.classList.remove('tpl-thumb-loading');
+              thumbEl.innerHTML = generateTplThumbnail(tpl);
+            }
+          }
+          thumbObserver.unobserve(card);
+        }
+      });
+    }, { rootMargin: '100px' });
+    
+    document.querySelectorAll('.tpl-card').forEach(function(card) {
+      var thumbEl = card.querySelector('.tpl-thumb');
+      if (thumbEl) {
+        thumbEl.classList.add('tpl-thumb-loading');
+        thumbEl.innerHTML = '';
+        thumbObserver.observe(card);
+      }
+    });
+  }
 }
 
 export function renderTplCategories() {
