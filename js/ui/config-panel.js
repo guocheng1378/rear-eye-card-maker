@@ -6,7 +6,7 @@ import { renderTemplatePreview, PreviewRenderer } from '../live-preview.js';
 import { escHtml, getRecentColors, addRecentColor, getFavorites, toggleFavorite } from '../utils.js';
 import { isInCameraZone } from './elements.js';
 import { renderElementEditor } from './editors/index.js';
-import { COLOR_PRESETS, THEME_PRESETS, LAYER_ICONS } from './editors/common.js';
+import { COLOR_PRESETS, THEME_PRESETS, LAYER_ICONS, renderColorPresets } from './editors/common.js';
 
 var _activeCategory = 'all';
 var _thumbCache = {};
