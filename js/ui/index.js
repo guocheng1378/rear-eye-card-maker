@@ -469,6 +469,12 @@ var _autoPreview = debounce(function () {
   S.setDirty(true);
   if (getStep() === 1) renderLivePreview();
   if (getStep() === 2) renderPreview();
+  // Pulse the generate preview button when dirty
+  var genBtn = document.querySelector('.preview-actions .btn-secondary');
+  if (genBtn && getStep() === 2) {
+    genBtn.style.boxShadow = '0 0 0 2px var(--accent)';
+    setTimeout(function() { genBtn.style.boxShadow = ''; }, 1500);
+  }
 }, 300);
 
 function setupEvents() {
