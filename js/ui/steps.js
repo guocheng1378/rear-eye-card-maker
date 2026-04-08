@@ -90,3 +90,7 @@ function cleanupVideos(containerId) {
   var el = document.getElementById(containerId);
   if (el) el.querySelectorAll('video').forEach(function (v) { v.pause(); v.src = ''; });
 }
+// Cleanup timer on page unload
+window.addEventListener('beforeunload', function() {
+  clearInterval(_previewTimer);
+});
