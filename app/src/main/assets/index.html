@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>REAREye 卡片制作器</title>
-<meta name="description" content="为小米背屏（SubScreen）制作 MAML 卡片模板的免费在线工具。支持 17 个预设模板，自定义元素，一键导出 ZIP。">
+<meta name="description" content="为小米背屏（SubScreen）制作 MAML 卡片模板的免费在线工具。支持 20 个预设模板，自定义元素，一键导出 ZIP。">
 <meta property="og:title" content="REAREye 卡片制作器">
 <meta property="og:description" content="为小米背屏制作 MAML 卡片模板的免费在线工具">
 <meta property="og:type" content="website">
@@ -168,6 +168,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC',sans-
 .config-header .tpl-icon{font-size:32px}
 .config-header h2{font-size:17px;font-weight:700}
 .config-header p{font-size:12px;color:var(--text2);margin-top:2px}
+.cfg-convert-btn{margin-left:auto;font-size:11px;padding:6px 14px;border-radius:8px;border:1px solid var(--border);background:var(--surface2);color:var(--accent);cursor:pointer;white-space:nowrap;transition:var(--transition)}
+.cfg-convert-btn:hover{background:var(--accent);color:#fff;border-color:var(--accent)}
 .config-section{margin-bottom:24px;max-height:2000px;overflow:hidden;transition:max-height .4s cubic-bezier(.4,0,.2,1),opacity .3s ease}
 .config-section.collapsed{max-height:36px;opacity:.6}
 .config-section.collapsed:hover{opacity:.85}
@@ -1913,6 +1915,7 @@ input[type=range]::-moz-range-track{
             <h2 id="cfgTitle" data-i18n="cfg.tplConfig">配置</h2>
             <p id="cfgDesc">调整参数以自定义卡片</p>
           </div>
+          <button class="cfg-convert-btn" id="cfgConvertBtn" onclick="JCM.convertToCustom()" title="转为自定义模式，自由编辑所有元素" style="display:none">📋 转自定义</button>
         </div>
         <div class="config-live-device-row">
           <label data-i18n="cfg.device">机型</label>
@@ -2088,16 +2091,22 @@ input[type=range]::-moz-range-track{
     <div class="modal-body">
       <div style="margin-bottom:12px;font-size:12px;font-weight:600;color:var(--accent)">⌨️ 键盘快捷键</div>
       <div class="shortcut-list">
+        <div class="shortcut-item"><kbd>N</kbd><span>添加文字元素</span></div>
+        <div class="shortcut-item"><kbd>R</kbd><span>添加矩形元素</span></div>
+        <div class="shortcut-item"><kbd>C</kbd><span>添加圆形元素</span></div>
         <div class="shortcut-item"><kbd>Ctrl</kbd>+<kbd>Z</kbd><span>撤销</span></div>
         <div class="shortcut-item"><kbd>Ctrl</kbd>+<kbd>Y</kbd> / <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>Z</kbd><span>重做</span></div>
         <div class="shortcut-item"><kbd>Ctrl</kbd>+<kbd>D</kbd><span>复制当前元素</span></div>
+        <div class="shortcut-item"><kbd>Ctrl</kbd>+<kbd>G</kbd><span>随机渐变色</span></div>
+        <div class="shortcut-item"><kbd>Ctrl</kbd>+<kbd>S</kbd><span>导出 ZIP</span></div>
         <div class="shortcut-item"><kbd>Ctrl</kbd>+<kbd>C</kbd><span>复制到剪贴板</span></div>
         <div class="shortcut-item"><kbd>Ctrl</kbd>+<kbd>V</kbd><span>从剪贴板粘贴</span></div>
+        <div class="shortcut-item"><kbd>Ctrl</kbd>+<kbd>L</kbd><span>切换图层面板</span></div>
+        <div class="shortcut-item"><kbd>Ctrl</kbd>+<kbd>K</kbd><span>命令面板</span></div>
+        <div class="shortcut-item"><kbd>Shift</kbd>+<kbd>Tab</kbd><span>切换选中元素</span></div>
         <div class="shortcut-item"><kbd>Delete</kbd><span>删除当前元素</span></div>
         <div class="shortcut-item"><kbd>↑↓←→</kbd><span>移动元素 1px</span></div>
         <div class="shortcut-item"><kbd>Shift</kbd>+<kbd>↑↓←→</kbd><span>移动元素 10px</span></div>
-        <div class="shortcut-item"><kbd>Tab</kbd><span>代码编辑器缩进</span></div>
-        <div class="shortcut-item"><kbd>Shift</kbd>+<kbd>Tab</kbd><span>代码编辑器反缩进</span></div>
       </div>
       <div style="margin:16px 0 12px;font-size:12px;font-weight:600;color:var(--accent)">🖱️ 鼠标操作</div>
       <div class="shortcut-list">
@@ -4305,6 +4314,158 @@ var pomodoro = {
   },
 };
 
+// ─── js/templates/quick_clock.js ───
+
+var quick_clock = {
+  id: 'quick_clock', icon: '⏱️', name: '速览时钟', desc: '极简大字时钟，一眼看时间',
+  updater: 'DateTime.Minute',
+  config: [
+    { group: '基本', fields: [
+      { key: 'cardName', label: '卡片名称', type: 'text', default: '速览时钟' },
+      { key: 'bgColor', label: '背景颜色', type: 'color', default: '#0a0e1a' },
+    ]},
+    { group: '样式', fields: [
+      { key: 'timeColor', label: '时间颜色', type: 'color', default: '#ffffff' },
+      { key: 'dateColor', label: '日期颜色', type: 'color', default: '#888888' },
+      { key: 'accentColor', label: '强调色', type: 'color', default: '#6c5ce7' },
+      { key: 'timeSize', label: '时间字号', type: 'range', min: 36, max: 100, default: 80 },
+      { key: 'showSeconds', label: '显示秒', type: 'select', options: [
+        { v: 'true', l: '显示' },
+        { v: 'false', l: '隐藏' },
+      ], default: 'false' },
+      { key: 'align', label: '对齐', type: 'select', options: [
+        { v: 'center', l: '居中' },
+        { v: 'left', l: '左侧' },
+        { v: 'right', l: '右侧' },
+      ], default: 'left' },
+    ]},
+  ],
+  elements(c) {
+    var ts = Number(c.timeSize) || 80;
+    var isCenter = c.align === 'center';
+    var isRight = c.align === 'right';
+    var baseX = isCenter ? 0 : (isRight ? 976 - 80 : 80);
+    var textAlign = isCenter ? 'center' : (isRight ? 'right' : 'left');
+    var showSec = c.showSeconds === 'true';
+    var timeFmt = showSec ? 'HH:mm:ss' : 'HH:mm';
+    var els = [
+      { type: 'rectangle', x: 0, y: 0, w: 976, h: 596, color: c.bgColor, locked: true },
+      { type: 'text', expression: "formatDate('" + timeFmt + "', #time_sys)", text: showSec ? '12:34:56' : '12:34', x: baseX, y: 140, size: ts, color: c.timeColor, bold: true, textAlign: textAlign, fontFamily: 'mipro-demibold', w: isCenter ? 976 : 800 },
+      { type: 'text', expression: "formatDate('MM/dd EEEE', #time_sys)", text: '04/10 星期五', x: baseX, y: 140 + Math.round(ts * 1.1), size: 18, color: c.dateColor, textAlign: textAlign, w: isCenter ? 976 : 800 },
+      { type: 'rectangle', x: isCenter ? 438 : baseX, y: 140 + Math.round(ts * 1.1) + 30, w: isCenter ? 100 : 40, h: 3, color: c.accentColor, radius: 1.5 },
+    ];
+    return els;
+  },
+};
+
+// ─── js/templates/daily_quote.js ───
+
+var QUOTES = [
+  { text: '生活不是等待风暴过去，而是学会在雨中翩翩起舞', author: '佚名' },
+  { text: '愿你出走半生，归来仍是少年', author: '佚名' },
+  { text: '不乱于心，不困于情，不畏将来，不念过往', author: '丰子恺' },
+  { text: '人生如逆旅，我亦是行人', author: '苏轼' },
+  { text: '山中何事？松花酿酒，春水煎茶', author: '张可久' },
+  { text: '浮生只合尊前老，雪满长安道', author: '舒亶' },
+  { text: '纵有千古，横有八荒，前途似海，来日方长', author: '梁启超' },
+  { text: '万物皆有裂痕，那是光照进来的地方', author: 'Leonard Cohen' },
+  { text: '凡心所向，素履以往', author: '七堇年' },
+  { text: '岁月不居，时节如流', author: '孔融' },
+];
+
+// Rotate quote by day index
+function getQuoteIndex() {
+  var d = new Date();
+  return (d.getFullYear() * 366 + d.getMonth() * 31 + d.getDate()) % QUOTES.length;
+}
+
+var daily_quote = {
+  id: 'daily_quote', icon: '📖', name: '每日一句', desc: '每日轮换名言语录，配渐变背景',
+  updater: 'DateTime.Day',
+  config: [
+    { group: '基本', fields: [
+      { key: 'cardName', label: '卡片名称', type: 'text', default: '每日一句' },
+      { key: 'bgColor', label: '背景色1', type: 'color', default: '#0f0c29' },
+      { key: 'bgColor2', label: '背景色2', type: 'color', default: '#302b63' },
+    ]},
+    { group: '文字', fields: [
+      { key: 'quoteColor', label: '语录颜色', type: 'color', default: '#ffffff' },
+      { key: 'authorColor', label: '作者颜色', type: 'color', default: '#a0a0c0' },
+      { key: 'quoteSize', label: '语录字号', type: 'range', min: 14, max: 32, default: 20 },
+      { key: 'decoColor', label: '装饰线颜色', type: 'color', default: '#6c5ce7' },
+    ]},
+  ],
+  elements(c) {
+    var qs = Number(c.quoteSize) || 20;
+    var qi = getQuoteIndex();
+    var q = QUOTES[qi];
+    var lineCount = Math.ceil(q.text.length / 24);
+    var quoteHeight = lineCount * Math.round(qs * 1.6);
+    return [
+      { type: 'rectangle', x: 0, y: 0, w: 976, h: 596, color: c.bgColor, fillColor2: c.bgColor2, locked: true },
+      { type: 'text', x: 60, y: 40, size: 28, color: c.decoColor, text: '\u275D', opacity: 40, bold: true },
+      { type: 'rectangle', x: 60, y: 80, w: 3, h: 40, color: c.decoColor, radius: 1.5 },
+      { type: 'text', x: 80, y: 85, size: qs, color: c.quoteColor, multiLine: true, w: 830, lineHeight: 1.6, text: q.text, fontFamily: 'noto-sans-sc' },
+      { type: 'text', x: 80, y: 85 + quoteHeight + 16, size: 14, color: c.authorColor, text: '\u2014 ' + q.author, fontFamily: 'noto-sans-sc' },
+    ];
+  },
+};
+
+// ─── js/templates/mini_status.js ───
+
+var mini_status = {
+  id: 'mini_status', icon: '📟', name: '迷你状态栏', desc: '紧凑的时间+电量+步数组合',
+  updater: 'DateTime.Minute',
+  config: [
+    { group: '基本', fields: [
+      { key: 'cardName', label: '卡片名称', type: 'text', default: '迷你状态栏' },
+      { key: 'bgColor', label: '背景颜色', type: 'color', default: '#111111' },
+    ]},
+    { group: '样式', fields: [
+      { key: 'textColor', label: '文字颜色', type: 'color', default: '#cccccc' },
+      { key: 'accentColor', label: '强调色', type: 'color', default: '#00c9a0' },
+      { key: 'batteryColor', label: '电池颜色', type: 'color', default: '#00c9a0' },
+      { key: 'layout', label: '布局', type: 'select', options: [
+        { v: 'horizontal', l: '横向' },
+        { v: 'vertical', l: '纵向' },
+      ], default: 'horizontal' },
+    ]},
+  ],
+  elements(c) {
+    var isH = c.layout === 'horizontal';
+    if (isH) {
+      return [
+        { type: 'rectangle', x: 0, y: 0, w: 976, h: 596, color: c.bgColor, locked: true },
+        { type: 'text', expression: "formatDate('HH:mm', #time_sys)", text: '12:34', x: 80, y: 220, size: 48, color: c.textColor, bold: true, fontFamily: 'mipro-demibold' },
+        { type: 'text', expression: "formatDate('MM/dd EEE', #time_sys)", text: '04/10 Fri', x: 80, y: 280, size: 16, color: c.textColor, opacity: 60 },
+        { type: 'rectangle', x: 460, y: 240, w: 2, h: 60, color: c.textColor, opacity: 20, radius: 1 },
+        { type: 'text', x: 500, y: 220, size: 16, color: c.accentColor, text: '🔋', opacity: 80 },
+        { type: 'text', expression: "#battery_level + '%'", text: '85%', x: 530, y: 222, size: 24, color: c.textColor, fontFamily: 'roboto-mono' },
+        { type: 'rectangle', x: 500, y: 260, w: 120, h: 6, color: c.textColor, opacity: 15, radius: 3 },
+        { type: 'rectangle', x: 500, y: 260, w: 102, h: 6, color: c.batteryColor, radius: 3 },
+        { type: 'text', x: 680, y: 220, size: 16, color: c.accentColor, text: '👣', opacity: 80 },
+        { type: 'text', expression: "#step_count + ' 步'", text: '3,256 步', x: 710, y: 222, size: 24, color: c.textColor, fontFamily: 'roboto-mono' },
+        { type: 'rectangle', x: 680, y: 260, w: 120, h: 6, color: c.textColor, opacity: 15, radius: 3 },
+        { type: 'rectangle', x: 680, y: 260, w: 65, h: 6, color: c.accentColor, radius: 3 },
+      ];
+    }
+    return [
+      { type: 'rectangle', x: 0, y: 0, w: 976, h: 596, color: c.bgColor, locked: true },
+      { type: 'text', expression: "formatDate('HH:mm', #time_sys)", text: '12:34', x: 80, y: 100, size: 56, color: c.textColor, bold: true, fontFamily: 'mipro-demibold' },
+      { type: 'text', expression: "formatDate('EEEE, MM/dd', #time_sys)", text: 'Friday, 04/10', x: 80, y: 170, size: 16, color: c.textColor, opacity: 50 },
+      { type: 'rectangle', x: 80, y: 210, w: 200, h: 1, color: c.textColor, opacity: 15 },
+      { type: 'text', x: 80, y: 230, size: 14, color: c.accentColor, text: '🔋 BATTERY' },
+      { type: 'text', expression: "#battery_level + '%'", text: '85%', x: 80, y: 255, size: 28, color: c.textColor, fontFamily: 'roboto-mono' },
+      { type: 'rectangle', x: 180, y: 265, w: 160, h: 6, color: c.textColor, opacity: 15, radius: 3 },
+      { type: 'rectangle', x: 180, y: 265, w: 136, h: 6, color: c.batteryColor, radius: 3 },
+      { type: 'text', x: 80, y: 310, size: 14, color: c.accentColor, text: '👣 STEPS' },
+      { type: 'text', expression: "#step_count", text: '3,256', x: 80, y: 335, size: 28, color: c.textColor, fontFamily: 'roboto-mono' },
+      { type: 'rectangle', x: 180, y: 345, w: 160, h: 6, color: c.textColor, opacity: 15, radius: 3 },
+      { type: 'rectangle', x: 180, y: 345, w: 65, h: 6, color: c.accentColor, radius: 3 },
+    ];
+  },
+};
+
 // ─── js/templates/quick_note.js ───
 
 var quick_note = {
@@ -4630,6 +4791,50 @@ const TPL_USAGE = {
     ],
     export: '交互卡片，支持点击操作和状态持久化',
   },
+  quick_clock: {
+    title: '⏱️ 速览时钟使用说明',
+    steps: [
+      '选择"速览时钟"模板',
+      '设置背景、文字和强调色',
+      '选择是否显示秒数',
+      '选择文字对齐方式（左/中/右）',
+      '导出后在小米背屏上使用',
+    ],
+    tips: [
+      '大字号设计，远距离也能看清时间',
+      '支持左/中/右三种对齐方式',
+      '可选显示秒数',
+    ],
+  },
+  daily_quote: {
+    title: '📖 每日一句使用说明',
+    steps: [
+      '选择"每日一句"模板',
+      '设置渐变背景色',
+      '调整语录字号和颜色',
+      '系统每天自动切换一条语录',
+      '导出后在小米背屏上使用',
+    ],
+    tips: [
+      '内建 10 条精选名言，按天轮换',
+      '渐变背景让卡片更有质感',
+      '装饰线颜色可自定义',
+    ],
+  },
+  mini_status: {
+    title: '📟 迷你状态栏使用说明',
+    steps: [
+      '选择"迷你状态栏"模板',
+      '设置背景和强调色',
+      '选择布局模式（横向/纵向）',
+      '导出后在小米背屏上使用',
+    ],
+    tips: [
+      '横向布局适合窄卡片，信息一目了然',
+      '纵向布局显示更多信息',
+      '实时显示电量和步数进度条',
+    ],
+  },
 };
 
 // ─── js/templates/index.js ───
@@ -4640,6 +4845,7 @@ const TEMPLATES = [
   action_buttons, number_clock, weather_cp, persistent_counter,
   fitness_ring, music_player, date_beauty, dual_clock, quick_note,
   brightness_slider, breathing_light, photo_frame, pomodoro,
+  quick_clock, daily_quote, mini_status,
 ];
 
 const TPL_CATEGORIES = [
@@ -4669,6 +4875,9 @@ const TPL_CATEGORY_MAP = {
   breathing_light: 'general',
   photo_frame: 'general',
   pomodoro: 'tool',
+  quick_clock: 'clock',
+  daily_quote: 'general',
+  mini_status: 'device',
 };
 
 // ─── js/live-preview.js ───
@@ -8117,10 +8326,12 @@ function fieldHtml(label, input, full) {
 }
 
 function colorFieldHtml(label, value, prop, idx) {
+  var randBtn = (prop === 'color' || prop === 'fillColor2') ? '<button class="eyedropper-btn" data-rand-gradient="' + prop + '" data-idx="' + idx + '" title="随机渐变色">🎲</button>' : '';
   return '<div class="field field-color"><label>' + label + '</label>' +
     '<input type="color" value="' + value + '" data-prop="' + prop + '" data-idx="' + idx + '">' +
     '<span class="color-val">' + value + '</span>' +
     '<button class="eyedropper-btn" data-eyedropper="' + prop + '" data-eyedropper-idx="' + idx + '" title="取色器">🎨</button>' +
+    randBtn +
     '</div>';
 }
 
@@ -9049,6 +9260,10 @@ function renderConfig(getTemplateMAML) {
   document.getElementById('cfgIcon').textContent = S.tpl.icon;
   document.getElementById('cfgTitle').textContent = S.tpl.name;
   document.getElementById('cfgDesc').textContent = S.tpl.desc;
+
+  // Show convert-to-custom button for non-custom templates
+  var convertBtn = document.getElementById('cfgConvertBtn');
+  if (convertBtn) convertBtn.style.display = S.tpl.id === 'custom' ? 'none' : '';
 
   // Section collapse state
   var collapseState = {};
@@ -13952,6 +14167,37 @@ function setupEvents() {
       });
       return;
     }
+    // Random gradient color
+    var randBtn = e.target.closest('[data-rand-gradient]');
+    if (randBtn) {
+      e.stopPropagation();
+      var rgi = Number(randBtn.dataset.idx);
+      var rgProp = randBtn.dataset.randGradient;
+      if (rgi >= 0 && rgi < S.elements.length) {
+        captureState('随机渐变');
+        var palettes = [
+          ['#6c5ce7', '#a29bfe'], ['#00cec9', '#81ecec'], ['#e17055', '#fab1a0'],
+          ['#00b894', '#55efc4'], ['#fdcb6e', '#ffeaa7'], ['#e84393', '#fd79a8'],
+          ['#0984e3', '#74b9ff'], ['#d63031', '#ff7675'], ['#00b4d8', '#90e0ef'],
+          ['#f72585', '#ff85a1', '#7209b7'], ['#4361ee', '#4cc9f0'], ['#e63946', '#f4a261'],
+        ];
+        var pick = palettes[Math.floor(Math.random() * palettes.length)];
+        var rgEl = S.elements[rgi];
+        if (rgEl.type === 'text') {
+          rgEl.textGradient = 'custom';
+          rgEl.color = pick[0];
+          rgEl.gradientColor2 = pick[1];
+        } else {
+          rgEl.color = pick[0];
+          rgEl.fillColor2 = pick[1];
+        }
+        S.setDirty(true);
+        renderConfig(getTemplateMAML);
+        _autoPreview();
+        toast('🌈 已应用随机渐变', 'success');
+      }
+      return;
+    }
     // Match size
     var matchBtn = e.target.closest('[data-match-size]');
     if (matchBtn) {
@@ -14282,6 +14528,61 @@ function setupEvents() {
         renderConfig(getTemplateMAML);
         _autoPreview();
         toast('📝 已添加文字元素', 'success', 1500);
+      }
+      return;
+    }
+
+    // R = Add rectangle, C = Add circle (when not in input)
+    if ((e.key === 'r' || e.key === 'c') && !e.ctrlKey && !e.metaKey && e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA' && e.target.tagName !== 'SELECT') {
+      e.preventDefault();
+      var addType = e.key === 'r' ? 'rectangle' : 'circle';
+      var addIcon = e.key === 'r' ? '⬜' : '⭕';
+      if (addElement(addType)) {
+        renderConfig(getTemplateMAML);
+        _autoPreview();
+        toast(addIcon + ' 已添加 ' + addType + ' 元素', 'success', 1500);
+      }
+      return;
+    }
+
+    // Ctrl+G = Random gradient on selected element
+    if (e.ctrlKey && e.key === 'g' && S.selIdx >= 0) {
+      e.preventDefault();
+      captureState('随机渐变');
+      var el = S.elements[S.selIdx];
+      var palettes = [
+        ['#6c5ce7', '#a29bfe'], ['#00cec9', '#81ecec'], ['#e17055', '#fab1a0'],
+        ['#00b894', '#55efc4'], ['#fdcb6e', '#ffeaa7'], ['#e84393', '#fd79a8'],
+        ['#0984e3', '#74b9ff'], ['#d63031', '#ff7675'], ['#636e72', '#b2bec3'],
+      ];
+      var pick = palettes[Math.floor(Math.random() * palettes.length)];
+      if (el.type === 'text') {
+        el.textGradient = 'custom';
+        el.gradientColor2 = pick[1];
+        el.color = pick[0];
+      } else {
+        el.color = pick[0];
+        el.fillColor2 = pick[1];
+      }
+      S.setDirty(true);
+      renderConfig(getTemplateMAML);
+      _autoPreview();
+      toast('🌈 已应用随机渐变', 'success');
+      return;
+    }
+
+    // Ctrl+Shift+D = Duplicate template as custom
+    if (e.ctrlKey && e.shiftKey && e.key === 'D') {
+      e.preventDefault();
+      if (S.tpl && S.tpl.id !== 'custom') {
+        var customTpl = TEMPLATES.find(function(t) { return t.id === 'custom'; });
+        if (customTpl) {
+          S.setTpl(customTpl);
+          S.setDirty(true);
+          renderTplGrid();
+          renderConfig(getTemplateMAML);
+          toast('📋 已转为自定义模式，可自由编辑', 'success');
+        }
       }
       return;
     }
@@ -14864,6 +15165,16 @@ Object.assign(window.JCM, {
   fmtSize: fmtSize,
   isInCameraZone: isInCameraZone,
   clearToken: function () { localStorage.removeItem('jcm-gh-token'); toast('🔑 Token 已清除', 'success'); },
+  convertToCustom: function () {
+    if (!S.tpl || S.tpl.id === 'custom') return;
+    var customTpl = TEMPLATES.find(function(t) { return t.id === 'custom'; });
+    if (!customTpl) return;
+    S.setTpl(customTpl);
+    S.setDirty(true);
+    renderTplGrid();
+    renderConfig(getTemplateMAML);
+    toast('📋 已转为自定义模式，可自由编辑所有元素', 'success');
+  },
   hasToken: function () { return !!localStorage.getItem('jcm-gh-token'); },
   elements: S.elements,
   // Dev tools

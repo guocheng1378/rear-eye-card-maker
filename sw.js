@@ -42,6 +42,10 @@ const ASSETS = [
   './js/templates/pomodoro.js',
   './js/templates/quick_note.js',
   './js/templates/usage.js',
+  './js/templates/quick_clock.js',
+  './js/templates/daily_quote.js',
+  './js/templates/mini_status.js',
+  './js/templates/index.js',
   // UI
   './js/ui/toast.js',
   './js/ui/steps.js',

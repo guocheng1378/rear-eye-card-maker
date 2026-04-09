@@ -11,10 +11,12 @@ export function fieldHtml(label, input, full) {
 }
 
 export function colorFieldHtml(label, value, prop, idx) {
+  var randBtn = (prop === 'color' || prop === 'fillColor2') ? '<button class="eyedropper-btn" data-rand-gradient="' + prop + '" data-idx="' + idx + '" title="随机渐变色">🎲</button>' : '';
   return '<div class="field field-color"><label>' + label + '</label>' +
     '<input type="color" value="' + value + '" data-prop="' + prop + '" data-idx="' + idx + '">' +
     '<span class="color-val">' + value + '</span>' +
     '<button class="eyedropper-btn" data-eyedropper="' + prop + '" data-eyedropper-idx="' + idx + '" title="取色器">🎨</button>' +
+    randBtn +
     '</div>';
 }
 

@@ -1012,6 +1012,37 @@ function setupEvents() {
       });
       return;
     }
+    // Random gradient color
+    var randBtn = e.target.closest('[data-rand-gradient]');
+    if (randBtn) {
+      e.stopPropagation();
+      var rgi = Number(randBtn.dataset.idx);
+      var rgProp = randBtn.dataset.randGradient;
+      if (rgi >= 0 && rgi < S.elements.length) {
+        captureState('随机渐变');
+        var palettes = [
+          ['#6c5ce7', '#a29bfe'], ['#00cec9', '#81ecec'], ['#e17055', '#fab1a0'],
+          ['#00b894', '#55efc4'], ['#fdcb6e', '#ffeaa7'], ['#e84393', '#fd79a8'],
+          ['#0984e3', '#74b9ff'], ['#d63031', '#ff7675'], ['#00b4d8', '#90e0ef'],
+          ['#f72585', '#ff85a1', '#7209b7'], ['#4361ee', '#4cc9f0'], ['#e63946', '#f4a261'],
+        ];
+        var pick = palettes[Math.floor(Math.random() * palettes.length)];
+        var rgEl = S.elements[rgi];
+        if (rgEl.type === 'text') {
+          rgEl.textGradient = 'custom';
+          rgEl.color = pick[0];
+          rgEl.gradientColor2 = pick[1];
+        } else {
+          rgEl.color = pick[0];
+          rgEl.fillColor2 = pick[1];
+        }
+        S.setDirty(true);
+        renderConfig(getTemplateMAML);
+        _autoPreview();
+        toast('🌈 已应用随机渐变', 'success');
+      }
+      return;
+    }
     // Match size
     var matchBtn = e.target.closest('[data-match-size]');
     if (matchBtn) {
@@ -1344,6 +1375,61 @@ function setupEvents() {
         renderConfig(getTemplateMAML);
         _autoPreview();
         toast('📝 已添加文字元素', 'success', 1500);
+      }
+      return;
+    }
+
+    // R = Add rectangle, C = Add circle (when not in input)
+    if ((e.key === 'r' || e.key === 'c') && !e.ctrlKey && !e.metaKey && e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA' && e.target.tagName !== 'SELECT') {
+      e.preventDefault();
+      var addType = e.key === 'r' ? 'rectangle' : 'circle';
+      var addIcon = e.key === 'r' ? '⬜' : '⭕';
+      if (addElement(addType)) {
+        renderConfig(getTemplateMAML);
+        _autoPreview();
+        toast(addIcon + ' 已添加 ' + addType + ' 元素', 'success', 1500);
+      }
+      return;
+    }
+
+    // Ctrl+G = Random gradient on selected element
+    if (e.ctrlKey && e.key === 'g' && S.selIdx >= 0) {
+      e.preventDefault();
+      captureState('随机渐变');
+      var el = S.elements[S.selIdx];
+      var palettes = [
+        ['#6c5ce7', '#a29bfe'], ['#00cec9', '#81ecec'], ['#e17055', '#fab1a0'],
+        ['#00b894', '#55efc4'], ['#fdcb6e', '#ffeaa7'], ['#e84393', '#fd79a8'],
+        ['#0984e3', '#74b9ff'], ['#d63031', '#ff7675'], ['#636e72', '#b2bec3'],
+      ];
+      var pick = palettes[Math.floor(Math.random() * palettes.length)];
+      if (el.type === 'text') {
+        el.textGradient = 'custom';
+        el.gradientColor2 = pick[1];
+        el.color = pick[0];
+      } else {
+        el.color = pick[0];
+        el.fillColor2 = pick[1];
+      }
+      S.setDirty(true);
+      renderConfig(getTemplateMAML);
+      _autoPreview();
+      toast('🌈 已应用随机渐变', 'success');
+      return;
+    }
+
+    // Ctrl+Shift+D = Duplicate template as custom
+    if (e.ctrlKey && e.shiftKey && e.key === 'D') {
+      e.preventDefault();
+      if (S.tpl && S.tpl.id !== 'custom') {
+        var customTpl = TEMPLATES.find(function(t) { return t.id === 'custom'; });
+        if (customTpl) {
+          S.setTpl(customTpl);
+          S.setDirty(true);
+          renderTplGrid();
+          renderConfig(getTemplateMAML);
+          toast('📋 已转为自定义模式，可自由编辑', 'success');
+        }
       }
       return;
     }
@@ -1926,6 +2012,16 @@ Object.assign(window.JCM, {
   fmtSize: fmtSize,
   isInCameraZone: isInCameraZone,
   clearToken: function () { localStorage.removeItem('jcm-gh-token'); toast('🔑 Token 已清除', 'success'); },
+  convertToCustom: function () {
+    if (!S.tpl || S.tpl.id === 'custom') return;
+    var customTpl = TEMPLATES.find(function(t) { return t.id === 'custom'; });
+    if (!customTpl) return;
+    S.setTpl(customTpl);
+    S.setDirty(true);
+    renderTplGrid();
+    renderConfig(getTemplateMAML);
+    toast('📋 已转为自定义模式，可自由编辑所有元素', 'success');
+  },
   hasToken: function () { return !!localStorage.getItem('jcm-gh-token'); },
   elements: S.elements,
   // Dev tools

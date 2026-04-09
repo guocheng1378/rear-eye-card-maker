@@ -17,12 +17,16 @@ import brightness_slider from './brightness_slider.js';
 import breathing_light from './breathing_light.js';
 import photo_frame from './photo_frame.js';
 import pomodoro from './pomodoro.js';
+import quick_clock from './quick_clock.js';
+import daily_quote from './daily_quote.js';
+import mini_status from './mini_status.js';
 
 export const TEMPLATES = [
   custom, animated_clock, slide_unlock, smart_battery,
   action_buttons, number_clock, weather_cp, persistent_counter,
   fitness_ring, music_player, date_beauty, dual_clock, quick_note,
   brightness_slider, breathing_light, photo_frame, pomodoro,
+  quick_clock, daily_quote, mini_status,
 ];
 
 export const TPL_CATEGORIES = [
@@ -52,4 +56,7 @@ export const TPL_CATEGORY_MAP = {
   breathing_light: 'general',
   photo_frame: 'general',
   pomodoro: 'tool',
+  quick_clock: 'clock',
+  daily_quote: 'general',
+  mini_status: 'device',
 };

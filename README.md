@@ -52,7 +52,7 @@ rear-eye-card-maker/
 │   ├── transcode.js        ← FFmpeg.wasm 视频转码
 │   ├── changelog.js        ← 更新日志
 │   ├── i18n.js             ← 国际化
-│   ├── templates/          ← 预设模板定义（17 个）
+│   ├── templates/          ← 预设模板定义（20 个）
 │   └── ui/                 ← UI 子模块
 │       ├── index.js        ← UI 入口 + 事件 + JCM 全局接口
 │       ├── toast.js        ← Toast 通知
@@ -112,7 +112,7 @@ npm run build
 
 ## 模板
 
-### 预设模板（17 个）
+### 预设模板（20 个）
 
 | 模板 | 类别 | 动态更新 |
 |------|------|----------|
@@ -133,11 +133,14 @@ npm run build
 | 💡 呼吸灯 | 通用 | DateTime.Second |
 | 🖼️ 相框卡片 | 通用 | 静态 |
 | 🍅 番茄钟 | 工具 | DateTime.Second |
+| ⏱️ 速览时钟 | 时钟 | DateTime.Minute |
+| 📖 每日一句 | 通用 | DateTime.Day |
+| 📟 迷你状态栏 | 设备 | DateTime.Minute |
 
 ## 功能清单
 
 ### 编辑
-- 🎨 17 个预设模板
+- 🎨 20 个预设模板
 - 🛠️ 自定义模式：文字、矩形、圆形、线条、图片、视频
 - 🔤 字体选择（8 种）
 - 🌈 文字渐变（6 种预设 + 自定义）
@@ -178,11 +181,19 @@ npm run build
 
 | 快捷键 | 功能 |
 |--------|------|
+| `N` | 添加文字元素 |
+| `R` | 添加矩形元素 |
+| `C` | 添加圆形元素 |
 | `Ctrl+Z` | 撤销 |
 | `Ctrl+Y` / `Ctrl+Shift+Z` | 重做 |
 | `Ctrl+D` | 复制当前元素 |
+| `Ctrl+G` | 随机渐变色 |
+| `Ctrl+S` | 导出 ZIP |
 | `Ctrl+C` | 复制到剪贴板 |
 | `Ctrl+V` | 从剪贴板粘贴 |
+| `Ctrl+L` | 切换图层面板 |
+| `Ctrl+K` | 命令面板 |
+| `Shift+Tab` | 切换选中元素 |
 | `Delete` | 删除当前元素 |
 
 ## 设备支持

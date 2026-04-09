@@ -165,6 +165,10 @@ export function renderConfig(getTemplateMAML) {
   document.getElementById('cfgTitle').textContent = S.tpl.name;
   document.getElementById('cfgDesc').textContent = S.tpl.desc;
 
+  // Show convert-to-custom button for non-custom templates
+  var convertBtn = document.getElementById('cfgConvertBtn');
+  if (convertBtn) convertBtn.style.display = S.tpl.id === 'custom' ? 'none' : '';
+
   // Section collapse state
   var collapseState = {};
   try { collapseState = JSON.parse(localStorage.getItem('jcm-collapsed') || '{}'); } catch(e) {}

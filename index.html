@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>REAREye 卡片制作器</title>
-<meta name="description" content="为小米背屏（SubScreen）制作 MAML 卡片模板的免费在线工具。支持 17 个预设模板，自定义元素，一键导出 ZIP。">
+<meta name="description" content="为小米背屏（SubScreen）制作 MAML 卡片模板的免费在线工具。支持 20 个预设模板，自定义元素，一键导出 ZIP。">
 <meta property="og:title" content="REAREye 卡片制作器">
 <meta property="og:description" content="为小米背屏制作 MAML 卡片模板的免费在线工具">
 <meta property="og:type" content="website">
@@ -87,6 +87,7 @@
             <h2 id="cfgTitle" data-i18n="cfg.tplConfig">配置</h2>
             <p id="cfgDesc">调整参数以自定义卡片</p>
           </div>
+          <button class="cfg-convert-btn" id="cfgConvertBtn" onclick="JCM.convertToCustom()" title="转为自定义模式，自由编辑所有元素" style="display:none">📋 转自定义</button>
         </div>
         <div class="config-live-device-row">
           <label data-i18n="cfg.device">机型</label>
@@ -262,16 +263,22 @@
     <div class="modal-body">
       <div style="margin-bottom:12px;font-size:12px;font-weight:600;color:var(--accent)">⌨️ 键盘快捷键</div>
       <div class="shortcut-list">
+        <div class="shortcut-item"><kbd>N</kbd><span>添加文字元素</span></div>
+        <div class="shortcut-item"><kbd>R</kbd><span>添加矩形元素</span></div>
+        <div class="shortcut-item"><kbd>C</kbd><span>添加圆形元素</span></div>
         <div class="shortcut-item"><kbd>Ctrl</kbd>+<kbd>Z</kbd><span>撤销</span></div>
         <div class="shortcut-item"><kbd>Ctrl</kbd>+<kbd>Y</kbd> / <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>Z</kbd><span>重做</span></div>
         <div class="shortcut-item"><kbd>Ctrl</kbd>+<kbd>D</kbd><span>复制当前元素</span></div>
+        <div class="shortcut-item"><kbd>Ctrl</kbd>+<kbd>G</kbd><span>随机渐变色</span></div>
+        <div class="shortcut-item"><kbd>Ctrl</kbd>+<kbd>S</kbd><span>导出 ZIP</span></div>
         <div class="shortcut-item"><kbd>Ctrl</kbd>+<kbd>C</kbd><span>复制到剪贴板</span></div>
         <div class="shortcut-item"><kbd>Ctrl</kbd>+<kbd>V</kbd><span>从剪贴板粘贴</span></div>
+        <div class="shortcut-item"><kbd>Ctrl</kbd>+<kbd>L</kbd><span>切换图层面板</span></div>
+        <div class="shortcut-item"><kbd>Ctrl</kbd>+<kbd>K</kbd><span>命令面板</span></div>
+        <div class="shortcut-item"><kbd>Shift</kbd>+<kbd>Tab</kbd><span>切换选中元素</span></div>
         <div class="shortcut-item"><kbd>Delete</kbd><span>删除当前元素</span></div>
         <div class="shortcut-item"><kbd>↑↓←→</kbd><span>移动元素 1px</span></div>
         <div class="shortcut-item"><kbd>Shift</kbd>+<kbd>↑↓←→</kbd><span>移动元素 10px</span></div>
-        <div class="shortcut-item"><kbd>Tab</kbd><span>代码编辑器缩进</span></div>
-        <div class="shortcut-item"><kbd>Shift</kbd>+<kbd>Tab</kbd><span>代码编辑器反缩进</span></div>
       </div>
       <div style="margin:16px 0 12px;font-size:12px;font-weight:600;color:var(--accent)">🖱️ 鼠标操作</div>
       <div class="shortcut-list">
