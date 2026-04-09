@@ -1027,6 +1027,20 @@ kbd{
   transform:scale(0.9);background:var(--accent);color:#fff;
 }
 
+/* ─── Eyedropper Button ─── */
+.eyedropper-btn{
+  width:26px;height:26px;border-radius:4px;
+  border:1px solid var(--border);background:var(--surface2);
+  cursor:pointer;font-size:12px;padding:0;
+  display:flex;align-items:center;justify-content:center;
+  transition:var(--transition);flex-shrink:0;
+}
+.eyedropper-btn:hover{
+  border-color:var(--accent);background:var(--accent-glow);
+  transform:scale(1.1);
+}
+.eyedropper-btn:active{transform:scale(0.9)}
+
 /* ─── Template Category Tabs ─── */
 .tpl-categories{
   display:flex;gap:6px;
@@ -8935,26 +8949,98 @@ function moveElementZ(idx, dir) {
   S.setDirty(true);
 }
 
-// ── Distribute evenly (horizontal/vertical) ──
-function distributeElements(dir) {
+// ── Distribute evenly (horizontal/vertical) with optional gap ──
+function distributeElements(dir, gap) {
   if (S.elements.length < 3) return;
   captureState('分布排列');
   var sorted = S.elements.map(function (el, i) { return { idx: i, el: el }; });
   if (dir === 'horizontal') {
     sorted.sort(function (a, b) { return a.el.x - b.el.x; });
-    var first = sorted[0].el.x, last = sorted[sorted.length - 1].el.x;
-    var totalSpace = last - first;
-    var step = totalSpace / (sorted.length - 1);
-    sorted.forEach(function (item, i) { if (i > 0 && i < sorted.length - 1) item.el.x = Math.round(first + step * i); });
+    if (gap !== undefined && gap >= 0) {
+      // Gap-based: start from first element, space others by gap
+      var curX = sorted[0].el.x;
+      var curW = sorted[0].el.w || 0;
+      sorted.forEach(function (item, i) {
+        if (i === 0) return;
+        curX += curW + gap;
+        item.el.x = Math.round(curX);
+        curW = item.el.w || 0;
+      });
+    } else {
+      var first = sorted[0].el.x, last = sorted[sorted.length - 1].el.x;
+      var totalSpace = last - first;
+      var step = totalSpace / (sorted.length - 1);
+      sorted.forEach(function (item, i) { if (i > 0 && i < sorted.length - 1) item.el.x = Math.round(first + step * i); });
+    }
   } else {
     sorted.sort(function (a, b) { return a.el.y - b.el.y; });
-    var firstY = sorted[0].el.y, lastY = sorted[sorted.length - 1].el.y;
-    var totalSpaceY = lastY - firstY;
-    var stepY = totalSpaceY / (sorted.length - 1);
-    sorted.forEach(function (item, i) { if (i > 0 && i < sorted.length - 1) item.el.y = Math.round(firstY + stepY * i); });
+    if (gap !== undefined && gap >= 0) {
+      var curY = sorted[0].el.y;
+      var curH = sorted[0].el.h || 0;
+      sorted.forEach(function (item, i) {
+        if (i === 0) return;
+        curY += curH + gap;
+        item.el.y = Math.round(curY);
+        curH = item.el.h || 0;
+      });
+    } else {
+      var firstY = sorted[0].el.y, lastY = sorted[sorted.length - 1].el.y;
+      var totalSpaceY = lastY - firstY;
+      var stepY = totalSpaceY / (sorted.length - 1);
+      sorted.forEach(function (item, i) { if (i > 0 && i < sorted.length - 1) item.el.y = Math.round(firstY + stepY * i); });
+    }
   }
   S.setDirty(true);
   toast('📐 已分布排列', 'success');
+}
+
+// ── Grid arrange: arrange elements in grid rows × cols ──
+function arrangeGrid(cols, gapH, gapV) {
+  if (S.elements.length < 2) return;
+  captureState('网格排列');
+  var device = getSelectedDevice();
+  var startX = Math.ceil(device.width * device.cameraZoneRatio) + 10;
+  var startY = 10;
+  S.elements.forEach(function (el, i) {
+    var col = i % cols;
+    var row = Math.floor(i / cols);
+    // Calculate cumulative offset based on element sizes + gaps
+    var x = startX;
+    for (var c = 0; c < col; c++) {
+      var prevEl = S.elements[row * cols + c];
+      x += (prevEl.w || prevEl.r * 2 || 50) + gapH;
+    }
+    var y = startY;
+    for (var r = 0; r < row; r++) {
+      var rowEl = S.elements[r * cols];
+      y += (rowEl.h || rowEl.r * 2 || 30) + gapV;
+    }
+    el.x = Math.round(x);
+    el.y = Math.round(y);
+  });
+  S.setDirty(true);
+  toast('📊 已网格排列 (' + cols + '列)', 'success');
+}
+
+// ── Apply constraint on device change ──
+function applyConstraint(el, device) {
+  if (!el.constraint) return;
+  var ew = el.w || (el.r ? el.r * 2 : 0) || 100;
+  var eh = el.h || (el.r ? el.r * 2 : 0) || 30;
+  var safeW = device.width * (1 - device.cameraZoneRatio);
+  var marginL = Math.ceil(device.width * device.cameraZoneRatio);
+  switch (el.constraint) {
+    case 'pin-left': el.x = marginL + 10; break;
+    case 'pin-right': el.x = marginL + safeW - ew - 10; break;
+    case 'pin-top': el.y = 10; break;
+    case 'pin-bottom': el.y = device.height - eh - 10; break;
+    case 'center-h': el.x = marginL + Math.round((safeW - ew) / 2); break;
+    case 'center-v': el.y = Math.round((device.height - eh) / 2); break;
+    case 'center-both':
+      el.x = marginL + Math.round((safeW - ew) / 2);
+      el.y = Math.round((device.height - eh) / 2);
+      break;
+  }
 }
 
 // ── Match size (width/height/both) ──
@@ -9043,7 +9129,9 @@ function fieldHtml(label, input, full) {
 function colorFieldHtml(label, value, prop, idx) {
   return '<div class="field field-color"><label>' + label + '</label>' +
     '<input type="color" value="' + value + '" data-prop="' + prop + '" data-idx="' + idx + '">' +
-    '<span class="color-val">' + value + '</span></div>';
+    '<span class="color-val">' + value + '</span>' +
+    '<button class="eyedropper-btn" data-eyedropper="' + prop + '" data-eyedropper-idx="' + idx + '" title="取色器">🎨</button>' +
+    '</div>';
 }
 
 function colorFieldHtml2(value, prop, idx) {
@@ -9630,12 +9718,42 @@ function renderPositionSection(el, idx) {
     html += '<button class="el-btn" data-qsize="quarter" data-qi="' + idx + '" style="font-size:10px;padding:4px 8px">◫ 1/4</button>';
     html += '</div>';
   }
+
+  // 🎯 约束布局
+  var constraintOptions = [
+    { v: '', l: '自由' }, { v: 'pin-left', l: '⬅ 钉左' }, { v: 'pin-right', l: '➡ 钉右' },
+    { v: 'pin-top', l: '⬆ 钉顶' }, { v: 'pin-bottom', l: '⬇ 钉底' },
+    { v: 'center-h', l: '↔ 水平居中' }, { v: 'center-v', l: '↕ 垂直居中' },
+    { v: 'center-both', l: '⊕ 完全居中' },
+  ];
+  html += '<div style="margin-top:8px"><div style="font-size:10px;color:var(--text3);font-weight:600;margin-bottom:4px">🎯 约束</div>';
+  html += '<div style="display:flex;gap:3px;flex-wrap:wrap">';
+  constraintOptions.forEach(function (o) {
+    var isActive = (el.constraint || '') === o.v;
+    html += '<button class="el-btn" data-constraint="' + o.v + '" data-ci="' + idx + '" style="font-size:10px;padding:3px 6px;' + (isActive ? 'background:var(--accent-glow);border-color:var(--accent)' : '') + '">' + o.l + '</button>';
+  });
+  html += '</div></div>';
+
   return html;
 }
 
 function renderTransformSection(el, idx) {
   var html = '';
-  html += fieldHtml('旋转', '<div style="display:flex;gap:6px;align-items:center"><input type="range" min="0" max="360" value="' + (el.rotation || 0) + '" data-prop="rotation" data-idx="' + idx + '" style="flex:1"><span style="font-size:11px;color:var(--text3);min-width:30px;text-align:right">' + (el.rotation || 0) + '°</span></div>');
+  // 旋转：滑块 + 精确数值输入 + 快捷角度
+  html += '<div class="field" style="grid-column:1/-1"><label>旋转</label>' +
+    '<div style="display:flex;gap:6px;align-items:center">' +
+    '<input type="range" min="0" max="360" value="' + (el.rotation || 0) + '" data-prop="rotation" data-idx="' + idx + '" style="flex:1">' +
+    '<input type="number" value="' + (el.rotation || 0) + '" data-prop="rotation" data-idx="' + idx + '" min="0" max="360" style="width:52px;text-align:center">' +
+    '<span style="font-size:11px;color:var(--text3)">°</span>' +
+    '</div></div>';
+  // 快捷角度
+  html += '<div style="grid-column:1/-1;display:flex;gap:3px;flex-wrap:wrap;margin-bottom:4px">';
+  [0, 45, 90, 135, 180, 225, 270, 315].forEach(function (deg) {
+    var isActive = (el.rotation || 0) === deg;
+    html += '<button class="el-btn" data-set-rotation="' + deg + '" data-idx="' + idx + '" style="font-size:10px;padding:3px 8px;' + (isActive ? 'background:var(--accent-glow);border-color:var(--accent)' : '') + '">' + deg + '°</button>';
+  });
+  html += '</div>';
+  // 透明度
   html += fieldHtml('透明度', '<div style="display:flex;gap:6px;align-items:center"><input type="range" min="0" max="100" value="' + (el.opacity !== undefined ? el.opacity : 100) + '" data-prop="opacity" data-idx="' + idx + '" style="flex:1"><span style="font-size:11px;color:var(--text3);min-width:30px;text-align:right">' + (el.opacity !== undefined ? el.opacity : 100) + '%</span></div>');
   return html;
 }
@@ -9688,6 +9806,23 @@ function renderQuickActions(el, idx) {
     html += '<div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:6px">';
     html += '<button class="el-btn" data-distribute="horizontal" style="font-size:10px;padding:4px 8px">↔ 水平分布</button>';
     html += '<button class="el-btn" data-distribute="vertical" style="font-size:10px;padding:4px 8px">↕ 垂直分布</button>';
+    html += '</div>';
+    // Gap-based distribute
+    html += '<div style="display:flex;gap:3px;flex-wrap:wrap;margin-top:4px">';
+    html += '<span style="font-size:9px;color:var(--text3);line-height:22px">间距:</span>';
+    [5, 10, 15, 20, 30].forEach(function (gap) {
+      html += '<button class="el-btn" data-distribute="horizontal" data-gap="' + gap + '" style="font-size:9px;padding:2px 6px">↔' + gap + '</button>';
+      html += '<button class="el-btn" data-distribute="vertical" data-gap="' + gap + '" style="font-size:9px;padding:2px 6px">↕' + gap + '</button>';
+    });
+    html += '</div>';
+  }
+  if (S.elements.length >= 2) {
+    // Grid arrange
+    html += '<div style="display:flex;gap:3px;flex-wrap:wrap;margin-top:6px">';
+    html += '<span style="font-size:9px;color:var(--text3);line-height:22px">网格:</span>';
+    html += '<button class="el-btn" data-grid-arrange data-grid-cols="2" data-grid-gap-h="10" data-grid-gap-v="10" style="font-size:9px;padding:2px 6px">⊞ 2列</button>';
+    html += '<button class="el-btn" data-grid-arrange data-grid-cols="3" data-grid-gap-h="8" data-grid-gap-v="8" style="font-size:9px;padding:2px 6px">⊟ 3列</button>';
+    html += '<button class="el-btn" data-grid-arrange data-grid-cols="4" data-grid-gap-h="5" data-grid-gap-v="5" style="font-size:9px;padding:2px 6px">▦ 4列</button>';
     html += '</div>';
   }
   if (S.elements.length >= 2) {
@@ -11714,6 +11849,102 @@ function isRulerEnabled() {
   return _enabled;
 }
 
+// ─── js/ui/eyedropper.js ───
+// ─── Eyedropper: 取色器 ──────────────────────────────────────────
+// Uses EyeDropper API (Chrome 95+) with canvas fallback
+
+var _active = false;
+var _overlay = null;
+var _callback = null;
+var _canvas = null;
+var _ctx = null;
+
+// ── Check if EyeDropper API is available ──
+function hasEyeDropperAPI() {
+  return typeof window.EyeDropper !== 'undefined';
+}
+
+// ── Native EyeDropper ──
+function pickColorNative(cb) {
+  try {
+    var dropper = new window.EyeDropper();
+    dropper.open().then(function (result) {
+      if (result.sRGBHex) {
+        cb(result.sRGBHex);
+      }
+    }).catch(function () {
+      // User cancelled
+    });
+  } catch (e) {
+    toast('⚠️ 取色器不可用', 'error');
+  }
+}
+
+// ── Canvas Fallback: screenshot + click ──
+function pickColorFallback(cb) {
+  // Create a full-screen overlay with a canvas
+  _active = true;
+  _callback = cb;
+
+  _overlay = document.createElement('div');
+  _overlay.style.cssText = 'position:fixed;inset:0;z-index:99999;cursor:crosshair;background:rgba(0,0,0,0.3)';
+  _overlay.innerHTML = '<div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:var(--surface);color:var(--text);padding:12px 20px;border-radius:10px;font-size:13px;box-shadow:0 8px 32px rgba(0,0,0,.5)">🎨 点击任意位置取色<br><small style="color:var(--text3)">按 Esc 取消</small></div>';
+
+  _canvas = document.createElement('canvas');
+  _ctx = _canvas.getContext('2d');
+
+  // Capture visible page (simplified - just sample from the preview area)
+  var preview = document.querySelector('.preview-content') || document.querySelector('.config-live-right .preview-content');
+  if (!preview) {
+    toast('⚠️ 未找到预览区域', 'error');
+    cleanup();
+    return;
+  }
+
+  document.body.appendChild(_overlay);
+
+  // Mouse move: show color preview
+  _overlay.addEventListener('mousemove', function (e) {
+    // We can't easily sample the page, so we'll just collect color on click
+  });
+
+  _overlay.addEventListener('click', function (e) {
+    // Sample from the page using elementFromPoint doesn't work on overlay
+    // So we prompt the user
+    cleanup();
+    var color = prompt('输入颜色值 (如 #ff6b6b):\n提示: 使用 Chrome 的 DevTools 取色器更精确', '#ffffff');
+    if (color && /^#[0-9a-fA-F]{3,6}$/.test(color)) {
+      cb(color);
+    }
+  });
+
+  function onKeyDown(e) {
+    if (e.key === 'Escape') { cleanup(); }
+  }
+
+  function cleanup() {
+    _active = false;
+    if (_overlay && _overlay.parentNode) _overlay.remove();
+    _overlay = null;
+    document.removeEventListener('keydown', onKeyDown);
+  }
+
+  document.addEventListener('keydown', onKeyDown);
+}
+
+// ── Public API ──
+function pickColor(cb) {
+  if (hasEyeDropperAPI()) {
+    pickColorNative(cb);
+  } else {
+    pickColorFallback(cb);
+  }
+}
+
+function isActive() {
+  return _active;
+}
+
 // ─── js/ui/binding-wizard.js ───
 // ─── Binding Wizard: 可视化数据绑定向导 ────────────────────────────
 
@@ -11901,6 +12132,9 @@ var COMMANDS = [
   { id: 'toggleGrid', icon: '⊞', label: '切换网格', shortcut: '', category: '视图', fn: function (c) { var cb = document.getElementById('showGrid'); if (cb) { cb.checked = !cb.checked; c.toggleGrid(); } } },
   { id: 'toggleFullscreen', icon: '⛶', label: '全屏预览', shortcut: '', category: '视图', fn: function (c) { c.toggleFullscreen(); } },
   { id: 'toggleRuler', icon: '📏', label: '切换标尺坐标', shortcut: '', category: '视图', fn: function (c) { c.toggleRuler(); } },
+  { id: 'gridArrange', icon: '⊞', label: '网格排列 (2列)', shortcut: '', category: '元素', fn: function (c) { c.arrangeGrid(2, 10, 10); } },
+  { id: 'gridArrange3', icon: '⊟', label: '网格排列 (3列)', shortcut: '', category: '元素', fn: function (c) { c.arrangeGrid(3, 8, 8); } },
+  { id: 'pickColor', icon: '🎨', label: '取色器', shortcut: '', category: '工具', fn: function (c) { c.pickColor(function(color) { toast('🎨 ' + color, 'success'); }); } },
   { id: 'zoomIn', icon: '🔍', label: '放大预览', shortcut: '', category: '视图', fn: function (c) { c.zoomIn(); } },
   { id: 'zoomOut', icon: '🔍', label: '缩小预览', shortcut: '', category: '视图', fn: function (c) { c.zoomOut(); } },
   { id: 'zoomReset', icon: '↺', label: '重置缩放', shortcut: '', category: '视图', fn: function (c) { c.zoomReset(); } },
@@ -14000,6 +14234,42 @@ function setupEvents() {
       return;
     }
 
+    // Quick rotation buttons
+    var rotBtn = e.target.closest('[data-set-rotation]');
+    if (rotBtn) {
+      e.stopPropagation();
+      var ri = Number(rotBtn.dataset.idx);
+      var rv = Number(rotBtn.dataset.setRotation);
+      if (ri >= 0 && ri < S.elements.length) {
+        captureState('设置旋转 ' + rv + '°');
+        S.elements[ri].rotation = rv;
+        S.setDirty(true);
+        renderConfig(getTemplateMAML);
+        _autoPreview();
+      }
+      return;
+    }
+
+    // Constraint layout buttons
+    var conBtn = e.target.closest('[data-constraint]');
+    if (conBtn) {
+      e.stopPropagation();
+      var ci = Number(conBtn.dataset.ci);
+      var cv = conBtn.dataset.constraint;
+      if (ci >= 0 && ci < S.elements.length) {
+        captureState('设置约束');
+        S.elements[ci].constraint = cv;
+        if (cv) {
+          applyConstraint(S.elements[ci], getSelectedDevice());
+        }
+        S.setDirty(true);
+        renderConfig(getTemplateMAML);
+        _autoPreview();
+        toast(cv ? '🎯 约束已设置: ' + cv : '🔓 已取消约束', 'info');
+      }
+      return;
+    }
+
     // Reset to defaults
     var resetBtn = e.target.closest('[data-reset-defaults]');
     if (resetBtn) {
@@ -14133,13 +14403,54 @@ function setupEvents() {
       }
       return;
     }
-    // Distribute elements
+    // Distribute elements (with optional gap)
     var distBtn = e.target.closest('[data-distribute]');
     if (distBtn) {
       e.stopPropagation();
-      distributeElements(distBtn.dataset.distribute);
+      var distDir = distBtn.dataset.distribute;
+      if (distBtn.dataset.gap !== undefined) {
+        distributeElements(distDir, Number(distBtn.dataset.gap));
+      } else {
+        distributeElements(distDir);
+      }
       renderConfig(getTemplateMAML);
       _autoPreview();
+      return;
+    }
+    // Grid arrange
+    var gridBtn = e.target.closest('[data-grid-arrange]');
+    if (gridBtn) {
+      e.stopPropagation();
+      var gCols = Number(gridBtn.dataset.gridCols) || 2;
+      var gGapH = Number(gridBtn.dataset.gridGapH) || 10;
+      var gGapV = Number(gridBtn.dataset.gridGapV) || 10;
+      arrangeGrid(gCols, gGapH, gGapV);
+      renderConfig(getTemplateMAML);
+      _autoPreview();
+      return;
+    }
+    // Eyedropper
+    var eyeBtn = e.target.closest('[data-eyedropper]');
+    if (eyeBtn) {
+      e.stopPropagation();
+      var eyeIdx = Number(eyeBtn.dataset.eyedropperIdx);
+      var eyeProp = eyeBtn.dataset.eyedropper;
+      pickColor(function (color) {
+        if (eyeIdx >= 0 && eyeIdx < S.elements.length) {
+          captureState('取色');
+          S.elements[eyeIdx][eyeProp] = color;
+          S.setDirty(true);
+          renderConfig(getTemplateMAML);
+          _autoPreview();
+          toast('🎨 已取色: ' + color, 'success');
+        } else if (eyeProp.startsWith('cfg:')) {
+          var cfgKey = eyeProp.replace('cfg:', '');
+          S.cfg[cfgKey] = color;
+          S.setDirty(true);
+          _autoPreview();
+          toast('🎨 已取色: ' + color, 'success');
+        }
+      });
       return;
     }
     // Match size
@@ -14432,10 +14743,20 @@ function setupEvents() {
   // Device selects
   document.getElementById('deviceSelect').addEventListener('change', function () { 
     try { sessionStorage.setItem('jcm-device', this.value); } catch(e) {}
+    // Apply constraints for new device
+    var device = getSelectedDevice();
+    S.elements.forEach(function (el) { if (el.constraint) applyConstraint(el, device); });
     renderPreview(); 
+    if (isLayerPanelVisible()) renderLayerPanel();
   });
   document.getElementById('showCamera').addEventListener('change', function () { renderPreview(); });
-  document.getElementById('cfgDeviceSelect').addEventListener('change', function () { syncDeviceSelect('toPreview'); renderLivePreview(); });
+  document.getElementById('cfgDeviceSelect').addEventListener('change', function () {
+    syncDeviceSelect('toPreview');
+    // Apply constraints for new device
+    var cfgDevice = getCfgDevice();
+    S.elements.forEach(function (el) { if (el.constraint) applyConstraint(el, cfgDevice); });
+    renderLivePreview();
+  });
   document.getElementById('cfgShowCamera').addEventListener('change', function () { document.getElementById('showCamera').checked = this.checked; renderLivePreview(); });
 
   // Keyboard shortcuts
@@ -14747,6 +15068,9 @@ Object.assign(window.JCM, {
     var on = toggleRuler();
     toast(on ? '📏 标尺已开启' : '📏 标尺已关闭', 'info');
   },
+  pickColor: pickColor,
+  arrangeGrid: function (cols, gapH, gapV) { arrangeGrid(cols, gapH, gapV); renderConfig(getTemplateMAML); },
+  renderConfig: function () { renderConfig(getTemplateMAML); },
   toggleMoreMenu: toggleMoreMenu,
   undo: function () {
     var r = undo();

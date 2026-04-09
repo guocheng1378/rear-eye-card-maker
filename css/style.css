@@ -1013,6 +1013,20 @@ kbd{
   transform:scale(0.9);background:var(--accent);color:#fff;
 }
 
+/* ─── Eyedropper Button ─── */
+.eyedropper-btn{
+  width:26px;height:26px;border-radius:4px;
+  border:1px solid var(--border);background:var(--surface2);
+  cursor:pointer;font-size:12px;padding:0;
+  display:flex;align-items:center;justify-content:center;
+  transition:var(--transition);flex-shrink:0;
+}
+.eyedropper-btn:hover{
+  border-color:var(--accent);background:var(--accent-glow);
+  transform:scale(1.1);
+}
+.eyedropper-btn:active{transform:scale(0.9)}
+
 /* ─── Template Category Tabs ─── */
 .tpl-categories{
   display:flex;gap:6px;

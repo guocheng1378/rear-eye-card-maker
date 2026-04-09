@@ -13,7 +13,9 @@ export function fieldHtml(label, input, full) {
 export function colorFieldHtml(label, value, prop, idx) {
   return '<div class="field field-color"><label>' + label + '</label>' +
     '<input type="color" value="' + value + '" data-prop="' + prop + '" data-idx="' + idx + '">' +
-    '<span class="color-val">' + value + '</span></div>';
+    '<span class="color-val">' + value + '</span>' +
+    '<button class="eyedropper-btn" data-eyedropper="' + prop + '" data-eyedropper-idx="' + idx + '" title="取色器">🎨</button>' +
+    '</div>';
 }
 
 export function colorFieldHtml2(value, prop, idx) {

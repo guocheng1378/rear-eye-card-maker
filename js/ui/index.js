@@ -16,7 +16,7 @@ import {
   ElementDefaults, getSelectedDevice, isInCameraZone,
   addElement, removeElement, alignElement, applyQuickSize, moveElementZ,
   distributeElements, matchSize, copyStyle, pasteStyle, hasStyleClipboard,
-  getStylePresets, saveStylePreset, applyStylePreset
+  getStylePresets, saveStylePreset, applyStylePreset, arrangeGrid, applyConstraint
 } from './elements.js';
 import {
   COLOR_PRESETS, renderTplGrid, filterTemplates, renderConfig,
@@ -38,6 +38,7 @@ import { autoSnapshot, showSnapshotsModal } from './version-snapshots.js';
 import { showADBPush, exportGIF, exportPDF } from './export-adb.js';
 import { renderLayerPanel, toggleLayerPanel, isLayerPanelVisible, initLayerPanel } from './layer-panel.js';
 import { initRuler, toggleRuler, isRulerEnabled } from './ruler.js';
+import { pickColor } from './eyedropper.js';
 import { isMockMode, toggleMockMode, openExprDebugger, closeExprDebugger, insertVar, evalExpr, insertExprPreset, openPerfDashboard, toggleTemplateCompare, cancelCompare, initDevTools } from './dev-tools.js';
 
 // re-export from export.js, transcode.js, storage.js (loaded as ES modules)
@@ -669,6 +670,42 @@ function setupEvents() {
       return;
     }
 
+    // Quick rotation buttons
+    var rotBtn = e.target.closest('[data-set-rotation]');
+    if (rotBtn) {
+      e.stopPropagation();
+      var ri = Number(rotBtn.dataset.idx);
+      var rv = Number(rotBtn.dataset.setRotation);
+      if (ri >= 0 && ri < S.elements.length) {
+        captureState('设置旋转 ' + rv + '°');
+        S.elements[ri].rotation = rv;
+        S.setDirty(true);
+        renderConfig(getTemplateMAML);
+        _autoPreview();
+      }
+      return;
+    }
+
+    // Constraint layout buttons
+    var conBtn = e.target.closest('[data-constraint]');
+    if (conBtn) {
+      e.stopPropagation();
+      var ci = Number(conBtn.dataset.ci);
+      var cv = conBtn.dataset.constraint;
+      if (ci >= 0 && ci < S.elements.length) {
+        captureState('设置约束');
+        S.elements[ci].constraint = cv;
+        if (cv) {
+          applyConstraint(S.elements[ci], getSelectedDevice());
+        }
+        S.setDirty(true);
+        renderConfig(getTemplateMAML);
+        _autoPreview();
+        toast(cv ? '🎯 约束已设置: ' + cv : '🔓 已取消约束', 'info');
+      }
+      return;
+    }
+
     // Reset to defaults
     var resetBtn = e.target.closest('[data-reset-defaults]');
     if (resetBtn) {
@@ -802,13 +839,54 @@ function setupEvents() {
       }
       return;
     }
-    // Distribute elements
+    // Distribute elements (with optional gap)
     var distBtn = e.target.closest('[data-distribute]');
     if (distBtn) {
       e.stopPropagation();
-      distributeElements(distBtn.dataset.distribute);
+      var distDir = distBtn.dataset.distribute;
+      if (distBtn.dataset.gap !== undefined) {
+        distributeElements(distDir, Number(distBtn.dataset.gap));
+      } else {
+        distributeElements(distDir);
+      }
       renderConfig(getTemplateMAML);
       _autoPreview();
+      return;
+    }
+    // Grid arrange
+    var gridBtn = e.target.closest('[data-grid-arrange]');
+    if (gridBtn) {
+      e.stopPropagation();
+      var gCols = Number(gridBtn.dataset.gridCols) || 2;
+      var gGapH = Number(gridBtn.dataset.gridGapH) || 10;
+      var gGapV = Number(gridBtn.dataset.gridGapV) || 10;
+      arrangeGrid(gCols, gGapH, gGapV);
+      renderConfig(getTemplateMAML);
+      _autoPreview();
+      return;
+    }
+    // Eyedropper
+    var eyeBtn = e.target.closest('[data-eyedropper]');
+    if (eyeBtn) {
+      e.stopPropagation();
+      var eyeIdx = Number(eyeBtn.dataset.eyedropperIdx);
+      var eyeProp = eyeBtn.dataset.eyedropper;
+      pickColor(function (color) {
+        if (eyeIdx >= 0 && eyeIdx < S.elements.length) {
+          captureState('取色');
+          S.elements[eyeIdx][eyeProp] = color;
+          S.setDirty(true);
+          renderConfig(getTemplateMAML);
+          _autoPreview();
+          toast('🎨 已取色: ' + color, 'success');
+        } else if (eyeProp.startsWith('cfg:')) {
+          var cfgKey = eyeProp.replace('cfg:', '');
+          S.cfg[cfgKey] = color;
+          S.setDirty(true);
+          _autoPreview();
+          toast('🎨 已取色: ' + color, 'success');
+        }
+      });
       return;
     }
     // Match size
@@ -1102,10 +1180,20 @@ function setupEvents() {
   // Device selects
   document.getElementById('deviceSelect').addEventListener('change', function () { 
     try { sessionStorage.setItem('jcm-device', this.value); } catch(e) {}
+    // Apply constraints for new device
+    var device = getSelectedDevice();
+    S.elements.forEach(function (el) { if (el.constraint) applyConstraint(el, device); });
     renderPreview(); 
+    if (isLayerPanelVisible()) renderLayerPanel();
   });
   document.getElementById('showCamera').addEventListener('change', function () { renderPreview(); });
-  document.getElementById('cfgDeviceSelect').addEventListener('change', function () { syncDeviceSelect('toPreview'); renderLivePreview(); });
+  document.getElementById('cfgDeviceSelect').addEventListener('change', function () {
+    syncDeviceSelect('toPreview');
+    // Apply constraints for new device
+    var cfgDevice = getCfgDevice();
+    S.elements.forEach(function (el) { if (el.constraint) applyConstraint(el, cfgDevice); });
+    renderLivePreview();
+  });
   document.getElementById('cfgShowCamera').addEventListener('change', function () { document.getElementById('showCamera').checked = this.checked; renderLivePreview(); });
 
   // Keyboard shortcuts
@@ -1418,6 +1506,9 @@ Object.assign(window.JCM, {
     var on = toggleRuler();
     toast(on ? '📏 标尺已开启' : '📏 标尺已关闭', 'info');
   },
+  pickColor: pickColor,
+  arrangeGrid: function (cols, gapH, gapV) { arrangeGrid(cols, gapH, gapV); renderConfig(getTemplateMAML); },
+  renderConfig: function () { renderConfig(getTemplateMAML); },
   toggleMoreMenu: toggleMoreMenu,
   undo: function () {
     var r = undo();

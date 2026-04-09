@@ -105,26 +105,98 @@ export function moveElementZ(idx, dir) {
   S.setDirty(true);
 }
 
-// ── Distribute evenly (horizontal/vertical) ──
-export function distributeElements(dir) {
+// ── Distribute evenly (horizontal/vertical) with optional gap ──
+export function distributeElements(dir, gap) {
   if (S.elements.length < 3) return;
   captureState('分布排列');
   var sorted = S.elements.map(function (el, i) { return { idx: i, el: el }; });
   if (dir === 'horizontal') {
     sorted.sort(function (a, b) { return a.el.x - b.el.x; });
-    var first = sorted[0].el.x, last = sorted[sorted.length - 1].el.x;
-    var totalSpace = last - first;
-    var step = totalSpace / (sorted.length - 1);
-    sorted.forEach(function (item, i) { if (i > 0 && i < sorted.length - 1) item.el.x = Math.round(first + step * i); });
+    if (gap !== undefined && gap >= 0) {
+      // Gap-based: start from first element, space others by gap
+      var curX = sorted[0].el.x;
+      var curW = sorted[0].el.w || 0;
+      sorted.forEach(function (item, i) {
+        if (i === 0) return;
+        curX += curW + gap;
+        item.el.x = Math.round(curX);
+        curW = item.el.w || 0;
+      });
+    } else {
+      var first = sorted[0].el.x, last = sorted[sorted.length - 1].el.x;
+      var totalSpace = last - first;
+      var step = totalSpace / (sorted.length - 1);
+      sorted.forEach(function (item, i) { if (i > 0 && i < sorted.length - 1) item.el.x = Math.round(first + step * i); });
+    }
   } else {
     sorted.sort(function (a, b) { return a.el.y - b.el.y; });
-    var firstY = sorted[0].el.y, lastY = sorted[sorted.length - 1].el.y;
-    var totalSpaceY = lastY - firstY;
-    var stepY = totalSpaceY / (sorted.length - 1);
-    sorted.forEach(function (item, i) { if (i > 0 && i < sorted.length - 1) item.el.y = Math.round(firstY + stepY * i); });
+    if (gap !== undefined && gap >= 0) {
+      var curY = sorted[0].el.y;
+      var curH = sorted[0].el.h || 0;
+      sorted.forEach(function (item, i) {
+        if (i === 0) return;
+        curY += curH + gap;
+        item.el.y = Math.round(curY);
+        curH = item.el.h || 0;
+      });
+    } else {
+      var firstY = sorted[0].el.y, lastY = sorted[sorted.length - 1].el.y;
+      var totalSpaceY = lastY - firstY;
+      var stepY = totalSpaceY / (sorted.length - 1);
+      sorted.forEach(function (item, i) { if (i > 0 && i < sorted.length - 1) item.el.y = Math.round(firstY + stepY * i); });
+    }
   }
   S.setDirty(true);
   toast('📐 已分布排列', 'success');
+}
+
+// ── Grid arrange: arrange elements in grid rows × cols ──
+export function arrangeGrid(cols, gapH, gapV) {
+  if (S.elements.length < 2) return;
+  captureState('网格排列');
+  var device = getSelectedDevice();
+  var startX = Math.ceil(device.width * device.cameraZoneRatio) + 10;
+  var startY = 10;
+  S.elements.forEach(function (el, i) {
+    var col = i % cols;
+    var row = Math.floor(i / cols);
+    // Calculate cumulative offset based on element sizes + gaps
+    var x = startX;
+    for (var c = 0; c < col; c++) {
+      var prevEl = S.elements[row * cols + c];
+      x += (prevEl.w || prevEl.r * 2 || 50) + gapH;
+    }
+    var y = startY;
+    for (var r = 0; r < row; r++) {
+      var rowEl = S.elements[r * cols];
+      y += (rowEl.h || rowEl.r * 2 || 30) + gapV;
+    }
+    el.x = Math.round(x);
+    el.y = Math.round(y);
+  });
+  S.setDirty(true);
+  toast('📊 已网格排列 (' + cols + '列)', 'success');
+}
+
+// ── Apply constraint on device change ──
+export function applyConstraint(el, device) {
+  if (!el.constraint) return;
+  var ew = el.w || (el.r ? el.r * 2 : 0) || 100;
+  var eh = el.h || (el.r ? el.r * 2 : 0) || 30;
+  var safeW = device.width * (1 - device.cameraZoneRatio);
+  var marginL = Math.ceil(device.width * device.cameraZoneRatio);
+  switch (el.constraint) {
+    case 'pin-left': el.x = marginL + 10; break;
+    case 'pin-right': el.x = marginL + safeW - ew - 10; break;
+    case 'pin-top': el.y = 10; break;
+    case 'pin-bottom': el.y = device.height - eh - 10; break;
+    case 'center-h': el.x = marginL + Math.round((safeW - ew) / 2); break;
+    case 'center-v': el.y = Math.round((device.height - eh) / 2); break;
+    case 'center-both':
+      el.x = marginL + Math.round((safeW - ew) / 2);
+      el.y = Math.round((device.height - eh) / 2);
+      break;
+  }
 }
 
 // ── Match size (width/height/both) ──

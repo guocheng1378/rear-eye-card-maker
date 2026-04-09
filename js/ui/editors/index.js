@@ -178,12 +178,42 @@ function renderPositionSection(el, idx) {
     html += '<button class="el-btn" data-qsize="quarter" data-qi="' + idx + '" style="font-size:10px;padding:4px 8px">◫ 1/4</button>';
     html += '</div>';
   }
+
+  // 🎯 约束布局
+  var constraintOptions = [
+    { v: '', l: '自由' }, { v: 'pin-left', l: '⬅ 钉左' }, { v: 'pin-right', l: '➡ 钉右' },
+    { v: 'pin-top', l: '⬆ 钉顶' }, { v: 'pin-bottom', l: '⬇ 钉底' },
+    { v: 'center-h', l: '↔ 水平居中' }, { v: 'center-v', l: '↕ 垂直居中' },
+    { v: 'center-both', l: '⊕ 完全居中' },
+  ];
+  html += '<div style="margin-top:8px"><div style="font-size:10px;color:var(--text3);font-weight:600;margin-bottom:4px">🎯 约束</div>';
+  html += '<div style="display:flex;gap:3px;flex-wrap:wrap">';
+  constraintOptions.forEach(function (o) {
+    var isActive = (el.constraint || '') === o.v;
+    html += '<button class="el-btn" data-constraint="' + o.v + '" data-ci="' + idx + '" style="font-size:10px;padding:3px 6px;' + (isActive ? 'background:var(--accent-glow);border-color:var(--accent)' : '') + '">' + o.l + '</button>';
+  });
+  html += '</div></div>';
+
   return html;
 }
 
 function renderTransformSection(el, idx) {
   var html = '';
-  html += fieldHtml('旋转', '<div style="display:flex;gap:6px;align-items:center"><input type="range" min="0" max="360" value="' + (el.rotation || 0) + '" data-prop="rotation" data-idx="' + idx + '" style="flex:1"><span style="font-size:11px;color:var(--text3);min-width:30px;text-align:right">' + (el.rotation || 0) + '°</span></div>');
+  // 旋转：滑块 + 精确数值输入 + 快捷角度
+  html += '<div class="field" style="grid-column:1/-1"><label>旋转</label>' +
+    '<div style="display:flex;gap:6px;align-items:center">' +
+    '<input type="range" min="0" max="360" value="' + (el.rotation || 0) + '" data-prop="rotation" data-idx="' + idx + '" style="flex:1">' +
+    '<input type="number" value="' + (el.rotation || 0) + '" data-prop="rotation" data-idx="' + idx + '" min="0" max="360" style="width:52px;text-align:center">' +
+    '<span style="font-size:11px;color:var(--text3)">°</span>' +
+    '</div></div>';
+  // 快捷角度
+  html += '<div style="grid-column:1/-1;display:flex;gap:3px;flex-wrap:wrap;margin-bottom:4px">';
+  [0, 45, 90, 135, 180, 225, 270, 315].forEach(function (deg) {
+    var isActive = (el.rotation || 0) === deg;
+    html += '<button class="el-btn" data-set-rotation="' + deg + '" data-idx="' + idx + '" style="font-size:10px;padding:3px 8px;' + (isActive ? 'background:var(--accent-glow);border-color:var(--accent)' : '') + '">' + deg + '°</button>';
+  });
+  html += '</div>';
+  // 透明度
   html += fieldHtml('透明度', '<div style="display:flex;gap:6px;align-items:center"><input type="range" min="0" max="100" value="' + (el.opacity !== undefined ? el.opacity : 100) + '" data-prop="opacity" data-idx="' + idx + '" style="flex:1"><span style="font-size:11px;color:var(--text3);min-width:30px;text-align:right">' + (el.opacity !== undefined ? el.opacity : 100) + '%</span></div>');
   return html;
 }
@@ -236,6 +266,23 @@ function renderQuickActions(el, idx) {
     html += '<div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:6px">';
     html += '<button class="el-btn" data-distribute="horizontal" style="font-size:10px;padding:4px 8px">↔ 水平分布</button>';
     html += '<button class="el-btn" data-distribute="vertical" style="font-size:10px;padding:4px 8px">↕ 垂直分布</button>';
+    html += '</div>';
+    // Gap-based distribute
+    html += '<div style="display:flex;gap:3px;flex-wrap:wrap;margin-top:4px">';
+    html += '<span style="font-size:9px;color:var(--text3);line-height:22px">间距:</span>';
+    [5, 10, 15, 20, 30].forEach(function (gap) {
+      html += '<button class="el-btn" data-distribute="horizontal" data-gap="' + gap + '" style="font-size:9px;padding:2px 6px">↔' + gap + '</button>';
+      html += '<button class="el-btn" data-distribute="vertical" data-gap="' + gap + '" style="font-size:9px;padding:2px 6px">↕' + gap + '</button>';
+    });
+    html += '</div>';
+  }
+  if (S.elements.length >= 2) {
+    // Grid arrange
+    html += '<div style="display:flex;gap:3px;flex-wrap:wrap;margin-top:6px">';
+    html += '<span style="font-size:9px;color:var(--text3);line-height:22px">网格:</span>';
+    html += '<button class="el-btn" data-grid-arrange data-grid-cols="2" data-grid-gap-h="10" data-grid-gap-v="10" style="font-size:9px;padding:2px 6px">⊞ 2列</button>';
+    html += '<button class="el-btn" data-grid-arrange data-grid-cols="3" data-grid-gap-h="8" data-grid-gap-v="8" style="font-size:9px;padding:2px 6px">⊟ 3列</button>';
+    html += '<button class="el-btn" data-grid-arrange data-grid-cols="4" data-grid-gap-h="5" data-grid-gap-v="5" style="font-size:9px;padding:2px 6px">▦ 4列</button>';
     html += '</div>';
   }
   if (S.elements.length >= 2) {
