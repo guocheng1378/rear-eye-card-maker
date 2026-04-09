@@ -37,19 +37,36 @@ rear-eye-card-maker/
 ├── index.html              ← 浏览器直接打开即可使用
 ├── css/style.css           ← 所有样式 + 响应式
 ├── js/
-│   ├── store.js            ← 响应式状态 + 公共工具
+│   ├── early-init.js       ← 最早加载的初始化脚本
+│   ├── main.js             ← 入口 + PWA 注册
+│   ├── state.js            ← 响应式状态 + 公共工具
+│   ├── utils.js            ← 通用工具函数
 │   ├── devices.js          ← 设备参数（4 款机型 + 自动检测）
 │   ├── maml.js             ← XML 生成 + 转义 + 校验
-│   ├── templates.js        ← 17 个预设模板定义（含 2 个真实设备模板）
-│   ├── preview.js          ← 预览渲染器
-│   ├── editor.js           ← 元素编辑器 + 默认值
-│   ├── export.js           ← ZIP/PNG 导入导出
+│   ├── live-preview.js     ← 预览渲染器
+│   ├── history.js          ← 撤销/重做
+│   ├── canvas.js           ← 画布拖拽
+│   ├── card-library.js     ← 卡片库管理
+│   ├── storage.js          ← 本地存储
+│   ├── export.js           ← ZIP/PNG/SVG 导入导出
 │   ├── transcode.js        ← FFmpeg.wasm 视频转码
-│   ├── ui.js               ← 页面导航 + 配置 + 快捷键
-│   └── app.js              ← 入口 + PWA 注册
+│   ├── changelog.js        ← 更新日志
+│   ├── i18n.js             ← 国际化
+│   ├── templates/          ← 预设模板定义（19 个）
+│   └── ui/                 ← UI 子模块
+│       ├── index.js        ← UI 入口 + 事件 + JCM 全局接口
+│       ├── toast.js        ← Toast 通知
+│       ├── steps.js        ← 步骤导航
+│       ├── code-editor.js  ← XML 代码编辑器
+│       ├── elements.js     ← 元素操作（增删对齐等）
+│       ├── config-panel.js ← 配置面板渲染
+│       ├── share.js        ← 模板分享
+│       ├── editors/        ← 各类型元素编辑器
+│       └── ...             ← 更多 UI 模块
 ├── lib/jszip.min.js        ← JSZip（本地化）
 ├── manifest.json           ← PWA 清单
 ├── sw.js                   ← Service Worker
+├── build.js                ← Node.js 构建脚本（内联打包）
 └── app/                    ← Android 包装（Kotlin）
 ```
 

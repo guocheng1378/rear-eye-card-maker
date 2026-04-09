@@ -26,10 +26,25 @@ jobs:
       - name: Setup Pages
         uses: actions/configure-pages@v4
 
+      - name: Prepare web assets
+        run: |
+          mkdir -p _site
+          # Copy only web-related files
+          cp index.html _site/
+          cp -r css _site/
+          cp -r js _site/
+          cp -r lib _site/
+          cp -r icons _site/
+          cp manifest.json _site/
+          cp sw.js _site/
+          cp REAREYE_USAGE.md _site/
+          cp README.md _site/
+          cp LICENSE _site/
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: '.'
+          path: '_site'
 
       - name: Deploy to GitHub Pages
         id: deployment

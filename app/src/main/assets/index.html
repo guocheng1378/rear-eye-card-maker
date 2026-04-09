@@ -1805,6 +1805,49 @@ input[type=range]::-moz-range-track{
   font-size:10px;color:var(--text3);margin-left:auto;
   white-space:nowrap;opacity:.6;
 }
+
+/* ─── Simple Mode ─── */
+.simple-mode .dev-tools-bar{display:none!important}
+.simple-mode .advanced-tools{display:none!important}
+.simple-mode .config-section[data-section="quickOps"]{display:none!important}
+.simple-mode .batch-export-bar{display:none!important}
+.simple-mode .cfg-zoom-controls{display:none!important}
+.simple-mode .el-toolbar .el-btn:nth-child(n+4){display:none!important}
+
+/* ─── Animation Editor ─── */
+.anim-timeline{padding:12px;background:var(--surface2);border-radius:var(--radius-sm);margin-top:8px}
+.anim-timeline-header{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.anim-timeline-header h4{font-size:12px;font-weight:600;color:var(--text2);margin:0}
+.anim-track{display:flex;align-items:center;gap:6px;margin-bottom:6px;padding:6px 8px;background:var(--surface);border-radius:var(--radius-sm);border:1px solid var(--border)}
+.anim-track-label{font-size:11px;color:var(--text2);width:60px;flex-shrink:0}
+.anim-track-bar{flex:1;height:20px;background:var(--surface2);border-radius:4px;position:relative;cursor:pointer;overflow:hidden}
+.anim-track-fill{height:100%;background:var(--accent);border-radius:4px;opacity:.6;transition:width .2s}
+.anim-track-keyframe{position:absolute;top:50%;transform:translate(-50%,-50%);width:8px;height:8px;background:var(--accent);border:2px solid #fff;border-radius:50%;cursor:grab;z-index:2;box-shadow:0 1px 3px rgba(0,0,0,.3)}
+.anim-track-keyframe:hover{transform:translate(-50%,-50%) scale(1.3)}
+.anim-track-time{font-size:9px;color:var(--text3);position:absolute;bottom:2px;right:4px}
+.anim-ease-select{font-size:10px;padding:2px 6px;border-radius:4px;background:var(--surface);border:1px solid var(--border);color:var(--text2)}
+.anim-preview-btn{font-size:10px;padding:3px 10px;border-radius:4px;border:1px solid var(--accent);color:var(--accent);background:transparent;cursor:pointer;transition:all .15s}
+.anim-preview-btn:hover{background:var(--accent);color:#fff}
+.anim-preview-btn.playing{background:var(--accent);color:#fff;animation:pulse 1s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.7}}
+
+/* ─── Binding Wizard ─── */
+.binding-wizard{padding:16px}
+.binding-source-list{display:flex;flex-direction:column;gap:4px;max-height:200px;overflow-y:auto}
+.binding-source-item{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:var(--radius-sm);border:1px solid var(--border);cursor:pointer;transition:all .15s}
+.binding-source-item:hover{border-color:var(--accent);background:var(--accent-glow)}
+.binding-source-item.active{border-color:var(--accent);background:var(--accent-glow)}
+.binding-source-icon{font-size:16px}
+.binding-source-name{font-size:12px;font-weight:600}
+.binding-source-desc{font-size:10px;color:var(--text3)}
+.binding-target-preview{padding:10px;background:var(--surface2);border-radius:var(--radius-sm);font-size:11px;color:var(--text2);margin-top:10px;font-family:monospace}
+
+/* ─── Drag Select ─── */
+.drag-select-box{position:absolute;border:1.5px dashed var(--accent);background:rgba(124,109,240,.08);pointer-events:none;z-index:100;border-radius:2px}
+.preview-content.drag-selecting{cursor:crosshair!important}
+
+/* ─── Multi-select ─── */
+.preview-content [data-el-idx].multi-selected{outline:2px solid #ffd700!important;outline-offset:2px!important;box-shadow:0 0 0 4px rgba(255,215,0,.2)!important}
 </style>
 <meta http-equiv="Content-Security-Policy" content="default-src 'self' blob: data:; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://unpkg.com/@ffmpeg/umd@0.12.10/ https://unpkg.com/@ffmpeg/core@0.12.6/; style-src 'self' 'unsafe-inline'; img-src 'self' blob: data: https:; media-src 'self' blob: data:; connect-src 'self' https://api.github.com https://api.github.com/gists https://unpkg.com/@ffmpeg/;">
 </head>
@@ -1932,7 +1975,8 @@ input[type=range]::-moz-range-track{
         </label>
         <label class="check-label">
           <input type="checkbox" id="showGrid" onchange="JCM.toggleGrid()"> <span data-i18n="preview.grid">网格</span>
-          <label class="check-label"><input type="checkbox" id="showThemeCompare" onchange="JCM.toggleThemeCompare()"> <span data-i18n="preview.themeCompare">双主题</span></label>
+        </label>
+        <label class="check-label"><input type="checkbox" id="showThemeCompare" onchange="JCM.toggleThemeCompare()"> <span data-i18n="preview.themeCompare">双主题</span></label>
         </label>
         <button class="mock-toggle active" id="mockToggle" title="模拟数据: ON"><span class="mock-toggle-dot"></span> 🎭 模拟</button>
         <button class="mock-toggle" id="compareTplBtn" onclick="JCM.toggleTemplateCompare()" title="模板对比"><span>🔄</span> 对比</button>
@@ -2233,7 +2277,10 @@ function setClipboard(v) { clipboard = v; }
 // ─── Devices: 设备参数 ─────────────────────────────────────────────
 
 const DEVICES = {
-  p2: { id: 'p2', label: 'Pro Max — 976×596', width: 976, height: 596, cameraZoneRatio: 0.30 },
+  p2:    { id: 'p2',    label: 'Pro Max — 976×596',  width: 976,  height: 596,  cameraZoneRatio: 0.30 },
+  q200:  { id: 'q200',  label: 'Pro — 904×572',      width: 904,  height: 572,  cameraZoneRatio: 0.30 },
+  q100:  { id: 'q100',  label: '标准版 — 840×520',    width: 840,  height: 520,  cameraZoneRatio: 0.30 },
+  ultra: { id: 'ultra', label: 'Ultra — 1020×620',   width: 1020, height: 620,  cameraZoneRatio: 0.30 },
 };
 
 function getDevice(id) {
@@ -2241,7 +2288,7 @@ function getDevice(id) {
 }
 
 function isAutoDevice(device) {
-  return false;
+  return device && device.id === 'auto';
 }
 
 function cameraZoneWidth(device) {
@@ -3682,12 +3729,925 @@ var persistent_counter = {
   },
 };
 
+// ─── js/templates/breathing_light.js ───
+
+var breathing_light = {
+  id: 'breathing_light', icon: '💡', name: '呼吸灯', desc: '柔和呼吸闪烁的氛围灯效果',
+  updater: 'DateTime.Second',
+  config: [
+    { group: '基本', fields: [
+      { key: 'cardName', label: '卡片名称', type: 'text', default: '呼吸灯' },
+      { key: 'bgColor', label: '背景颜色', type: 'color', default: '#0a0a0a' },
+    ]},
+    { group: '样式', fields: [
+      { key: 'lightColor', label: '灯光颜色', type: 'color', default: '#6c5ce7' },
+      { key: 'glowColor', label: '光晕颜色', type: 'color', default: '#a29bfe' },
+      { key: 'speed', label: '呼吸速度(ms)', type: 'range', min: 500, max: 3000, default: 1500 },
+      { key: 'size', label: '灯大小', type: 'range', min: 20, max: 80, default: 40 },
+    ]},
+  ],
+  elements(c) {
+    var s = Number(c.size) || 40;
+    return [
+      { type: 'rectangle', x: 0, y: 0, w: 976, h: 596, color: c.bgColor, locked: true },
+      { type: 'circle', x: 120, y: 120, r: s + 20, color: c.glowColor, opacity: 20 },
+      { type: 'circle', x: 120, y: 120, r: s, color: c.lightColor },
+      { type: 'text', text: '呼吸灯', x: 30, y: 230, size: 13, color: '#666666' },
+    ];
+  },
+  rawXml(c) {
+    var spd = Number(c.speed) || 1500;
+    var s = Number(c.size) || 40;
+    var half = Math.round(spd / 2);
+    return [
+      '<Widget screenWidth="976" frameRate="30" scaleByDensity="false" useVariableUpdater="DateTime.Second" name="' + escXml(c.cardName || '呼吸灯') + '">',
+      '  <Var name="marginL" type="number" expression="(#view_width * 0.30)" />',
+      '',
+      '  <!-- 背景 -->',
+      '  <Rectangle w="#view_width" h="#view_height" fillColor="' + c.bgColor + '" />',
+      '',
+      '  <Group x="#marginL" y="0">',
+      '    <!-- 光晕（大圆，低透明度） -->',
+      '    <Circle x="' + (s + 20) + '" y="' + (s + 20) + '" r="' + (s + 20) + '" color="' + c.glowColor + '">',
+      '      <AlphaAnimation repeat="-1">',
+      '        <A time="0" alpha="0.1" />',
+      '        <A time="' + half + '" alpha="0.35" />',
+      '        <A time="' + spd + '" alpha="0.1" />',
+      '      </AlphaAnimation>',
+      '      <SizeAnimation repeat="-1">',
+      '        <A time="0" w="' + ((s+20)*2) + '" h="' + ((s+20)*2) + '" />',
+      '        <A time="' + half + '" w="' + ((s+30)*2) + '" h="' + ((s+30)*2) + '" />',
+      '        <A time="' + spd + '" w="' + ((s+20)*2) + '" h="' + ((s+20)*2) + '" />',
+      '      </SizeAnimation>',
+      '    </Circle>',
+      '',
+      '    <!-- 核心灯 -->',
+      '    <Circle x="' + s + '" y="' + s + '" r="' + s + '" color="' + c.lightColor + '">',
+      '      <AlphaAnimation repeat="-1">',
+      '        <A time="0" alpha="0.6" />',
+      '        <A time="' + half + '" alpha="1.0" />',
+      '        <A time="' + spd + '" alpha="0.6" />',
+      '      </AlphaAnimation>',
+      '    </Circle>',
+      '',
+      '    <!-- 标签 -->',
+      '    <Text x="0" y="' + (s * 2 + 50) + '" size="12" color="#444444" text="呼吸灯" />',
+      '  </Group>',
+      '</Widget>',
+    ].join('\n');
+  },
+};
+
+// ─── js/templates/brightness_slider.js ───
+
+var brightness_slider = {
+  id: 'brightness_slider', icon: '🔆', name: '亮度滑块', desc: '拖拽调节亮度的交互卡片',
+  updater: 'DateTime.Minute',
+  config: [
+    { group: '基本', fields: [
+      { key: 'cardName', label: '卡片名称', type: 'text', default: '亮度调节' },
+      { key: 'bgColor', label: '背景颜色', type: 'color', default: '#0a0a0a' },
+    ]},
+    { group: '样式', fields: [
+      { key: 'sliderColor', label: '滑块颜色', type: 'color', default: '#ffd60a' },
+      { key: 'trackColor', label: '轨道颜色', type: 'color', default: '#333333' },
+      { key: 'textColor', label: '文字颜色', type: 'color', default: '#ffffff' },
+      { key: 'iconColor', label: '图标颜色', type: 'color', default: '#888888' },
+    ]},
+  ],
+  elements(c) {
+    return [
+      { type: 'rectangle', x: 0, y: 0, w: 976, h: 596, color: c.bgColor, locked: true },
+      { type: 'text', text: '🔆', x: 30, y: 60, size: 28, color: c.iconColor },
+      { type: 'text', text: '亮度', x: 70, y: 65, size: 16, color: c.textColor, bold: true },
+      { type: 'rectangle', x: 30, y: 110, w: 250, h: 8, color: c.trackColor, radius: 4 },
+      { type: 'rectangle', x: 30, y: 110, w: 180, h: 8, color: c.sliderColor, radius: 4 },
+      { type: 'circle', x: 210, y: 114, r: 10, color: '#ffffff' },
+      { type: 'text', text: '72%', x: 30, y: 140, size: 14, color: c.iconColor },
+    ];
+  },
+  rawXml(c) {
+    return [
+      '<Widget screenWidth="976" frameRate="0" scaleByDensity="false" useVariableUpdater="DateTime.Minute" name="' + escXml(c.cardName || '亮度调节') + '">',
+      '  <Var name="marginL" type="number" expression="(#view_width * 0.30)" />',
+      '',
+      '  <!-- 背景 -->',
+      '  <Rectangle w="#view_width" h="#view_height" fillColor="' + c.bgColor + '" />',
+      '',
+      '  <Group x="#marginL" y="0">',
+      '    <!-- 标题 -->',
+      '    <Text x="0" y="40" size="16" color="' + c.textColor + '" text="亮度" bold="true" />',
+      '',
+      '    <!-- 滑块轨道 -->',
+      '    <Rectangle x="0" y="90" w="250" h="8" fillColor="' + c.trackColor + '" cornerRadius="4" />',
+      '',
+      '    <!-- 滑块填充 -->',
+      '    <Rectangle x="0" y="90" w="180" h="8" fillColor="' + c.sliderColor + '" cornerRadius="4" />',
+      '',
+      '    <!-- 滑块手柄 -->',
+      '    <Circle x="180" y="94" r="10" color="#ffffff" />',
+      '',
+      '    <!-- 百分比 -->',
+      '    <Text x="0" y="120" size="12" color="' + c.iconColor + '" text="72%" />',
+      '',
+      '    <!-- 快捷按钮：25/50/75/100 -->',
+      '    <Text x="0" y="155" size="11" color="' + c.iconColor + '" text="25%   50%   75%   100%" />',
+      '  </Group>',
+      '</Widget>',
+    ].join('\n');
+  },
+};
+
+// ─── js/templates/date_beauty.js ───
+
+var date_beauty = {
+  id: 'date_beauty', icon: '📅', name: '精美日期', desc: '大号日期显示，带节日/倒计时',
+  updater: 'DateTime.Day',
+  config: [
+    { group: '基本', fields: [
+      { key: 'cardName', label: '卡片名称', type: 'text', default: '精美日期' },
+      { key: 'bgColor', label: '背景颜色', type: 'color', default: '#0f0f1a' },
+    ]},
+    { group: '样式', fields: [
+      { key: 'dayColor', label: '日期数字颜色', type: 'color', default: '#ffffff' },
+      { key: 'monthColor', label: '月份颜色', type: 'color', default: '#888888' },
+      { key: 'accentColor', label: '强调色', type: 'color', default: '#ff6b6b' },
+      { key: 'weekColor', label: '星期颜色', type: 'color', default: '#666666' },
+      { key: 'countdownLabel', label: '倒计时标签', type: 'text', default: '距离新年' },
+      { key: 'countdownDate', label: '倒计时日期(MMDD)', type: 'text', default: '0101' },
+    ]},
+  ],
+  elements(c) {
+    return [
+      { type: 'rectangle', x: 0, y: 0, w: 976, h: 596, color: c.bgColor, locked: true },
+      { type: 'text', text: '2026', x: 30, y: 50, size: 18, color: c.monthColor, locked: true },
+      { type: 'text', text: '04', x: 30, y: 80, size: 96, color: c.dayColor, bold: true, fontFamily: 'mipro-demibold' },
+      { type: 'rectangle', x: 30, y: 195, w: 50, h: 3, color: c.accentColor, radius: 1.5 },
+      { type: 'text', text: '星期四', x: 30, y: 215, size: 16, color: c.weekColor },
+      { type: 'text', text: c.countdownLabel + ': 272天', x: 30, y: 250, size: 13, color: c.accentColor },
+    ];
+  },
+  rawXml(c) {
+    return [
+      '<Widget screenWidth="976" frameRate="0" scaleByDensity="false" useVariableUpdater="DateTime.Day" name="' + escXml(c.cardName || '精美日期') + '">',
+      '  <Var name="marginL" type="number" expression="(#view_width * 0.30)" />',
+      '',
+      '  <!-- 背景 -->',
+      '  <Rectangle w="#view_width" h="#view_height" fillColor="' + c.bgColor + '" />',
+      '',
+      '  <Group x="#marginL" y="0">',
+      '    <!-- 年份 -->',
+      '    <Text x="0" y="30" size="18" color="' + c.monthColor + '" textExp="#year" />',
+      '',
+      '    <!-- 大号日期 -->',
+      '    <Text x="0" y="60" size="96" color="' + c.dayColor + '" textExp="formatDate(\'dd\', #time_sys)" bold="true" fontFamily="mipro-demibold" />',
+      '',
+      '    <!-- 强调线 -->',
+      '    <Rectangle x="0" y="175" w="50" h="3" fillColor="' + c.accentColor + '" cornerRadius="1.5" />',
+      '',
+      '    <!-- 星期 -->',
+      '    <Text x="0" y="195" size="16" color="' + c.weekColor + '" textExp="formatDate(\'EEEE\', #time_sys)" />',
+      '',
+      '    <!-- 月份 -->',
+      '    <Text x="0" y="222" size="14" color="' + c.monthColor + '" textExp="formatDate(\'MM月\', #time_sys)" />',
+      '',
+      '    <!-- 倒计时 -->',
+      '    <Text x="0" y="250" size="13" color="' + c.accentColor + '" textExp="' + escXml(c.countdownLabel || '距离新年') + ' + &quot;: &quot; + countDown(\'' + (c.countdownDate || '0101') + '\') + &quot;天&quot;" />',
+      '  </Group>',
+      '</Widget>',
+    ].join('\n');
+  },
+};
+
+// ─── js/templates/dual_clock.js ───
+
+var dual_clock = {
+  id: 'dual_clock', icon: '🌍', name: '双时区时钟', desc: '同时显示两个时区的时间',
+  updater: 'DateTime.Second',
+  config: [
+    { group: '基本', fields: [
+      { key: 'cardName', label: '卡片名称', type: 'text', default: '双时区' },
+      { key: 'bgColor', label: '背景颜色', type: 'color', default: '#0a0e1a' },
+    ]},
+    { group: '本地时间', fields: [
+      { key: 'localLabel', label: '本地标签', type: 'text', default: '北京' },
+      { key: 'localColor', label: '本地时间颜色', type: 'color', default: '#ffffff' },
+    ]},
+    { group: '远程时间', fields: [
+      { key: 'remoteLabel', label: '远程标签', type: 'text', default: '纽约' },
+      { key: 'remoteColor', label: '远程时间颜色', type: 'color', default: '#4fc3f7' },
+      { key: 'remoteOffset', label: '时差(小时)', type: 'range', min: -12, max: 12, default: -13 },
+    ]},
+    { group: '样式', fields: [
+      { key: 'dividerColor', label: '分隔线颜色', type: 'color', default: '#333333' },
+      { key: 'labelColor', label: '标签颜色', type: 'color', default: '#666666' },
+    ]},
+  ],
+  elements(c) {
+    return [
+      { type: 'rectangle', x: 0, y: 0, w: 976, h: 596, color: c.bgColor, locked: true },
+      // 本地时间
+      { type: 'text', text: c.localLabel, x: 30, y: 50, size: 13, color: c.labelColor },
+      { type: 'text', text: '10:30', x: 30, y: 75, size: 52, color: c.localColor, bold: true, fontFamily: 'mipro-demibold' },
+      // 分隔线
+      { type: 'rectangle', x: 30, y: 145, w: 250, h: 1, color: c.dividerColor },
+      // 远程时间
+      { type: 'text', text: c.remoteLabel, x: 30, y: 165, size: 13, color: c.labelColor },
+      { type: 'text', text: '21:30', x: 30, y: 190, size: 52, color: c.remoteColor, bold: true, fontFamily: 'mipro-demibold' },
+      // 日期
+      { type: 'text', text: '2026/04/10 星期四', x: 30, y: 260, size: 13, color: c.labelColor },
+    ];
+  },
+  rawXml(c) {
+    var offset = c.remoteOffset || -13;
+    return [
+      '<Widget screenWidth="976" frameRate="30" scaleByDensity="false" useVariableUpdater="DateTime.Second" name="' + escXml(c.cardName || '双时区') + '">',
+      '  <Var name="marginL" type="number" expression="(#view_width * 0.30)" />',
+      '',
+      '  <!-- 背景 -->',
+      '  <Rectangle w="#view_width" h="#view_height" fillColor="' + c.bgColor + '" />',
+      '',
+      '  <Group x="#marginL" y="0">',
+      '    <!-- 本地时间标签 -->',
+      '    <Text x="0" y="30" size="13" color="' + c.labelColor + '" text="' + escXml(c.localLabel || '北京') + '" />',
+      '',
+      '    <!-- 本地时间 -->',
+      '    <Text x="0" y="55" size="52" color="' + c.localColor + '" textExp="formatDate(\'HH:mm\', #time_sys)" bold="true" fontFamily="mipro-demibold" />',
+      '',
+      '    <!-- 分隔线 -->',
+      '    <Rectangle x="0" y="125" w="250" h="1" fillColor="' + c.dividerColor + '" />',
+      '',
+      '    <!-- 远程时间标签 -->',
+      '    <Text x="0" y="145" size="13" color="' + c.labelColor + '" text="' + escXml(c.remoteLabel || '纽约') + '" />',
+      '',
+      '    <!-- 远程时间（带时差偏移） -->',
+      '    <Text x="0" y="170" size="52" color="' + c.remoteColor + '" textExp="formatDate(\'HH:mm\', #time_sys + ' + (offset * 3600000) + ')" bold="true" fontFamily="mipro-demibold" />',
+      '',
+      '    <!-- 日期 -->',
+      '    <Text x="0" y="240" size="13" color="' + c.labelColor + '" textExp="formatDate(\'yyyy/MM/dd EEEE\', #time_sys)" />',
+      '',
+      '    <!-- 秒数（闪烁） -->',
+      '    <Text x="0" y="265" size="11" color="#444444" textExp="formatDate(\'ss\', #time_sys) + &quot; 秒&quot;">',
+      '      <AlphaAnimation repeat="-1">',
+      '        <A time="0" alpha="0.4" />',
+      '        <A time="500" alpha="0.8" />',
+      '        <A time="1000" alpha="0.4" />',
+      '      </AlphaAnimation>',
+      '    </Text>',
+      '  </Group>',
+      '</Widget>',
+    ].join('\n');
+  },
+};
+
+// ─── js/templates/fitness_ring.js ───
+
+var fitness_ring = {
+  id: 'fitness_ring', icon: '🏋️', name: '健身圆环', desc: '步数/卡路里/距离三环进度',
+  updater: 'Sensor',
+  config: [
+    { group: '基本', fields: [
+      { key: 'cardName', label: '卡片名称', type: 'text', default: '健身圆环' },
+      { key: 'bgColor', label: '背景颜色', type: 'color', default: '#0a0a0a' },
+    ]},
+    { group: '目标', fields: [
+      { key: 'stepGoal', label: '步数目标', type: 'range', min: 3000, max: 20000, default: 8000 },
+      { key: 'calGoal', label: '卡路里目标', type: 'range', min: 100, max: 1000, default: 400 },
+      { key: 'distGoal', label: '距离目标(km)', type: 'range', min: 1, max: 15, default: 5 },
+    ]},
+    { group: '颜色', fields: [
+      { key: 'ring1Color', label: '步数环颜色', type: 'color', default: '#ff3b30' },
+      { key: 'ring2Color', label: '卡路里环颜色', type: 'color', default: '#34c759' },
+      { key: 'ring3Color', label: '距离环颜色', type: 'color', default: '#007aff' },
+      { key: 'numColor', label: '数字颜色', type: 'color', default: '#ffffff' },
+      { key: 'labelColor', label: '标签颜色', type: 'color', default: '#666666' },
+    ]},
+  ],
+  elements(c) {
+    return [
+      { type: 'rectangle', x: 0, y: 0, w: 976, h: 596, color: c.bgColor, locked: true },
+      { type: 'circle', x: 100, y: 100, r: 60, color: '#1a1a1a' },
+      { type: 'circle', x: 100, y: 100, r: 45, color: '#1a1a1a' },
+      { type: 'circle', x: 100, y: 100, r: 30, color: '#1a1a1a' },
+      { type: 'text', text: '6,542', x: 30, y: 230, size: 32, color: c.numColor, bold: true, fontFamily: 'mipro-demibold' },
+      { type: 'text', text: '步', x: 30, y: 265, size: 13, color: c.labelColor },
+      { type: 'text', text: '256', x: 130, y: 230, size: 32, color: c.numColor, bold: true, fontFamily: 'mipro-demibold' },
+      { type: 'text', text: '千卡', x: 130, y: 265, size: 13, color: c.labelColor },
+      { type: 'text', text: '4.2', x: 230, y: 230, size: 32, color: c.numColor, bold: true, fontFamily: 'mipro-demibold' },
+      { type: 'text', text: '公里', x: 230, y: 265, size: 13, color: c.labelColor },
+    ];
+  },
+  rawXml(c) {
+    var stepG = c.stepGoal || 8000;
+    var calG = c.calGoal || 400;
+    var distG = c.distGoal || 5;
+    return [
+      '<Widget screenWidth="976" frameRate="0" scaleByDensity="false" useVariableUpdater="Sensor" name="' + escXml(c.cardName || '健身圆环') + '">',
+      '  <Var name="marginL" type="number" expression="(#view_width * 0.30)" />',
+      '',
+      '  <!-- 背景 -->',
+      '  <Rectangle w="#view_width" h="#view_height" fillColor="' + c.bgColor + '" />',
+      '',
+      '  <Group x="#marginL" y="0">',
+      '    <!-- 步数环 最外层 -->',
+      '    <Arc x="80" y="80" r="60" startAngle="0" endAngle="360" strokeColor="' + c.ring1Color + '" strokeWidth="10" strokeLineCap="round" />',
+      '',
+      '    <!-- 卡路里环 中间层 -->',
+      '    <Arc x="80" y="80" r="45" startAngle="0" endAngle="270" strokeColor="' + c.ring2Color + '" strokeWidth="10" strokeLineCap="round" />',
+      '',
+      '    <!-- 距离环 最内层 -->',
+      '    <Arc x="80" y="80" r="30" startAngle="0" endAngle="200" strokeColor="' + c.ring3Color + '" strokeWidth="10" strokeLineCap="round" />',
+      '',
+      '    <!-- 步数 -->',
+      '    <Text x="0" y="170" size="32" color="' + c.numColor + '" textExp="#step_count" bold="true" fontFamily="mipro-demibold" />',
+      '    <Text x="0" y="205" size="13" color="' + c.labelColor + '" text="步" />',
+      '',
+      '    <!-- 卡路里 -->',
+      '    <Text x="90" y="170" size="32" color="' + c.numColor + '" textExp="#step_calorie" bold="true" fontFamily="mipro-demibold" />',
+      '    <Text x="90" y="205" size="13" color="' + c.labelColor + '" text="千卡" />',
+      '',
+      '    <!-- 距离 -->',
+      '    <Text x="180" y="170" size="32" color="' + c.numColor + '" textExp="#step_distance" bold="true" fontFamily="mipro-demibold" />',
+      '    <Text x="180" y="205" size="13" color="' + c.labelColor + '" text="公里" />',
+      '',
+      '    <!-- 目标 -->',
+      '    <Text x="0" y="235" size="11" color="#444444" text="目标: ' + stepG + ' 步 / ' + calG + ' 千卡 / ' + distG + ' km" />',
+      '  </Group>',
+      '</Widget>',
+    ].join('\n');
+  },
+};
+
+// ─── js/templates/music_player.js ───
+
+var music_player = {
+  id: 'music_player', icon: '🎵', name: '音乐卡片', desc: '显示当前播放歌曲和控制按钮',
+  updater: 'Music',
+  config: [
+    { group: '基本', fields: [
+      { key: 'cardName', label: '卡片名称', type: 'text', default: '音乐卡片' },
+      { key: 'bgColor', label: '背景颜色', type: 'color', default: '#0a0a0a' },
+    ]},
+    { group: '样式', fields: [
+      { key: 'titleColor', label: '歌名颜色', type: 'color', default: '#ffffff' },
+      { key: 'artistColor', label: '歌手颜色', type: 'color', default: '#888888' },
+      { key: 'accentColor', label: '强调色', type: 'color', default: '#1db954' },
+      { key: 'progressBg', label: '进度条底色', type: 'color', default: '#333333' },
+    ]},
+  ],
+  elements(c) {
+    return [
+      { type: 'rectangle', x: 0, y: 0, w: 976, h: 596, color: c.bgColor, locked: true },
+      { type: 'rectangle', x: 30, y: 50, w: 100, h: 100, color: '#222222', radius: 8 },
+      { type: 'text', text: '歌曲名称', x: 150, y: 70, size: 20, color: c.titleColor, bold: true },
+      { type: 'text', text: '歌手名', x: 150, y: 100, size: 14, color: c.artistColor },
+      { type: 'rectangle', x: 30, y: 170, w: 250, h: 3, color: c.progressBg, radius: 1.5 },
+      { type: 'rectangle', x: 30, y: 170, w: 120, h: 3, color: c.accentColor, radius: 1.5 },
+      { type: 'text', text: '⏮  ⏸  ⏭', x: 100, y: 190, size: 20, color: c.titleColor },
+    ];
+  },
+  rawXml(c) {
+    return [
+      '<Widget screenWidth="976" frameRate="0" scaleByDensity="false" useVariableUpdater="Music" name="' + escXml(c.cardName || '音乐卡片') + '">',
+      '  <Var name="marginL" type="number" expression="(#view_width * 0.30)" />',
+      '',
+      '  <!-- 背景 -->',
+      '  <Rectangle w="#view_width" h="#view_height" fillColor="' + c.bgColor + '" />',
+      '',
+      '  <Group x="#marginL" y="0">',
+      '    <!-- 专辑封面占位 -->',
+      '    <Rectangle x="0" y="30" w="100" h="100" fillColor="#222222" cornerRadius="8" />',
+      '',
+      '    <!-- 歌名 -->',
+      '    <Text x="115" y="50" size="20" color="' + c.titleColor + '" textExp="#music_title" bold="true" />',
+      '',
+      '    <!-- 歌手 -->',
+      '    <Text x="115" y="80" size="14" color="' + c.artistColor + '" textExp="#music_artist" />',
+      '',
+      '    <!-- 进度条背景 -->',
+      '    <Rectangle x="0" y="150" w="250" h="3" fillColor="' + c.progressBg + '" cornerRadius="1.5" />',
+      '',
+      '    <!-- 进度条 -->',
+      '    <Rectangle x="0" y="150" w="0" h="3" fillColor="' + c.accentColor + '" cornerRadius="1.5" />',
+      '',
+      '    <!-- 控制按钮区域 -->',
+      '    <MusicControl x="60" y="170" w="130" h="40" prevColor="' + c.titleColor + '" playColor="' + c.accentColor + '" nextColor="' + c.titleColor + '" />',
+      '  </Group>',
+      '</Widget>',
+    ].join('\n');
+  },
+};
+
+// ─── js/templates/photo_frame.js ───
+
+var photo_frame = {
+  id: 'photo_frame', icon: '🖼️', name: '相框卡片', desc: '圆形/圆角裁切照片展示',
+  config: [
+    { group: '基本', fields: [
+      { key: 'cardName', label: '卡片名称', type: 'text', default: '相框卡片' },
+      { key: 'bgColor', label: '背景颜色', type: 'color', default: '#0d1117' },
+    ]},
+    { group: '样式', fields: [
+      { key: 'frameStyle', label: '边框样式', type: 'select', options: [
+        { v: 'circle', l: '圆形' },
+        { v: 'rounded', l: '圆角方形' },
+        { v: 'none', l: '无边框' },
+      ], default: 'circle' },
+      { key: 'borderColor', label: '边框颜色', type: 'color', default: '#30363d' },
+      { key: 'borderWidth', label: '边框粗细', type: 'range', min: 0, max: 8, default: 3 },
+      { key: 'frameSize', label: '相框大小', type: 'range', min: 80, max: 200, default: 140 },
+      { key: 'nameColor', label: '名字颜色', type: 'color', default: '#ffffff' },
+      { key: 'subColor', label: '副标题颜色', type: 'color', default: '#8b949e' },
+      { key: 'nameText', label: '名字', type: 'text', default: '我的照片' },
+      { key: 'subText', label: '副标题', type: 'text', default: '2026 · 春' },
+    ]},
+  ],
+  elements(c) {
+    var fs = Number(c.frameSize) || 140;
+    var bw = Number(c.borderWidth) || 3;
+    var isCircle = c.frameStyle === 'circle';
+    var els = [
+      { type: 'rectangle', x: 0, y: 0, w: 976, h: 596, color: c.bgColor, locked: true },
+    ];
+    if (isCircle) {
+      els.push({ type: 'circle', x: 120, y: 100, r: fs / 2 + bw, color: c.borderColor });
+      els.push({ type: 'circle', x: 120, y: 100, r: fs / 2, color: '#222222' });
+    } else {
+      var radius = c.frameStyle === 'rounded' ? 16 : 0;
+      els.push({ type: 'rectangle', x: 120 - fs / 2 - bw, y: 100 - fs / 2 - bw, w: fs + bw * 2, h: fs + bw * 2, color: c.borderColor, radius: radius });
+      els.push({ type: 'rectangle', x: 120 - fs / 2, y: 100 - fs / 2, w: fs, h: fs, color: '#222222', radius: radius });
+    }
+    els.push({ type: 'text', text: c.nameText, x: 30, y: 220, size: 20, color: c.nameColor, bold: true });
+    els.push({ type: 'text', text: c.subText, x: 30, y: 248, size: 13, color: c.subColor });
+    return els;
+  },
+  rawXml(c) {
+    var fs = Number(c.frameSize) || 140;
+    var bw = Number(c.borderWidth) || 3;
+    var isCircle = c.frameStyle === 'circle';
+    var lines = [
+      '<Widget screenWidth="976" frameRate="0" scaleByDensity="false" name="' + escXml(c.cardName || '相框卡片') + '">',
+      '  <Var name="marginL" type="number" expression="(#view_width * 0.30)" />',
+      '',
+      '  <!-- 背景 -->',
+      '  <Rectangle w="#view_width" h="#view_height" fillColor="' + c.bgColor + '" />',
+      '',
+      '  <Group x="#marginL" y="0">',
+    ];
+    if (isCircle) {
+      lines.push('    <!-- 圆形边框 -->');
+      lines.push('    <Circle x="' + (fs/2+bw) + '" y="' + (fs/2+bw) + '" r="' + (fs/2+bw) + '" color="' + c.borderColor + '" />');
+      lines.push('    <Circle x="' + (fs/2+bw) + '" y="' + (fs/2+bw) + '" r="' + (fs/2) + '" color="#222222" />');
+    } else {
+      var r = c.frameStyle === 'rounded' ? 16 : 0;
+      lines.push('    <Rectangle x="0" y="0" w="' + (fs+bw*2) + '" h="' + (fs+bw*2) + '" fillColor="' + c.borderColor + '" cornerRadius="' + (r+bw) + '" />');
+      lines.push('    <Rectangle x="' + bw + '" y="' + bw + '" w="' + fs + '" h="' + fs + '" fillColor="#222222" cornerRadius="' + r + '" />');
+    }
+    lines.push('    <!-- 用户需替换为自己的图片 -->');
+    lines.push('    <!-- <Image x="0" y="0" w="' + fs + '" h="' + fs + '" src="photo.jpg" maskShape="' + (isCircle ? 'circle' : 'roundedrect') + '" cornerRadius="' + (isCircle ? 0 : 16) + '" /> -->');
+    lines.push('');
+    lines.push('    <Text x="0" y="' + (fs + bw*2 + 15) + '" size="20" color="' + c.nameColor + '" text="' + escXml(c.nameText || '我的照片') + '" bold="true" />');
+    lines.push('    <Text x="0" y="' + (fs + bw*2 + 42) + '" size="13" color="' + c.subColor + '" text="' + escXml(c.subText || '2026 · 春') + '" />');
+    lines.push('  </Group>');
+    lines.push('</Widget>');
+    return lines.join('\n');
+  },
+};
+
+// ─── js/templates/pomodoro.js ───
+
+var pomodoro = {
+  id: 'pomodoro', icon: '🍅', name: '番茄钟', desc: '25分钟专注计时器，带开始/暂停',
+  updater: 'DateTime.Second',
+  config: [
+    { group: '基本', fields: [
+      { key: 'cardName', label: '卡片名称', type: 'text', default: '番茄钟' },
+      { key: 'bgColor', label: '背景颜色', type: 'color', default: '#1a0a0a' },
+    ]},
+    { group: '设置', fields: [
+      { key: 'workMinutes', label: '专注时长(分)', type: 'range', min: 5, max: 60, default: 25 },
+      { key: 'breakMinutes', label: '休息时长(分)', type: 'range', min: 1, max: 15, default: 5 },
+    ]},
+    { group: '颜色', fields: [
+      { key: 'timerColor', label: '计时器颜色', type: 'color', default: '#ff6b6b' },
+      { key: 'breakColor', label: '休息颜色', type: 'color', default: '#51cf66' },
+      { key: 'textColor', label: '文字颜色', type: 'color', default: '#ffffff' },
+      { key: 'subColor', label: '副文字颜色', type: 'color', default: '#666666' },
+    ]},
+  ],
+  elements(c) {
+    var wm = Number(c.workMinutes) || 25;
+    return [
+      { type: 'rectangle', x: 0, y: 0, w: 976, h: 596, color: c.bgColor, locked: true },
+      { type: 'text', text: '🍅', x: 120, y: 40, size: 36, color: c.timerColor },
+      { type: 'text', text: wm + ':00', x: 60, y: 100, size: 64, color: c.timerColor, bold: true, fontFamily: 'mipro-demibold' },
+      { type: 'text', text: '专注中', x: 110, y: 175, size: 14, color: c.subColor },
+      { type: 'rectangle', x: 30, y: 200, w: 250, h: 6, color: '#333333', radius: 3 },
+      { type: 'rectangle', x: 30, y: 200, w: 0, h: 6, color: c.timerColor, radius: 3 },
+      { type: 'text', text: '开始  暂停  重置', x: 80, y: 225, size: 16, color: c.textColor },
+    ];
+  },
+  rawXml(c) {
+    var wm = Number(c.workMinutes) || 25;
+    var bm = Number(c.breakMinutes) || 5;
+    var totalSec = wm * 60;
+    return [
+      '<Widget screenWidth="976" frameRate="1" scaleByDensity="false" useVariableUpdater="DateTime.Second" name="' + escXml(c.cardName || '番茄钟') + '">',
+      '  <Var name="marginL" type="number" expression="(#view_width * 0.30)" />',
+      '',
+      '  <!-- 持久化状态 -->',
+      '  <Permanence name="pomodoro_state" expression="0" />',
+      '  <Permanence name="pomodoro_remaining" expression="' + totalSec + '" />',
+      '  <Permanence name="pomodoro_count" expression="0" />',
+      '',
+      '  <!-- 背景 -->',
+      '  <Rectangle w="#view_width" h="#view_height" fillColor="' + c.bgColor + '" />',
+      '',
+      '  <Group x="#marginL" y="0">',
+      '    <!-- 番茄图标 -->',
+      '    <Text x="90" y="20" size="36" color="' + c.timerColor + '" text="🍅" />',
+      '',
+      '    <!-- 计时显示 -->',
+      '    <Text x="30" y="80" size="56" color="' + c.timerColor + '" textExp="div(#pomodoro_remaining,60) + &quot;:&quot; + ifelse(mod(#pomodoro_remaining,60) < 10, &quot;0&quot;, &quot;&quot;) + mod(#pomodoro_remaining,60)" bold="true" fontFamily="mipro-demibold" />',
+      '',
+      '    <!-- 状态文字 -->',
+      '    <Text x="80" y="155" size="14" color="' + c.subColor + '" textExp="ifelse(eq(#pomodoro_state,1), &quot;专注中&quot;, ifelse(eq(#pomodoro_state,2), &quot;休息中&quot;, &quot;已暂停&quot;))" />',
+      '',
+      '    <!-- 进度条背景 -->',
+      '    <Rectangle x="0" y="180" w="250" h="6" fillColor="#333333" cornerRadius="3" />',
+      '',
+      '    <!-- 进度条 -->',
+      '    <Rectangle x="0" y="180" w="0" h="6" fillColor="' + c.timerColor + '" cornerRadius="3" />',
+      '',
+      '    <!-- 完成次数 -->',
+      '    <Text x="0" y="205" size="11" color="#444444" textExp="&quot;今日完成 &quot; + #pomodoro_count + &quot; 个&quot;" />',
+      '',
+      '    <!-- 控制按钮 -->',
+      '    <Button name="btn_start" x="0" y="225" w="70" h="32">',
+      '      <Rectangle x="0" y="0" w="70" h="32" fillColor="' + c.timerColor + '" cornerRadius="6" />',
+      '      <Text x="18" y="8" size="13" color="#ffffff" text="开始" bold="true" />',
+      '      <Trigger action="click">',
+      '        <VariableCommand target="pomodoro_state" value="1" />',
+      '      </Trigger>',
+      '    </Button>',
+      '',
+      '    <Button name="btn_pause" x="80" y="225" w="70" h="32">',
+      '      <Rectangle x="0" y="0" w="70" h="32" fillColor="#333333" cornerRadius="6" />',
+      '      <Text x="18" y="8" size="13" color="#888888" text="暂停" />',
+      '      <Trigger action="click">',
+      '        <VariableCommand target="pomodoro_state" value="0" />',
+      '      </Trigger>',
+      '    </Button>',
+      '',
+      '    <Button name="btn_reset" x="160" y="225" w="70" h="32">',
+      '      <Rectangle x="0" y="0" w="70" h="32" fillColor="#222222" cornerRadius="6" />',
+      '      <Text x="18" y="8" size="13" color="#666666" text="重置" />',
+      '      <Trigger action="click">',
+      '        <VariableCommand target="pomodoro_state" value="0" />',
+      '        <VariableCommand target="pomodoro_remaining" value="' + totalSec + '" />',
+      '      </Trigger>',
+      '    </Button>',
+      '  </Group>',
+      '</Widget>',
+    ].join('\n');
+  },
+};
+
+// ─── js/templates/quick_note.js ───
+
+var quick_note = {
+  id: 'quick_note', icon: '📝', name: '快捷便签', desc: '自定义文字备忘，支持多行',
+  updater: 'DateTime.Minute',
+  config: [
+    { group: '基本', fields: [
+      { key: 'cardName', label: '卡片名称', type: 'text', default: '快捷便签' },
+      { key: 'bgColor', label: '背景颜色', type: 'color', default: '#1a1a0a' },
+    ]},
+    { group: '内容', fields: [
+      { key: 'title', label: '标题', type: 'text', default: '今日待办' },
+      { key: 'line1', label: '第1行', type: 'text', default: '✅ 完成卡片模板' },
+      { key: 'line2', label: '第2行', type: 'text', default: '⬜ 修复预览bug' },
+      { key: 'line3', label: '第3行', type: 'text', default: '⬜ 添加新模板' },
+      { key: 'line4', label: '第4行', type: 'text', default: '' },
+    ]},
+    { group: '样式', fields: [
+      { key: 'titleColor', label: '标题颜色', type: 'color', default: '#ffd700' },
+      { key: 'textColor', label: '文字颜色', type: 'color', default: '#cccccc' },
+      { key: 'accentColor', label: '强调色', type: 'color', default: '#ffd700' },
+    ]},
+  ],
+  elements(c) {
+    var lines = [c.line1, c.line2, c.line3, c.line4].filter(Boolean);
+    var els = [
+      { type: 'rectangle', x: 0, y: 0, w: 976, h: 596, color: c.bgColor, locked: true },
+      { type: 'rectangle', x: 25, y: 30, w: 4, h: 20, color: c.accentColor, radius: 2 },
+      { type: 'text', text: c.title, x: 38, y: 30, size: 18, color: c.titleColor, bold: true },
+    ];
+    lines.forEach(function(line, i) {
+      els.push({ type: 'text', text: line, x: 30, y: 70 + i * 36, size: 16, color: c.textColor });
+    });
+    return els;
+  },
+  rawXml(c) {
+    var lines = [c.line1, c.line2, c.line3, c.line4].filter(Boolean);
+    var xml = [
+      '<Widget screenWidth="976" frameRate="0" scaleByDensity="false" useVariableUpdater="DateTime.Minute" name="' + escXml(c.cardName || '快捷便签') + '">',
+      '  <Var name="marginL" type="number" expression="(#view_width * 0.30)" />',
+      '',
+      '  <!-- 背景 -->',
+      '  <Rectangle w="#view_width" h="#view_height" fillColor="' + c.bgColor + '" />',
+      '',
+      '  <Group x="#marginL" y="0">',
+      '    <!-- 标题强调线 -->',
+      '    <Rectangle x="0" y="10" w="4" h="20" fillColor="' + c.accentColor + '" cornerRadius="2" />',
+      '',
+      '    <!-- 标题 -->',
+      '    <Text x="13" y="10" size="18" color="' + c.titleColor + '" text="' + escXml(c.title || '今日待办') + '" bold="true" />',
+    ];
+    lines.forEach(function(line, i) {
+      xml.push('    <Text x="5" y="' + (50 + i * 36) + '" size="16" color="' + c.textColor + '" text="' + escXml(line) + '" />');
+    });
+    xml.push('  </Group>');
+    xml.push('</Widget>');
+    return xml.join('\n');
+  },
+};
+
+// ─── js/templates/usage.js ───
+// ─── Templates: 使用说明 ──────────────────────────────────────────
+
+const TPL_USAGE = {
+  custom: {
+    title: '🛠️ 自定义卡片使用说明',
+    steps: [
+      '选择"自定义"模板',
+      '设置背景颜色和名称',
+      '点击"下一步"进入配置页面',
+      '使用顶部工具栏添加文字、矩形、图片、视频等元素',
+      '拖拽元素调整位置，右下角拖拽调整大小',
+      '在右侧实时预览区查看效果',
+      '点击"生成预览"查看完整 XML',
+      '导出 ZIP 文件',
+    ],
+    tips: [
+      '按 N 键快速添加文字元素',
+      '按 Ctrl+D 复制当前选中元素',
+      '拖拽文件到预览区可直接上传图片/视频',
+      '使用对齐工具快速居中或边缘对齐',
+    ],
+    export: '导出的 ZIP 包含 manifest.xml 和 media 文件夹，可直接用于小米背屏',
+  },
+  animated_clock: {
+    title: '🕐 动画时钟使用说明',
+    steps: [
+      '选择"动画时钟"模板',
+      '设置背景颜色和时钟样式',
+      '实时预览会显示当前时间',
+      '导出后在小米背屏上使用',
+    ],
+    tips: [
+      '时钟会自动显示系统当前时间',
+      '可以调整颜色匹配你的壁纸风格',
+      '支持 12 小时和 24 小时制',
+    ],
+    export: '导出后可直接推送到小米背屏使用',
+  },
+  slide_unlock: {
+    title: '📱 滑动解锁使用说明',
+    steps: [
+      '选择"滑动解锁"模板',
+      '自定义背景颜色和文字',
+      '预览滑动解锁效果',
+      '导出使用',
+    ],
+    tips: [
+      '滑动解锁效果仅在小米背屏上可交互',
+      '预览中会显示静态模拟效果',
+    ],
+    export: '包含滑动交互逻辑，导出后在设备上可滑动操作',
+  },
+  smart_battery: {
+    title: '🔋 智能电池使用说明',
+    steps: [
+      '选择"智能电池"模板',
+      '自定义颜色和布局风格',
+      '预览会显示模拟电量数据',
+      '导出后在小米背屏显示实时电量',
+    ],
+    tips: [
+      '电量百分比会根据实际电量动态变化',
+      '充电状态会显示不同动画效果',
+      '可以调整进度条样式和颜色',
+    ],
+    export: '会自动绑定系统电量数据',
+  },
+  action_buttons: {
+    title: '🔘 快捷按钮使用说明',
+    steps: [
+      '选择"快捷按钮"模板',
+      '配置按钮文字和样式',
+      '设置按钮的触发动作',
+      '预览并导出',
+    ],
+    tips: [
+      '支持自定义按钮数量和排列方式',
+      '每个按钮可以绑定不同的快捷操作',
+      '建议按钮区域避开摄像头遮挡区',
+    ],
+    export: '包含按钮交互逻辑，导出后可点击触发',
+  },
+  number_clock: {
+    title: '🔢 数字时钟使用说明',
+    steps: [
+      '选择"数字时钟"模板',
+      '选择喜欢的数字样式和颜色',
+      '预览当前时间显示效果',
+      '导出使用',
+    ],
+    tips: [
+      '支持多种数字字体风格',
+      '可以自定义时间分隔符样式',
+      '日期和星期也可以一并显示',
+    ],
+    export: '自动绑定系统时间，导出后实时显示',
+  },
+  weather_cp: {
+    title: '🌤️ 天气卡片使用说明',
+    steps: [
+      '选择"天气卡片"模板',
+      '设置城市和显示风格',
+      '选择要显示的天气信息',
+      '预览并导出',
+    ],
+    tips: [
+      '天气数据需要设备联网获取',
+      '可以显示温度、天气图标、湿度等信息',
+      '建议在安全区内显示核心信息',
+    ],
+    export: '会自动请求天气数据权限',
+  },
+  persistent_counter: {
+    title: '📊 持久计数器使用说明',
+    steps: [
+      '选择"持久计数器"模板',
+      '设置计数器名称和样式',
+      '配置递增/递减逻辑',
+      '预览并导出',
+    ],
+    tips: [
+      '计数值会持久化存储，重启后不丢失',
+      '支持触控递增/递减操作',
+      '可以设置计数上限和下限',
+    ],
+    export: '数据通过 Permanence 持久化，不会因重启丢失',
+  },
+  fitness_ring: {
+    title: '🏋️ 健身圆环使用说明',
+    steps: [
+      '选择"健身圆环"模板',
+      '设置步数、卡路里、距离目标值',
+      '自定义三环颜色',
+      '预览并导出',
+    ],
+    tips: [
+      '三环设计灵感来自 Apple Watch 健身圆环',
+      '步数、卡路里、距离数据自动从传感器获取',
+      '圆环颜色可独立配置，建议使用高对比配色',
+    ],
+    export: '绑定传感器数据，实时更新步数/卡路里/距离',
+  },
+  music_player: {
+    title: '🎵 音乐卡片使用说明',
+    steps: [
+      '选择"音乐卡片"模板',
+      '自定义背景和强调色',
+      '预览会显示模拟音乐数据',
+      '导出后绑定系统音乐播放器',
+    ],
+    tips: [
+      'MusicControl 元素提供上一首/播放暂停/下一首控制',
+      '歌名和歌手名自动从系统音乐数据获取',
+      '进度条实时跟随播放进度',
+    ],
+    export: '绑定系统音乐播放器，需设备授权音乐数据访问',
+  },
+  date_beauty: {
+    title: '📅 精美日期使用说明',
+    steps: [
+      '选择"精美日期"模板',
+      '设置倒计时目标日期(MMDD格式)',
+      '自定义倒计时标签文字',
+      '预览并导出',
+    ],
+    tips: [
+      '大号日期数字醒目易读',
+      '倒计时功能可设置任意日期，如生日、考试等',
+      '每天自动更新日期和倒计时天数',
+    ],
+    export: '每天自动更新，倒计时自动计算剩余天数',
+  },
+  dual_clock: {
+    title: '🌍 双时区时钟使用说明',
+    steps: [
+      '选择"双时区时钟"模板',
+      '设置两个城市的标签名称',
+      '调整时差（-12到+12小时）',
+      '预览并导出',
+    ],
+    tips: [
+      '时差支持正负值，东区为正、西区为负',
+      '秒数会闪烁显示当前秒',
+      '常见时差：纽约-13、伦敦-8、东京+1、巴黎-7',
+    ],
+    export: '每秒更新，两个时间同步刷新',
+  },
+  quick_note: {
+    title: '📝 快捷便签使用说明',
+    steps: [
+      '选择"快捷便签"模板',
+      '填写标题和最多4行文字',
+      '自定义颜色方案',
+      '预览并导出',
+    ],
+    tips: [
+      '适合显示待办清单、备忘录、提醒事项',
+      '文字内容在配置时填入，导出后固定显示',
+      '空行会自动跳过，不会显示空白',
+      '可以在文字前加 ✅⬜ 等符号标记状态',
+    ],
+    export: '静态文字卡片，导出后内容固定不变',
+  },
+  brightness_slider: {
+    title: '🔆 亮度滑块使用说明',
+    steps: [
+      '选择"亮度滑块"模板',
+      '自定义滑块和轨道颜色',
+      '预览并导出',
+    ],
+    tips: [
+      'Slider 元素支持拖拽交互',
+      '可以绑定系统亮度变量',
+      '圆角半径让滑块更美观',
+    ],
+    export: '滑块支持触控拖拽操作',
+  },
+  breathing_light: {
+    title: '💡 呼吸灯使用说明',
+    steps: [
+      '选择"呼吸灯"模板',
+      '调整灯光颜色和大小',
+      '设置呼吸速度',
+      '预览并导出',
+    ],
+    tips: [
+      'AlphaAnimation 实现柔和呼吸效果',
+      '光晕层叠加 SizeAnimation 增强视觉',
+      '建议深色背景搭配亮色灯光',
+    ],
+    export: '纯视觉效果模板，自动循环播放',
+  },
+  photo_frame: {
+    title: '🖼️ 相框卡片使用说明',
+    steps: [
+      '选择"相框卡片"模板',
+      '选择边框样式（圆形/圆角/无边框）',
+      '调整相框大小和边框粗细',
+      '填写名字和副标题',
+      '导出后替换为自己的图片',
+    ],
+    tips: [
+      '圆形裁切适合头像照片',
+      '圆角方形适合风景照',
+      '导出后手动替换 Image 的 src 为自己的图片文件',
+    ],
+    export: '导出后需手动添加图片文件到 media 目录',
+  },
+  pomodoro: {
+    title: '🍅 番茄钟使用说明',
+    steps: [
+      '选择"番茄钟"模板',
+      '设置专注时长和休息时长',
+      '自定义颜色方案',
+      '预览并导出',
+    ],
+    tips: [
+      'Permanence 实现跨重启保存计时状态',
+      'Button + Trigger 实现点击交互',
+      '开始/暂停/重置三个按钮独立控制',
+      '每日完成次数自动累计',
+    ],
+    export: '交互卡片，支持点击操作和状态持久化',
+  },
+};
+
 // ─── js/templates/index.js ───
 // ─── Templates: 模板注册表 ────────────────────────────────────────
 
 const TEMPLATES = [
   custom, animated_clock, slide_unlock, smart_battery,
   action_buttons, number_clock, weather_cp, persistent_counter,
+  fitness_ring, music_player, date_beauty, dual_clock, quick_note,
+  brightness_slider, breathing_light, photo_frame, pomodoro,
 ];
 
 const TPL_CATEGORIES = [
@@ -3695,17 +4655,28 @@ const TPL_CATEGORIES = [
   { id: 'general', label: '🎨 通用' },
   { id: 'device', label: '📱 设备' },
   { id: 'tool', label: '🔧 工具' },
+  { id: 'clock', label: '🕐 时钟' },
+  { id: 'health', label: '💪 健康' },
 ];
 
 const TPL_CATEGORY_MAP = {
   custom: 'general',
-  animated_clock: 'general',
+  animated_clock: 'clock',
   slide_unlock: 'general',
-  smart_battery: 'general',
+  smart_battery: 'device',
   action_buttons: 'tool',
-  number_clock: 'general',
+  number_clock: 'clock',
   weather_cp: 'device',
   persistent_counter: 'tool',
+  fitness_ring: 'health',
+  music_player: 'device',
+  date_beauty: 'clock',
+  dual_clock: 'clock',
+  quick_note: 'general',
+  brightness_slider: 'device',
+  breathing_light: 'general',
+  photo_frame: 'general',
+  pomodoro: 'tool',
 };
 
 // ─── js/live-preview.js ───
@@ -4175,6 +5146,7 @@ PreviewRenderer.prototype.renderElements = function (elements, files, selIdx) {
       default: return sizeLabel;
     }
   }).join('');
+  return html;
 };
 
 // ─── Render Template Preview (dispatch) ───────────────────────────
