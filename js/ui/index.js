@@ -7,7 +7,7 @@ import { TEMPLATES } from '../templates/index.js';
 import { renderTemplatePreview, PreviewRenderer } from '../live-preview.js';
 import { captureState, undo, redo, undoTo, getHistoryLabels, resetHistory } from '../history.js';
 import { initCanvas } from '../canvas.js';
-import { debounce, fmtSize, addRecentColor } from '../utils.js';
+import { debounce, fmtSize, addRecentColor, toggleFavorite, escHtml } from '../utils.js';
 
 import { toast, toastProgress } from './toast.js';
 import { getStep, goStep, moveStepSlider, syncDeviceSelect } from './steps.js';
@@ -49,6 +49,7 @@ import { needsTranscode, transcodeToH264, forceTranscodeAsset } from '../transco
 import { saveDraft as _saveDraft, loadDraft as _loadDraft, clearDraft as _clearDraft } from '../storage.js';
 
 // ─── Local State ──────────────────────────────────────────────────
+var esc = escHtml; // alias for escHtml
 var _zoomLevel = 100;
 var _cfgZoomLevel = 100;
 
@@ -1925,7 +1926,7 @@ Object.assign(window.JCM, {
   fmtSize: fmtSize,
   isInCameraZone: isInCameraZone,
   clearToken: function () { localStorage.removeItem('jcm-gh-token'); toast('🔑 Token 已清除', 'success'); },
-  hasToken: function () { return !!_getGH(); },
+  hasToken: function () { return !!localStorage.getItem('jcm-gh-token'); },
   elements: S.elements,
   // Dev tools
   toggleMockMode: function () {

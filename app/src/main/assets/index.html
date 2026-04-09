@@ -1977,7 +1977,6 @@ input[type=range]::-moz-range-track{
           <input type="checkbox" id="showGrid" onchange="JCM.toggleGrid()"> <span data-i18n="preview.grid">网格</span>
         </label>
         <label class="check-label"><input type="checkbox" id="showThemeCompare" onchange="JCM.toggleThemeCompare()"> <span data-i18n="preview.themeCompare">双主题</span></label>
-        </label>
         <button class="mock-toggle active" id="mockToggle" title="模拟数据: ON"><span class="mock-toggle-dot"></span> 🎭 模拟</button>
         <button class="mock-toggle" id="compareTplBtn" onclick="JCM.toggleTemplateCompare()" title="模板对比"><span>🔄</span> 对比</button>
         <div class="zoom-controls">
@@ -12997,6 +12996,7 @@ function initDevTools() {
 // re-export from export.js, transcode.js, storage.js (loaded as ES modules)
 
 // ─── Local State ──────────────────────────────────────────────────
+var esc = escHtml; // alias for escHtml
 var _zoomLevel = 100;
 var _cfgZoomLevel = 100;
 
@@ -14871,7 +14871,7 @@ Object.assign(window.JCM, {
   fmtSize: fmtSize,
   isInCameraZone: isInCameraZone,
   clearToken: function () { localStorage.removeItem('jcm-gh-token'); toast('🔑 Token 已清除', 'success'); },
-  hasToken: function () { return !!_getGH(); },
+  hasToken: function () { return !!localStorage.getItem('jcm-gh-token'); },
   elements: S.elements,
   // Dev tools
   toggleMockMode: function () {
