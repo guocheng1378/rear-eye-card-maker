@@ -8,10 +8,16 @@ import action_buttons from './action_buttons.js';
 import number_clock from './number_clock.js';
 import weather_cp from './weather_cp.js';
 import persistent_counter from './persistent_counter.js';
+import fitness_ring from './fitness_ring.js';
+import music_player from './music_player.js';
+import date_beauty from './date_beauty.js';
+import dual_clock from './dual_clock.js';
+import quick_note from './quick_note.js';
 
 export const TEMPLATES = [
   custom, animated_clock, slide_unlock, smart_battery,
   action_buttons, number_clock, weather_cp, persistent_counter,
+  fitness_ring, music_player, date_beauty, dual_clock, quick_note,
 ];
 
 export const TPL_CATEGORIES = [
@@ -19,15 +25,22 @@ export const TPL_CATEGORIES = [
   { id: 'general', label: '🎨 通用' },
   { id: 'device', label: '📱 设备' },
   { id: 'tool', label: '🔧 工具' },
+  { id: 'clock', label: '🕐 时钟' },
+  { id: 'health', label: '💪 健康' },
 ];
 
 export const TPL_CATEGORY_MAP = {
   custom: 'general',
-  animated_clock: 'general',
+  animated_clock: 'clock',
   slide_unlock: 'general',
-  smart_battery: 'general',
+  smart_battery: 'device',
   action_buttons: 'tool',
-  number_clock: 'general',
+  number_clock: 'clock',
   weather_cp: 'device',
   persistent_counter: 'tool',
+  fitness_ring: 'health',
+  music_player: 'device',
+  date_beauty: 'clock',
+  dual_clock: 'clock',
+  quick_note: 'general',
 };
