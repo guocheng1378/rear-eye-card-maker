@@ -466,6 +466,7 @@ PreviewRenderer.prototype.renderElements = function (elements, files, selIdx) {
       default: return sizeLabel;
     }
   }).join('');
+  return html;
 };
 
 
