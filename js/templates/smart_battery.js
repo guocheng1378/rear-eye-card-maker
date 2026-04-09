@@ -66,7 +66,7 @@ export default {
       '',
       '    <!-- 进度条 -->',
       '    <Rectangle x="0" y="160" w="240" h="6" fillColor="#333333" cornerRadius="3" />',
-      '    <Rectangle x="0" y="160" w="0" h="6" fillColor="' + c.midColor + '" cornerRadius="3">',
+      '    <Rectangle x="0" y="160" w="0" h="6" fillColor="' + c.midColor + '" cornerRadius="3" />',
       '      <!-- 进度条宽度随电量变化 -->',
       '    </Rectangle>',
       '    <Text x="0" y="178" size="12" color="#666666" textExp="(ge(#battery_state, 1) ? (eq(#battery_state, 3) ? &quot;已充满&quot; : &quot;充电中&quot;) : &quot;电量&quot;)" />',

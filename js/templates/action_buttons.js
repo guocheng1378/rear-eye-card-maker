@@ -1,7 +1,7 @@
 import { escXml } from '../maml.js';
 
 export default {
-  id: 'quick_actions', icon: '⚡', name: '快捷按钮', desc: 'Button 交互面板，可触发命令',
+  id: 'action_buttons', icon: '⚡', name: '快捷按钮', desc: 'Button 交互面板，可触发命令',
   updater: 'DateTime.Minute',
   config: [
     { group: '基本', fields: [
@@ -44,7 +44,7 @@ export default {
       '      <Rectangle x="0" y="0" w="100" h="44" fillColor="' + c.btnColor + '" cornerRadius="10" />',
       '      <Text x="16" y="12" size="13" color="' + c.textColor + '" text="🔊 音量" />',
       '      <Trigger action="click">',
-      '        <VariableCommand target="#volume_type" value="3" />',
+      '        <BinderCommand target="volume_up" value="1" />',
       '      </Trigger>',
       '    </Button>',
       '',
@@ -53,7 +53,7 @@ export default {
       '      <Rectangle x="0" y="0" w="100" h="44" fillColor="' + c.btnColor + '" cornerRadius="10" />',
       '      <Text x="16" y="12" size="13" color="' + c.textColor + '" text="📶 WiFi" />',
       '      <Trigger action="click">',
-      '        <VariableCommand target="#wifi_state" value="1" />',
+      '        <BinderCommand target="wifi_toggle" value="1" />',
       '      </Trigger>',
       '    </Button>',
       '',
@@ -62,7 +62,7 @@ export default {
       '      <Rectangle x="0" y="0" w="100" h="44" fillColor="' + c.btnColor + '" cornerRadius="10" />',
       '      <Text x="16" y="12" size="13" color="' + c.textColor + '" text="🔵 蓝牙" />',
       '      <Trigger action="click">',
-      '        <VariableCommand target="#bluetooth_state" value="1" />',
+      '        <BinderCommand target="bt_toggle" value="1" />',
       '      </Trigger>',
       '    </Button>',
       '',
@@ -71,7 +71,7 @@ export default {
       '      <Rectangle x="0" y="0" w="100" h="44" fillColor="' + c.btnColor + '" cornerRadius="10" />',
       '      <Text x="16" y="12" size="13" color="' + c.textColor + '" text="🔆 亮度" />',
       '      <Trigger action="click">',
-      '        <VariableCommand target="brightness_mode" value="auto" />',
+      '        <BinderCommand target="brightness_auto" value="1" />',
       '      </Trigger>',
       '    </Button>',
       '',
