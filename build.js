@@ -9,58 +9,12 @@ const ROOT = __dirname;
 
 // 依赖顺序（从无依赖的模块开始）
 const JS_FILES = [
-  'js/utils.js',           // 无依赖
-  'js/state.js',           // 无依赖
-  'js/devices.js',         // 无依赖
-  'js/maml.js',            // 无依赖（escXml 内联）
+  'js/utils.js',
+  'js/state.js',
+  'js/devices.js',
+  'js/maml.js',
   // Templates
-  'js/templates/clock.js',
-  'js/templates/quote.js',
-  'js/templates/battery.js',
-  'js/templates/countdown.js',
-  'js/templates/gradient.js',
-  'js/templates/steps.js',
-  'js/templates/calendar.js',
-  'js/templates/dualclock.js',
-  'js/templates/dailyquote.js',
-  'js/templates/ring.js',
-  'js/templates/dashboard.js',
-  'js/templates/image.js',
   'js/templates/custom.js',
-  'js/templates/weather_real.js',
-  'js/templates/music_real.js',
-  'js/templates/lyrics.js',
-  'js/templates/video_wallpaper.js',
-  'js/templates/health.js',
-  'js/templates/schedule.js',
-  'js/templates/notification.js',
-  'js/templates/carousel.js',
-  'js/templates/quick_settings.js',
-  'js/templates/torch.js',
-  'js/templates/screen_time.js',
-  'js/templates/storage.js',
-  'js/templates/signal.js',
-  'js/templates/water.js',
-  'js/templates/stopwatch.js',
-  'js/templates/world_clock3.js',
-  'js/templates/todo.js',
-  // 新增模板 end
-  'js/templates/lunar.js',
-  'js/templates/pomodoro.js',
-  'js/templates/analog_clock.js',
-  'js/templates/counter.js',
-  'js/templates/photo_calendar.js',
-  'js/templates/quote_carousel.js',
-  'js/templates/multi_countdown.js',
-  'js/templates/hitokoto.js',
-  'js/templates/news.js',
-  'js/templates/exchange_rate.js',
-  'js/templates/bilibili.js',
-  'js/templates/dice.js',
-  'js/templates/flip_clock.js',
-  'js/templates/breathing.js',
-  'js/templates/pixel_clock.js',
-  // MAML v2 新模板
   'js/templates/animated_clock.js',
   'js/templates/slide_unlock.js',
   'js/templates/smart_battery.js',
@@ -68,7 +22,7 @@ const JS_FILES = [
   'js/templates/number_clock.js',
   'js/templates/weather_cp.js',
   'js/templates/persistent_counter.js',
-  'js/templates/index.js',  // 汇总所有模板
+  'js/templates/index.js',
   // Core
   'js/live-preview.js',
   'js/history.js',
@@ -79,7 +33,7 @@ const JS_FILES = [
   'js/transcode.js',
   'js/changelog.js',
   'js/i18n.js',
-  // UI 子模块
+  // UI
   'js/ui/toast.js',
   'js/ui/steps.js',
   'js/ui/code-editor.js',
@@ -108,8 +62,8 @@ const JS_FILES = [
   'js/ui/snippets.js',
   'js/ui/batch-ops.js',
   'js/ui/dev-tools.js',
-  'js/ui/index.js',         // UI 入口（依赖所有上面的）
-  'js/main.js',             // 应用入口
+  'js/ui/index.js',
+  'js/main.js',
 ];
 
 // 读取并转换模块文件
