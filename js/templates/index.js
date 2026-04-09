@@ -13,11 +13,16 @@ import music_player from './music_player.js';
 import date_beauty from './date_beauty.js';
 import dual_clock from './dual_clock.js';
 import quick_note from './quick_note.js';
+import brightness_slider from './brightness_slider.js';
+import breathing_light from './breathing_light.js';
+import photo_frame from './photo_frame.js';
+import pomodoro from './pomodoro.js';
 
 export const TEMPLATES = [
   custom, animated_clock, slide_unlock, smart_battery,
   action_buttons, number_clock, weather_cp, persistent_counter,
   fitness_ring, music_player, date_beauty, dual_clock, quick_note,
+  brightness_slider, breathing_light, photo_frame, pomodoro,
 ];
 
 export const TPL_CATEGORIES = [
@@ -43,4 +48,8 @@ export const TPL_CATEGORY_MAP = {
   date_beauty: 'clock',
   dual_clock: 'clock',
   quick_note: 'general',
+  brightness_slider: 'device',
+  breathing_light: 'general',
+  photo_frame: 'general',
+  pomodoro: 'tool',
 };

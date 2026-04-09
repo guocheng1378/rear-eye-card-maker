@@ -1,0 +1,98 @@
+import { escXml } from '../maml.js';
+
+export default {
+  id: 'pomodoro', icon: '🍅', name: '番茄钟', desc: '25分钟专注计时器，带开始/暂停',
+  updater: 'DateTime.Second',
+  config: [
+    { group: '基本', fields: [
+      { key: 'cardName', label: '卡片名称', type: 'text', default: '番茄钟' },
+      { key: 'bgColor', label: '背景颜色', type: 'color', default: '#1a0a0a' },
+    ]},
+    { group: '设置', fields: [
+      { key: 'workMinutes', label: '专注时长(分)', type: 'range', min: 5, max: 60, default: 25 },
+      { key: 'breakMinutes', label: '休息时长(分)', type: 'range', min: 1, max: 15, default: 5 },
+    ]},
+    { group: '颜色', fields: [
+      { key: 'timerColor', label: '计时器颜色', type: 'color', default: '#ff6b6b' },
+      { key: 'breakColor', label: '休息颜色', type: 'color', default: '#51cf66' },
+      { key: 'textColor', label: '文字颜色', type: 'color', default: '#ffffff' },
+      { key: 'subColor', label: '副文字颜色', type: 'color', default: '#666666' },
+    ]},
+  ],
+  elements(c) {
+    var wm = Number(c.workMinutes) || 25;
+    return [
+      { type: 'rectangle', x: 0, y: 0, w: 976, h: 596, color: c.bgColor, locked: true },
+      { type: 'text', text: '🍅', x: 120, y: 40, size: 36, color: c.timerColor },
+      { type: 'text', text: wm + ':00', x: 60, y: 100, size: 64, color: c.timerColor, bold: true, fontFamily: 'mipro-demibold' },
+      { type: 'text', text: '专注中', x: 110, y: 175, size: 14, color: c.subColor },
+      { type: 'rectangle', x: 30, y: 200, w: 250, h: 6, color: '#333333', radius: 3 },
+      { type: 'rectangle', x: 30, y: 200, w: 0, h: 6, color: c.timerColor, radius: 3 },
+      { type: 'text', text: '开始  暂停  重置', x: 80, y: 225, size: 16, color: c.textColor },
+    ];
+  },
+  rawXml(c) {
+    var wm = Number(c.workMinutes) || 25;
+    var bm = Number(c.breakMinutes) || 5;
+    var totalSec = wm * 60;
+    return [
+      '<Widget screenWidth="976" frameRate="1" scaleByDensity="false" useVariableUpdater="DateTime.Second" name="' + escXml(c.cardName || '番茄钟') + '">',
+      '  <Var name="marginL" type="number" expression="(#view_width * 0.30)" />',
+      '',
+      '  <!-- 持久化状态 -->',
+      '  <Permanence name="pomodoro_state" expression="0" />',
+      '  <Permanence name="pomodoro_remaining" expression="' + totalSec + '" />',
+      '  <Permanence name="pomodoro_count" expression="0" />',
+      '',
+      '  <!-- 背景 -->',
+      '  <Rectangle w="#view_width" h="#view_height" fillColor="' + c.bgColor + '" />',
+      '',
+      '  <Group x="#marginL" y="0">',
+      '    <!-- 番茄图标 -->',
+      '    <Text x="90" y="20" size="36" color="' + c.timerColor + '" text="🍅" />',
+      '',
+      '    <!-- 计时显示 -->',
+      '    <Text x="30" y="80" size="56" color="' + c.timerColor + '" textExp="div(#pomodoro_remaining,60) + &quot;:&quot; + ifelse(mod(#pomodoro_remaining,60) < 10, &quot;0&quot;, &quot;&quot;) + mod(#pomodoro_remaining,60)" bold="true" fontFamily="mipro-demibold" />',
+      '',
+      '    <!-- 状态文字 -->',
+      '    <Text x="80" y="155" size="14" color="' + c.subColor + '" textExp="ifelse(eq(#pomodoro_state,1), &quot;专注中&quot;, ifelse(eq(#pomodoro_state,2), &quot;休息中&quot;, &quot;已暂停&quot;))" />',
+      '',
+      '    <!-- 进度条背景 -->',
+      '    <Rectangle x="0" y="180" w="250" h="6" fillColor="#333333" cornerRadius="3" />',
+      '',
+      '    <!-- 进度条 -->',
+      '    <Rectangle x="0" y="180" w="0" h="6" fillColor="' + c.timerColor + '" cornerRadius="3" />',
+      '',
+      '    <!-- 完成次数 -->',
+      '    <Text x="0" y="205" size="11" color="#444444" textExp="&quot;今日完成 &quot; + #pomodoro_count + &quot; 个&quot;" />',
+      '',
+      '    <!-- 控制按钮 -->',
+      '    <Button name="btn_start" x="0" y="225" w="70" h="32">',
+      '      <Rectangle x="0" y="0" w="70" h="32" fillColor="' + c.timerColor + '" cornerRadius="6" />',
+      '      <Text x="18" y="8" size="13" color="#ffffff" text="开始" bold="true" />',
+      '      <Trigger action="click">',
+      '        <VariableCommand target="pomodoro_state" value="1" />',
+      '      </Trigger>',
+      '    </Button>',
+      '',
+      '    <Button name="btn_pause" x="80" y="225" w="70" h="32">',
+      '      <Rectangle x="0" y="0" w="70" h="32" fillColor="#333333" cornerRadius="6" />',
+      '      <Text x="18" y="8" size="13" color="#888888" text="暂停" />',
+      '      <Trigger action="click">',
+      '        <VariableCommand target="pomodoro_state" value="0" />',
+      '      </Trigger>',
+      '    </Button>',
+      '',
+      '    <Button name="btn_reset" x="160" y="225" w="70" h="32">',
+      '      <Rectangle x="0" y="0" w="70" h="32" fillColor="#222222" cornerRadius="6" />',
+      '      <Text x="18" y="8" size="13" color="#666666" text="重置" />',
+      '      <Trigger action="click">',
+      '        <VariableCommand target="pomodoro_state" value="0" />',
+      '        <VariableCommand target="pomodoro_remaining" value="' + totalSec + '" />',
+      '      </Trigger>',
+      '    </Button>',
+      '  </Group>',
+      '</Widget>',
+    ].join('\n');
+  },
+};
