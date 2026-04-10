@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // ─── build.js: 将 CSS/JS 内联到单个 HTML，供 Android WebView 使用 ───
-// v4: 补全所有模块和模板
+// v5: 补全所有模块和模板（27 个）
 
 const fs = require('fs');
 const path = require('path');
@@ -35,6 +35,14 @@ const JS_FILES = [
   'js/templates/mini_status.js',
   'js/templates/quick_note.js',
   'js/templates/usage.js',
+  // v5 新增模板
+  'js/templates/countdown.js',
+  'js/templates/step_counter.js',
+  'js/templates/world_clock.js',
+  'js/templates/calendar_mini.js',
+  'js/templates/streak_tracker.js',
+  'js/templates/qr_display.js',
+  'js/templates/progress_ring.js',
   'js/templates/index.js',
   // Core
   'js/live-preview.js',
@@ -139,7 +147,7 @@ html = html.replace(/<!--\s*Non-module[^>]*-->\s*\n?/g, '');
 
 // Insert inline scripts before </body>
 const inlineScripts = [
-  '<!-- Inlined by build.js v4 -->',
+  '<!-- Inlined by build.js v5 -->',
   '<script>' + jszip + '<\/script>',
   '<script>window.JCM = window.JCM || {};<\/script>',
   '<script>' + js + '<\/script>',
