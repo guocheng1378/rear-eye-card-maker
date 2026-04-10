@@ -73,6 +73,13 @@ export function renderRectangleEditor(el, idx) {
   // 模糊
   html += fieldHtml('模糊', '<input type="range" min="0" max="30" value="' + (el.blur || 0) + '" data-prop="blur" data-idx="' + idx + '"><span style="font-size:10px;color:var(--text3)">' + (el.blur || 0) + 'px</span>');
 
+  // 毛玻璃快捷预设
+  html += '<div style="margin:4px 0 8px;display:flex;gap:4px;flex-wrap:wrap">' +
+    '<button class="el-btn" data-glass-preset="light" data-idx="' + idx + '" style="font-size:10px;padding:3px 8px">🪟 轻毛玻璃</button>' +
+    '<button class="el-btn" data-glass-preset="dark" data-idx="' + idx + '" style="font-size:10px;padding:3px 8px">🌑 深毛玻璃</button>' +
+    '<button class="el-btn" data-glass-preset="color" data-idx="' + idx + '" style="font-size:10px;padding:3px 8px">🌈 彩色毛玻璃</button>' +
+    '</div>';
+
   // CSS 滤镜
   html += fieldHtml('亮度', '<input type="range" min="0" max="200" value="' + (el.brightness !== undefined ? el.brightness : 100) + '" data-prop="brightness" data-idx="' + idx + '"><span style="font-size:10px;color:var(--text3)">' + (el.brightness !== undefined ? el.brightness : 100) + '%</span>');
   html += fieldHtml('饱和度', '<input type="range" min="0" max="200" value="' + (el.saturate !== undefined ? el.saturate : 100) + '" data-prop="saturate" data-idx="' + idx + '"><span style="font-size:10px;color:var(--text3)">' + (el.saturate !== undefined ? el.saturate : 100) + '%</span>');

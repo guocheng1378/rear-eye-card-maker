@@ -965,6 +965,31 @@ function setupEvents() {
       fontInput.click();
       return;
     }
+    // 毛玻璃预设
+    var glassBtn = e.target.closest('[data-glass-preset]');
+    if (glassBtn) {
+      e.stopPropagation();
+      var gi = Number(glassBtn.dataset.idx);
+      var preset = glassBtn.dataset.glassPreset;
+      if (gi >= 0 && gi < S.elements.length && S.elements[gi].type === 'rectangle') {
+        captureState('毛玻璃效果');
+        var presets = {
+          light: { color: '#ffffff', opacity: 15, blur: 12, radius: 16 },
+          dark: { color: '#000000', opacity: 40, blur: 12, radius: 16 },
+          color: { color: '#6c5ce7', opacity: 20, blur: 16, radius: 20 },
+        };
+        var p = presets[preset] || presets.light;
+        S.elements[gi].color = p.color;
+        S.elements[gi].opacity = p.opacity;
+        S.elements[gi].blur = p.blur;
+        S.elements[gi].radius = p.radius;
+        S.setDirty(true);
+        renderConfig(getTemplateMAML);
+        _autoPreview();
+        toast('🪟 已应用' + (preset === 'light' ? '轻' : preset === 'dark' ? '深' : '彩色') + '毛玻璃', 'success');
+      }
+      return;
+    }
     // Save style preset
     var saveStyleBtn = e.target.closest('[data-save-style]');
     if (saveStyleBtn) {
@@ -2052,6 +2077,36 @@ Object.assign(window.JCM, {
     renderTplGrid();
     renderConfig(getTemplateMAML);
     toast('📋 已转为自定义模式，可自由编辑所有元素', 'success');
+  },
+  forkTemplate: function () {
+    if (!S.tpl) return toast('请先选择模板', 'error');
+    var customTpl = TEMPLATES.find(function(t) { return t.id === 'custom'; });
+    if (!customTpl) return;
+    captureState('Fork 模板');
+    S.setTpl(customTpl);
+    S.setDirty(true);
+    renderTplGrid();
+    renderConfig(getTemplateMAML);
+    toast('🍴 已 Fork 为自定义模板，可自由修改', 'success');
+  },
+  exportWallpaper: function () {
+    if (!S.tpl) return toast('请先选择模板', 'error');
+    var device = getSelectedDevice();
+    var canvas = document.createElement('canvas');
+    canvas.width = device.width;
+    canvas.height = device.height;
+    var ctx = canvas.getContext('2d');
+    ctx.fillStyle = S.cfg.bgColor || '#000000';
+    ctx.fillRect(0, 0, device.width, device.height);
+    toast('📱 壁纸已生成', 'success');
+    canvas.toBlob(function (blob) {
+      if (!blob) return;
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement('a');
+      a.href = url; a.download = (S.cfg.cardName || 'wallpaper') + '.png';
+      a.click();
+      setTimeout(function () { URL.revokeObjectURL(url); }, 10000);
+    }, 'image/png');
   },
   hasToken: function () { return !!localStorage.getItem('jcm-gh-token'); },
   elements: S.elements,

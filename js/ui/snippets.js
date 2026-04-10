@@ -1,122 +1,96 @@
-// ─── MAML Snippets: 常用代码片段一键插入 ────────────────────────
+// ─── Snippets: MAML 代码片段库 ──────────────────────────────────
 import * as S from '../state.js';
 import { toast } from './toast.js';
 import { captureState } from '../history.js';
 
-var _modal = null;
-
 var SNIPPETS = [
   {
-    id: 'countdown', icon: '⏳', name: '倒计时到日期', category: '时间',
-    desc: '显示距离指定日期的天数',
-    apply: function () {
-      var date = prompt('目标日期 (MMDD, 如 1225 表示12月25日):', '0101');
-      if (!date || !/^\d{4}$/.test(date)) return toast('格式错误，需要4位数字', 'error');
-      captureState('插入倒计时');
-      S.elements.push({ type: 'text', text: '', x: 10, y: 40, size: 72, color: '#ffffff', bold: true, textAlign: 'left', multiLine: false, w: 200, opacity: 100, fontFamily: 'default', _mamlSnippet: 'countdown_' + date });
-      S.elements.push({ type: 'text', text: '天后', x: 10, y: 120, size: 20, color: '#888888', bold: false, textAlign: 'left', multiLine: false, w: 100, opacity: 153 });
-      S.elements.push({ type: 'text', text: '距离目标', x: 10, y: 16, size: 14, color: '#888888', bold: false, textAlign: 'left', multiLine: false, w: 200, opacity: 153 });
-      S.setSelIdx(S.elements.length - 3);
-      S.setDirty(true);
-      toast('⏳ 倒计时片段已插入（导出时自动转 MAML 变量）', 'success');
-    },
-    mamlCode: '<!-- 倒计时 -->\n<Var name="targetMM" type="number" expression="12" />\n<Var name="targetDD" type="number" expression="25" />\n<Var name="daysLeft" type="number" expression="..." />',
+    name: '日期 + 时间', icon: '📅', cat: '布局',
+    desc: '大时间 + 小日期上下排列',
+    elements: [
+      { type: 'text', text: '14:30', expression: "formatDate('HH:mm', #time_sys)", x: 10, y: 30, size: 48, color: '#ffffff', bold: true, w: 200 },
+      { type: 'text', text: '2026/04/10 周四', expression: "formatDate('yyyy/MM/dd EEEE', #time_sys)", x: 10, y: 90, size: 14, color: '#888888', w: 200 },
+    ],
   },
   {
-    id: 'progress_ring', icon: '⭕', name: '进度环', category: '进度',
-    desc: '圆形进度条（步数/电量/自定义）',
-    apply: function () {
-      captureState('插入进度环');
-      // Background ring
-      S.elements.push({ type: 'circle', x: 100, y: 120, r: 60, color: '#222233', opacity: 100, strokeWidth: 0 });
-      // Inner cutout
-      S.elements.push({ type: 'circle', x: 100, y: 120, r: 48, color: '#0a0a1a', opacity: 100, strokeWidth: 0 });
-      // Value text
-      S.elements.push({ type: 'text', text: '75%', x: 60, y: 100, size: 36, color: '#ffffff', bold: true, textAlign: 'left', multiLine: false, w: 80 });
-      // Label
-      S.elements.push({ type: 'text', text: '步数', x: 76, y: 140, size: 12, color: '#888888', bold: false, textAlign: 'left', multiLine: false, w: 50, opacity: 153 });
-      S.setSelIdx(S.elements.length - 4);
-      S.setDirty(true);
-      toast('⭕ 进度环已插入，修改颜色和文字自定义', 'success');
-    },
+    name: '电量 + 步数', icon: '🔋', cat: '设备',
+    desc: '电量百分比 + 步数组合',
+    elements: [
+      { type: 'text', text: '78%', expression: '#battery_level + "%"', x: 10, y: 30, size: 36, color: '#00ff41', bold: true, w: 120 },
+      { type: 'text', text: '6542 步', expression: '#step_count + " 步"', x: 10, y: 80, size: 16, color: '#aaaaaa', w: 120 },
+      { type: 'rectangle', x: 10, y: 105, w: 160, h: 4, color: '#00ff41', radius: 2, opacity: 40 },
+    ],
   },
   {
-    id: 'gradient_text', icon: '🌈', name: '渐变文字', category: '文字',
-    desc: '双色渐变填充的文字',
-    apply: function () {
-      captureState('插入渐变文字');
-      S.elements.push({ type: 'text', text: '渐变文字', x: 10, y: 80, size: 48, color: '#6c5ce7', bold: true, textAlign: 'left', multiLine: false, w: 300, textGradient: 'aurora', gradientColor2: '#00b894' });
-      S.setSelIdx(S.elements.length - 1);
-      S.setDirty(true);
-      toast('🌈 渐变文字已插入', 'success');
-    },
+    name: '天气面板', icon: '🌤️', cat: '设备',
+    desc: '温度 + 描述 + 城市',
+    elements: [
+      { type: 'text', text: '23°', expression: '#weather_temp + "°"', x: 10, y: 20, size: 56, color: '#ffffff', bold: true, w: 150 },
+      { type: 'text', text: '多云 · 北京', expression: '#weather_desc + " · " + #weather_city', x: 10, y: 90, size: 14, color: '#74b9ff', w: 200 },
+    ],
   },
   {
-    id: 'divider', icon: '➖', name: '分割线', category: '装饰',
-    desc: '水平分割线',
-    apply: function () {
-      captureState('插入分割线');
-      S.elements.push({ type: 'rectangle', x: 10, y: 100, w: 200, h: 1, color: '#333333', radius: 0, opacity: 40 });
-      S.setDirty(true);
-      toast('➖ 分割线已插入', 'success');
-    },
+    name: '分隔线', icon: '─', cat: '装饰',
+    desc: '细线分隔',
+    elements: [
+      { type: 'rectangle', x: 0, y: 0, w: 200, h: 1, color: '#333333', opacity: 50 },
+    ],
   },
   {
-    id: 'accent_dot', icon: '●', name: '强调圆点', category: '装饰',
-    desc: '小圆点标记',
-    apply: function () {
-      captureState('插入圆点');
-      S.elements.push({ type: 'circle', x: 10, y: 70, r: 4, color: '#6c5ce7', opacity: 255 });
-      S.setDirty(true);
-      toast('● 圆点已插入', 'success');
-    },
+    name: '圆角卡片', icon: '▢', cat: '装饰',
+    desc: '半透明圆角背景',
+    elements: [
+      { type: 'rectangle', x: 0, y: 0, w: 200, h: 80, color: '#ffffff', radius: 12, opacity: 10 },
+      { type: 'text', text: '标题', x: 16, y: 20, size: 18, color: '#ffffff', bold: true, w: 170 },
+      { type: 'text', text: '副标题描述文字', x: 16, y: 48, size: 12, color: '#888888', w: 170 },
+    ],
   },
   {
-    id: 'vertical_bar', icon: '▮', name: '竖向强调条', category: '装饰',
-    desc: '左侧竖条装饰',
-    apply: function () {
-      captureState('插入竖条');
-      S.elements.push({ type: 'rectangle', x: 10, y: 20, w: 3, h: 200, color: '#6c5ce7', radius: 2, opacity: 80 });
-      S.setDirty(true);
-      toast('▮ 竖条已插入', 'success');
-    },
+    name: '心率显示', icon: '❤️', cat: '设备',
+    desc: '心率数值 + BPM',
+    elements: [
+      { type: 'text', text: '72', expression: '#heart_rate', x: 10, y: 20, size: 48, color: '#ff6b6b', bold: true, w: 100 },
+      { type: 'text', text: 'BPM', x: 10, y: 76, size: 12, color: '#ff6b6b', opacity: 60, w: 50 },
+    ],
   },
   {
-    id: 'time_display', icon: '🕐', name: '大号时间', category: '时间',
-    desc: '大字体时间显示元素',
-    apply: function () {
-      captureState('插入时间');
-      S.elements.push({ type: 'text', text: '21:30', x: 10, y: 30, size: 72, color: '#ffffff', bold: true, textAlign: 'left', multiLine: false, w: 300, fontFamily: 'default' });
-      S.elements.push({ type: 'text', text: '04/07 星期二', x: 10, y: 110, size: 16, color: '#888888', bold: false, textAlign: 'left', multiLine: false, w: 200, opacity: 153 });
-      S.setDirty(true);
-      toast('🕐 时间元素已插入', 'success');
-    },
+    name: '进度条 + 百分比', icon: '▰', cat: '装饰',
+    desc: '带文字的进度条',
+    elements: [
+      { type: 'text', text: '65%', x: 10, y: 0, size: 14, color: '#ffffff', w: 60 },
+      { type: 'progress', x: 10, y: 24, w: 200, h: 6, color: '#6c5ce7', bgColor: '#222222', value: 65, radius: 3 },
+    ],
   },
   {
-    id: 'blur_card', icon: '🔲', name: '毛玻璃卡片', category: '装饰',
-    desc: '半透明模糊背景卡片',
-    apply: function () {
-      captureState('插入毛玻璃');
-      S.elements.push({ type: 'rectangle', x: 20, y: 40, w: 200, h: 160, color: '#ffffff', radius: 16, opacity: 10, blur: 20 });
-      S.setDirty(true);
-      toast('🔲 毛玻璃卡片已插入', 'success');
-    },
+    name: '毛玻璃面板', icon: '🪟', cat: '装饰',
+    desc: '磨砂玻璃效果背景',
+    elements: [
+      { type: 'rectangle', x: 0, y: 0, w: 220, h: 100, color: '#ffffff', radius: 16, opacity: 15, blur: 12 },
+      { type: 'rectangle', x: 0, y: 0, w: 220, h: 100, color: '#ffffff', radius: 16, opacity: 5 },
+    ],
   },
   {
-    id: 'battery_bar', icon: '🔋', name: '电量条', category: '进度',
-    desc: '横向电量条',
-    apply: function () {
-      captureState('插入电量条');
-      S.elements.push({ type: 'rectangle', x: 10, y: 100, w: 180, h: 10, color: '#333333', radius: 5, opacity: 100 });
-      S.elements.push({ type: 'rectangle', x: 10, y: 100, w: 137, h: 10, color: '#00b894', radius: 5, opacity: 100 });
-      S.elements.push({ type: 'text', text: '76%', x: 10, y: 78, size: 32, color: '#ffffff', bold: true, textAlign: 'left', multiLine: false, w: 100 });
-      S.setDirty(true);
-      toast('🔋 电量条已插入', 'success');
-    },
+    name: '极简数字时钟', icon: '🕐', cat: '时钟',
+    desc: '超大号时间数字',
+    elements: [
+      { type: 'text', text: '14', expression: "formatDate('HH', #time_sys)", x: 10, y: 10, size: 80, color: '#ffffff', bold: true, w: 120 },
+      { type: 'text', text: ':', x: 105, y: 10, size: 80, color: '#6c5ce7', bold: true, w: 30 },
+      { type: 'text', text: '30', expression: "formatDate('mm', #time_sys)", x: 130, y: 10, size: 80, color: '#ffffff', bold: true, w: 120 },
+    ],
+  },
+  {
+    name: '血氧显示', icon: '🫁', cat: '设备',
+    desc: '血氧百分比',
+    elements: [
+      { type: 'text', text: '98%', expression: '#blood_oxygen + "%"', x: 10, y: 20, size: 40, color: '#48dbfb', bold: true, w: 120 },
+      { type: 'text', text: 'SpO₂', x: 10, y: 68, size: 12, color: '#48dbfb', opacity: 60, w: 50 },
+    ],
   },
 ];
 
-export function openSnippetsModal(callbacks) {
+var _modal = null;
+
+export function openSnippetsModal(stepCallbacks) {
   if (_modal) { _modal.remove(); _modal = null; }
 
   var overlay = document.createElement('div');
@@ -126,52 +100,65 @@ export function openSnippetsModal(callbacks) {
 
   var modal = document.createElement('div');
   modal.className = 'modal';
-  modal.style.maxWidth = '560px';
+  modal.style.maxWidth = '600px';
   modal.style.maxHeight = '80vh';
   modal.onclick = function (e) { e.stopPropagation(); };
 
-  var html = '<div class="modal-header"><h3>🧩 MAML 代码片段</h3><button class="modal-close" id="snipCloseBtn">✕</button></div>';
-  html += '<div class="modal-body" style="max-height:60vh;overflow-y:auto">';
-  html += '<div style="font-size:12px;color:var(--text2);margin-bottom:12px">点击插入常用元素组合到当前卡片</div>';
+  var cats = ['全部', '布局', '设备', '装饰', '时钟'];
+  var activeCat = '全部';
 
-  var categories = {};
-  SNIPPETS.forEach(function (s) {
-    if (!categories[s.category]) categories[s.category] = [];
-    categories[s.category].push(s);
-  });
-
-  Object.keys(categories).forEach(function (cat) {
-    html += '<div style="font-size:11px;font-weight:600;color:var(--text3);margin:12px 0 6px;text-transform:uppercase">' + cat + '</div>';
-    html += '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">';
-    categories[cat].forEach(function (s) {
-      html += '<div class="card-lib-item" style="cursor:pointer;flex-direction:column;align-items:center;text-align:center;padding:12px 8px" data-snip-insert="' + s.id + '">' +
-        '<div style="font-size:24px;margin-bottom:6px">' + s.icon + '</div>' +
-        '<div style="font-size:12px;font-weight:600">' + s.name + '</div>' +
-        '<div style="font-size:10px;color:var(--text3);margin-top:2px">' + s.desc + '</div>' +
-        '</div>';
+  function render() {
+    var filtered = activeCat === '全部' ? SNIPPETS : SNIPPETS.filter(function (s) { return s.cat === activeCat; });
+    var html = '<div class="modal-header"><h3>🧩 代码片段库</h3><button class="modal-close" id="snipClose">✕</button></div>';
+    // Category tabs
+    html += '<div style="display:flex;gap:4px;padding:8px 16px;border-bottom:1px solid var(--border);flex-wrap:wrap">';
+    cats.forEach(function (cat) {
+      var isActive = activeCat === cat;
+      html += '<button data-snip-cat="' + cat + '" style="padding:4px 10px;border-radius:12px;border:1px solid ' + (isActive ? 'var(--accent)' : 'var(--border)') + ';background:' + (isActive ? 'var(--accent)' : 'transparent') + ';color:' + (isActive ? '#fff' : 'var(--text3)') + ';font-size:11px;cursor:pointer">' + cat + '</button>';
     });
     html += '</div>';
-  });
+    // Snippet list
+    html += '<div class="modal-body" style="max-height:55vh;overflow-y:auto;padding:12px 16px">';
+    html += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px">';
+    filtered.forEach(function (snip, si) {
+      html += '<div data-snip-apply="' + SNIPPETS.indexOf(snip) + '" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px;cursor:pointer;transition:border-color .15s" onmouseenter="this.style.borderColor=\'var(--accent)\'" onmouseleave="this.style.borderColor=\'var(--border)\'">' +
+        '<div style="font-size:24px;margin-bottom:6px">' + snip.icon + '</div>' +
+        '<div style="font-size:13px;font-weight:600;color:var(--text1)">' + snip.name + '</div>' +
+        '<div style="font-size:11px;color:var(--text3);margin-top:2px">' + snip.desc + '</div>' +
+        '<div style="font-size:10px;color:var(--accent);margin-top:4px">' + snip.elements.length + ' 个元素</div>' +
+        '</div>';
+    });
+    html += '</div></div>';
+    modal.innerHTML = html;
 
-  html += '</div>';
+    // Events
+    modal.querySelector('#snipClose').onclick = closeSnippetsModal;
+    modal.querySelectorAll('[data-snip-cat]').forEach(function (btn) {
+      btn.onclick = function () { activeCat = btn.dataset.snipCat; render(); };
+    });
+    modal.querySelectorAll('[data-snip-apply]').forEach(function (el) {
+      el.onclick = function () {
+        var idx = Number(el.dataset.snipApply);
+        var snip = SNIPPETS[idx];
+        if (!snip) return;
+        captureState('插入片段: ' + snip.name);
+        snip.elements.forEach(function (tpl) {
+          var newEl = JSON.parse(JSON.stringify(tpl));
+          S.elements.push(newEl);
+        });
+        S.setDirty(true);
+        S.setSelIdx(S.elements.length - 1);
+        closeSnippetsModal();
+        if (stepCallbacks) stepCallbacks.renderConfig();
+        toast('🧩 已插入: ' + snip.name, 'success');
+      };
+    });
+  }
 
-  modal.innerHTML = html;
+  render();
   overlay.appendChild(modal);
   document.body.appendChild(overlay);
   _modal = overlay;
-
-  overlay.querySelector('#snipCloseBtn').onclick = function () { closeSnippetsModal(); };
-
-  overlay.querySelectorAll('[data-snip-insert]').forEach(function (btn) {
-    btn.onclick = function () {
-      var snippet = SNIPPETS.find(function (s) { return s.id === btn.dataset.snipInsert; });
-      if (snippet) {
-        snippet.apply();
-        if (callbacks && callbacks.renderConfig) callbacks.renderConfig();
-        if (callbacks && callbacks.renderLivePreview) callbacks.renderLivePreview();
-      }
-    };
-  });
 }
 
 export function closeSnippetsModal() {

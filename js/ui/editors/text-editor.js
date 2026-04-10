@@ -70,6 +70,8 @@ export function renderTextEditor(el, idx) {
   // ── 字体 & 大小 ──
   html += fieldHtml('字号', '<div style="display:flex;gap:4px;align-items:center"><input type="number" value="' + el.size + '" data-prop="size" data-idx="' + idx + '" min="8" max="200" style="flex:1"><button class="el-btn" data-autofit="' + idx + '" title="自动适配宽度" style="padding:4px 8px;font-size:12px">📐</button></div>');
   html += colorFieldHtml('颜色', el.color || '#ffffff', 'color', idx);
+  // WCAG 对比度检查
+  html += renderContrastCheck(el.color || '#ffffff');
   html += '<div class="field"><label>字体</label><select data-prop="fontFamily" data-idx="' + idx + '">' +
     FONT_OPTIONS.map(function (f) {
       return '<option value="' + f.id + '"' + (el.fontFamily === f.id ? ' selected' : '') + '>' + f.name + '</option>';
@@ -113,6 +115,35 @@ export function renderTextEditor(el, idx) {
     '</div>');
 
   return html;
+}
+
+// ── WCAG 对比度检查 ──
+function getLuminance(hex) {
+  if (!hex || hex.charAt(0) !== '#') return 0;
+  var c = hex.substring(1);
+  if (c.length === 3) c = c[0]+c[0]+c[1]+c[1]+c[2]+c[2];
+  var r = parseInt(c.substring(0, 2), 16) / 255;
+  var g = parseInt(c.substring(2, 4), 16) / 255;
+  var b = parseInt(c.substring(4, 6), 16) / 255;
+  var srgb = [r, g, b].map(function (v) { return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); });
+  return 0.2126 * srgb[0] + 0.7152 * srgb[1] + 0.0722 * srgb[2];
+}
+function getContrastRatio(c1, c2) {
+  var l1 = getLuminance(c1), l2 = getLuminance(c2);
+  var lighter = Math.max(l1, l2), darker = Math.min(l1, l2);
+  return (lighter + 0.05) / (darker + 0.05);
+}
+function renderContrastCheck(fgColor) {
+  var bg = '#000000';
+  var ratio = getContrastRatio(fgColor, bg);
+  var aa = ratio >= 4.5;
+  var aaa = ratio >= 7;
+  var color = aaa ? '#00b894' : aa ? '#fdcb6e' : '#ff6b6b';
+  var label = aaa ? 'AAA ✓' : aa ? 'AA ✓' : '不达标 ✗';
+  return '<div style="font-size:10px;color:var(--text3);margin:-4px 0 4px;display:flex;gap:6px;align-items:center">' +
+    '<span>对比度: <span style="color:' + color + ';font-weight:600">' + ratio.toFixed(1) + ':1</span></span>' +
+    '<span style="color:' + color + '">' + label + '</span>' +
+    '<span style="opacity:0.5">(vs #000 背景)</span></div>';
 }
 
 function renderMamlVarPanel(idx) {

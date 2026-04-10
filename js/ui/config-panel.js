@@ -227,7 +227,8 @@ export function renderConfig(getTemplateMAML) {
     '</div></div>' +
     '<div style="display:flex;gap:12px;margin-bottom:12px;align-items:center">' +
     '<label class="check-label"><input type="checkbox" id="snapToggle" checked> 吸附网格 (' + S.SNAP_GRID + 'px)</label>' +
-    '</div>';
+    '</div>' +
+    (S.elements.length > 3 ? '<input type="text" id="elSearchInput" placeholder="🔍 搜索元素..." style="width:100%;padding:6px 10px;font-size:12px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);margin-bottom:8px;outline:none">' : '');
 
   // Element list with layer-panel style: drag reorder, visibility, lock, delete, camera warning
   elementSectionInner += '<div class="el-list" id="elListDrag">';
