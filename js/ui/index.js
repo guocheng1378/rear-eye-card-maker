@@ -2155,4 +2155,37 @@ Object.assign(window.JCM, {
   openCPWizard: function () {
     openBindingWizard();
   },
+  // 模板点赞
+  likeTemplate: function () {
+    if (!S.tpl) return;
+    var key = 'jcm-likes-' + S.tpl.id;
+    var liked = localStorage.getItem(key);
+    if (liked) {
+      localStorage.removeItem(key);
+      toast('取消点赞', 'info');
+    } else {
+      localStorage.setItem(key, '1');
+      toast('❤️ 已点赞: ' + S.tpl.name, 'success');
+    }
+  },
+  // 快捷插入模板片段 (在代码编辑器中)
+  insertCodeSnippet: function (type) {
+    var textarea = document.getElementById('codeContent');
+    if (!textarea) return;
+    var snippets = {
+      text: '    <Text x="10" y="60" size="24" color="#ffffff" text="新文字" />',
+      rect: '    <Rectangle x="10" y="60" w="100" h="40" fillColor="#333333" />',
+      circle: '    <Circle x="50" y="100" r="30" fillColor="#6c5ce7" />',
+      image: '    <Image src="images/xxx.png" x="10" y="60" w="100" h="100" />',
+      group: '    <Group x="0" y="0">\n      \n    </Group>',
+      var: '  <Var name="myVar" type="number" expression="(#battery_level)" />',
+    };
+    var snip = snippets[type];
+    if (!snip) return;
+    var pos = textarea.selectionStart;
+    textarea.value = textarea.value.substring(0, pos) + '\n' + snip + textarea.value.substring(pos);
+    textarea.selectionStart = textarea.selectionEnd = pos + snip.length + 1;
+    updateCodeEditor();
+    toast('📝 已插入 ' + type + ' 片段', 'success');
+  },
 });
