@@ -1,0 +1,112 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 520">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0d1117"/>
+      <stop offset="100%" style="stop-color:#161b22"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="520" fill="url(#bg)"/>
+  <!-- Title -->
+  <text x="600" y="45" text-anchor="middle" font-family="sans-serif" font-size="22" font-weight="700" fill="#ffffff">✨ v5 新增 · 7 个全新模板</text>
+  <!-- Card 1: Countdown -->
+  <rect x="30" y="70" width="160" height="200" rx="12" fill="#1a0a1a" stroke="#ff6b6b" stroke-opacity="0.2"/>
+  <text x="110" y="120" text-anchor="middle" font-size="40">⏳</text>
+  <text x="110" y="150" text-anchor="middle" font-family="sans-serif" font-size="13" font-weight="600" fill="#ffffff">倒计时</text>
+  <text x="110" y="180" text-anchor="middle" font-family="sans-serif" font-size="24" font-weight="800" fill="#ff6b6b">258</text>
+  <text x="110" y="200" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#888888">天</text>
+  <rect x="55" y="215" width="50" height="2" rx="1" fill="#ff6b6b"/>
+  <text x="110" y="245" text-anchor="middle" font-family="sans-serif" font-size="9" fill="#555555">生日/节日/纪念日</text>
+  <!-- Card 2: Step Counter -->
+  <rect x="210" y="70" width="160" height="200" rx="12" fill="#0a1a0a" stroke="#00e676" stroke-opacity="0.2"/>
+  <text x="290" y="115" text-anchor="middle" font-size="28">🦶</text>
+  <text x="290" y="145" text-anchor="middle" font-family="sans-serif" font-size="13" font-weight="600" fill="#ffffff">步数计</text>
+  <text x="290" y="175" text-anchor="middle" font-family="sans-serif" font-size="20" font-weight="800" fill="#00e676">7,832</text>
+  <rect x="230" y="195" width="120" height="5" rx="2.5" fill="#1a3a1a"/>
+  <rect x="230" y="195" width="94" height="5" rx="2.5" fill="#00e676"/>
+  <text x="290" y="225" text-anchor="middle" font-family="sans-serif" font-size="9" fill="#555555">78% 完成</text>
+  <text x="290" y="245" text-anchor="middle" font-family="sans-serif" font-size="9" fill="#555555">步数/卡路里/距离</text>
+  <!-- Card 3: World Clock -->
+  <rect x="390" y="70" width="160" height="200" rx="12" fill="#0a0a1a" stroke="#4fc3f7" stroke-opacity="0.2"/>
+  <text x="470" y="110" text-anchor="middle" font-size="24">🌍</text>
+  <text x="470" y="138" text-anchor="middle" font-family="sans-serif" font-size="13" font-weight="600" fill="#ffffff">世界时钟</text>
+  <text x="430" y="165" font-family="sans-serif" font-size="10" fill="#4fc3f7">北京</text>
+  <text x="430" y="185" font-family="sans-serif" font-size="18" font-weight="700" fill="#ffffff">14:30</text>
+  <text x="430" y="208" font-family="sans-serif" font-size="10" fill="#666666">东京</text>
+  <text x="430" y="225" font-family="sans-serif" font-size="14" font-weight="700" fill="#ffffff">15:30</text>
+  <text x="470" y="248" text-anchor="middle" font-family="sans-serif" font-size="9" fill="#555555">3 个可配时区</text>
+  <!-- Card 4: Calendar -->
+  <rect x="570" y="70" width="160" height="200" rx="12" fill="#1a1a0a" stroke="#ffd700" stroke-opacity="0.2"/>
+  <text x="650" y="110" text-anchor="middle" font-size="24">📅</text>
+  <text x="650" y="138" text-anchor="middle" font-family="sans-serif" font-size="13" font-weight="600" fill="#ffffff">月历</text>
+  <text x="605" y="160" font-family="monospace" font-size="7" fill="#555555">日 一 二 三 四 五 六</text>
+  <text x="605" y="173" font-family="monospace" font-size="7" fill="#444444">        1  2  3  4</text>
+  <text x="605" y="186" font-family="monospace" font-size="7" fill="#888888">5  6  7  8  9</text>
+  <circle cx="653" cy="180" r="5" fill="#4fc3f7" opacity="0.3"/>
+  <text x="653" y="184" text-anchor="middle" font-family="monospace" font-size="7" fill="#4fc3f7" font-weight="700">10</text>
+  <text x="605" y="199" font-family="monospace" font-size="7" fill="#888888">12 13 14 15 16</text>
+  <circle cx="653" cy="193" r="1.5" fill="#ffd700"/>
+  <text x="650" y="225" text-anchor="middle" font-family="sans-serif" font-size="9" fill="#555555">事件标记</text>
+  <text x="650" y="245" text-anchor="middle" font-family="sans-serif" font-size="9" fill="#555555">今日高亮</text>
+  <!-- Card 5: Streak -->
+  <rect x="750" y="70" width="160" height="200" rx="12" fill="#1a0a0a" stroke="#ff6b35" stroke-opacity="0.2"/>
+  <text x="830" y="110" text-anchor="middle" font-size="28">🔥</text>
+  <text x="830" y="138" text-anchor="middle" font-family="sans-serif" font-size="13" font-weight="600" fill="#ffffff">打卡追踪</text>
+  <text x="830" y="178" text-anchor="middle" font-family="sans-serif" font-size="32" font-weight="800" fill="#ff6b35">42</text>
+  <text x="830" y="198" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#ffffff">天连续</text>
+  <circle cx="788" cy="220" r="7" fill="#00e676"/>
+  <circle cx="808" cy="220" r="7" fill="#00e676"/>
+  <circle cx="828" cy="220" r="7" fill="#00e676"/>
+  <circle cx="848" cy="220" r="7" fill="#ff6b35" opacity="0.4" stroke="#ff6b35" stroke-width="1"/>
+  <circle cx="868" cy="220" r="7" fill="#333333"/>
+  <text x="830" y="248" text-anchor="middle" font-family="sans-serif" font-size="9" fill="#555555">习惯养成</text>
+  <!-- Card 6: QR -->
+  <rect x="930" y="70" width="160" height="200" rx="12" fill="#fafafa" stroke="#dddddd"/>
+  <text x="1010" y="110" text-anchor="middle" font-size="24">📱</text>
+  <text x="1010" y="138" text-anchor="middle" font-family="sans-serif" font-size="13" font-weight="600" fill="#333333">二维码</text>
+  <!-- Mini QR -->
+  <rect x="968" y="148" width="84" height="84" rx="6" fill="#f0f0f0" stroke="#e0e0e0"/>
+  <rect x="976" y="156" width="18" height="18" rx="2" fill="#333333"/>
+  <rect x="1004" y="156" width="8" height="8" rx="1" fill="#333333"/>
+  <rect x="1026" y="156" width="18" height="18" rx="2" fill="#333333"/>
+  <rect x="976" y="180" width="8" height="8" rx="1" fill="#333333"/>
+  <rect x="992" y="180" width="8" height="8" rx="1" fill="#333333"/>
+  <rect x="1012" y="180" width="8" height="8" rx="1" fill="#333333"/>
+  <rect x="1028" y="180" width="8" height="8" rx="1" fill="#333333"/>
+  <rect x="976" y="196" width="18" height="18" rx="2" fill="#333333"/>
+  <rect x="1004" y="196" width="8" height="8" rx="1" fill="#333333"/>
+  <rect x="1026" y="196" width="18" height="18" rx="2" fill="#333333"/>
+  <rect x="976" y="216" width="8" height="8" rx="1" fill="#333333"/>
+  <rect x="996" y="216" width="8" height="8" rx="1" fill="#333333"/>
+  <rect x="1016" y="216" width="8" height="8" rx="1" fill="#333333"/>
+  <text x="1010" y="248" text-anchor="middle" font-family="sans-serif" font-size="9" fill="#999999">收款码/WiFi码</text>
+  <!-- Bottom row: Progress Ring -->
+  <rect x="30" y="295" width="160" height="200" rx="12" fill="#0a0a1a" stroke="#4fc3f7" stroke-opacity="0.2"/>
+  <text x="110" y="345" text-anchor="middle" font-size="28">🎯</text>
+  <text x="110" y="375" text-anchor="middle" font-family="sans-serif" font-size="13" font-weight="600" fill="#ffffff">目标进度</text>
+  <!-- Mini ring -->
+  <circle cx="110" cy="420" r="30" fill="none" stroke="#1a2a3a" stroke-width="6"/>
+  <circle cx="110" cy="420" r="30" fill="none" stroke="#4fc3f7" stroke-width="6"
+    stroke-dasharray="188.5" stroke-dashoffset="60" stroke-linecap="round"
+    transform="rotate(-90 110 420)"/>
+  <text x="110" y="425" text-anchor="middle" font-family="sans-serif" font-size="14" font-weight="700" fill="#ffffff">68%</text>
+  <text x="110" y="465" text-anchor="middle" font-family="sans-serif" font-size="9" fill="#555555">环形进度 · 目标追踪</text>
+  <!-- Summary bar -->
+  <rect x="220" y="310" width="870" height="170" rx="16" fill="#ffffff" fill-opacity="0.03" stroke="#ffffff" stroke-opacity="0.06"/>
+  <text x="260" y="350" font-family="sans-serif" font-size="16" font-weight="600" fill="#ffffff">📊 模板总数</text>
+  <text x="260" y="385" font-family="sans-serif" font-size="48" font-weight="800" fill="#4fc3f7">27</text>
+  <text x="340" y="385" font-family="sans-serif" font-size="16" fill="#666666">个模板</text>
+  <!-- Category pills -->
+  <rect x="260" y="405" width="70" height="24" rx="12" fill="#ffffff" fill-opacity="0.06"/>
+  <text x="295" y="421" text-anchor="middle" font-family="sans-serif" font-size="10" fill="#aaaacc">🕐 时钟 ×6</text>
+  <rect x="340" y="405" width="70" height="24" rx="12" fill="#ffffff" fill-opacity="0.06"/>
+  <text x="375" y="421" text-anchor="middle" font-family="sans-serif" font-size="10" fill="#aaaacc">💪 健康 ×3</text>
+  <rect x="420" y="405" width="70" height="24" rx="12" fill="#ffffff" fill-opacity="0.06"/>
+  <text x="455" y="421" text-anchor="middle" font-family="sans-serif" font-size="10" fill="#aaaacc">🔧 工具 ×5</text>
+  <rect x="500" y="405" width="70" height="24" rx="12" fill="#ffffff" fill-opacity="0.06"/>
+  <text x="535" y="421" text-anchor="middle" font-family="sans-serif" font-size="10" fill="#aaaacc">📱 设备 ×6</text>
+  <rect x="580" y="405" width="70" height="24" rx="12" fill="#ffffff" fill-opacity="0.06"/>
+  <text x="615" y="421" text-anchor="middle" font-family="sans-serif" font-size="10" fill="#aaaacc">🎨 通用 ×7</text>
+  <!-- Features list -->
+  <text x="260" y="460" font-family="sans-serif" font-size="11" fill="#666666">✅ ContentProvider 绑定 · ✅ 持久化状态 · ✅ 动画支持</text>
+  <text x="260" y="480" font-family="sans-serif" font-size="11" fill="#666666">✅ 条件渲染 · ✅ 按钮交互 · ✅ 实时预览</text>
+</svg>
