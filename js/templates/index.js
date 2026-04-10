@@ -20,6 +20,14 @@ import pomodoro from './pomodoro.js';
 import quick_clock from './quick_clock.js';
 import daily_quote from './daily_quote.js';
 import mini_status from './mini_status.js';
+// v5 新增模板
+import countdown from './countdown.js';
+import step_counter from './step_counter.js';
+import world_clock from './world_clock.js';
+import calendar_mini from './calendar_mini.js';
+import streak_tracker from './streak_tracker.js';
+import qr_display from './qr_display.js';
+import progress_ring from './progress_ring.js';
 
 export const TEMPLATES = [
   custom, animated_clock, slide_unlock, smart_battery,
@@ -27,6 +35,9 @@ export const TEMPLATES = [
   fitness_ring, music_player, date_beauty, dual_clock, quick_note,
   brightness_slider, breathing_light, photo_frame, pomodoro,
   quick_clock, daily_quote, mini_status,
+  // v5
+  countdown, step_counter, world_clock, calendar_mini,
+  streak_tracker, qr_display, progress_ring,
 ];
 
 export const TPL_CATEGORIES = [
@@ -59,4 +70,12 @@ export const TPL_CATEGORY_MAP = {
   quick_clock: 'clock',
   daily_quote: 'general',
   mini_status: 'device',
+  // v5
+  countdown: 'general',
+  step_counter: 'health',
+  world_clock: 'clock',
+  calendar_mini: 'tool',
+  streak_tracker: 'health',
+  qr_display: 'tool',
+  progress_ring: 'general',
 };
