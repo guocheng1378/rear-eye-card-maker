@@ -263,6 +263,21 @@ export function renderConfig(getTemplateMAML) {
 
   html += sec('elements', '额外元素' + (S.elements.length > 0 ? ' <span class="el-count-badge">' + S.elements.length + '</span>' : ''), elementSectionInner);
 
+  // Batch operations (when 2+ elements)
+  if (S.elements.length >= 2) {
+    var batchInner = '<div style="display:flex;flex-direction:column;gap:8px">';
+    // Batch color
+    batchInner += '<div style="display:flex;gap:6px;align-items:center"><label style="font-size:11px;width:40px;color:var(--text2)">颜色</label><input type="color" id="batchColor" value="#ffffff" style="width:32px;height:26px;padding:1px;border-radius:4px;cursor:pointer;border:1px solid var(--border)"><button class="el-btn" data-batch="color" style="font-size:10px;padding:3px 8px">应用到全部</button></div>';
+    // Batch opacity
+    batchInner += '<div style="display:flex;gap:6px;align-items:center"><label style="font-size:11px;width:40px;color:var(--text2)">透明度</label><input type="range" id="batchOpacity" min="0" max="100" value="100" style="flex:1"><span id="batchOpacityVal" style="font-size:10px;color:var(--text3);width:28px">100%</span><button class="el-btn" data-batch="opacity" style="font-size:10px;padding:3px 8px">应用</button></div>';
+    // Batch font size (only applies to text elements)
+    batchInner += '<div style="display:flex;gap:6px;align-items:center"><label style="font-size:11px;width:40px;color:var(--text2)">字号</label><input type="number" id="batchFontSize" value="24" min="8" max="200" style="width:60px"><button class="el-btn" data-batch="fontSize" style="font-size:10px;padding:3px 8px">应用到文字</button></div>';
+    // Batch bold
+    batchInner += '<div style="display:flex;gap:6px;align-items:center"><label style="font-size:11px;width:40px;color:var(--text2)">加粗</label><button class="el-btn" data-batch="boldOn" style="font-size:10px;padding:3px 8px">全部加粗</button><button class="el-btn" data-batch="boldOff" style="font-size:10px;padding:3px 8px">取消加粗</button></div>';
+    batchInner += '</div>';
+    html += sec('batchOps', '⚡ 批量操作', batchInner, true);
+  }
+
   // Selected element editor
   if (S.selIdx >= 0 && S.selIdx < S.elements.length) {
     html += renderElementEditor(S.elements[S.selIdx], S.selIdx, device);

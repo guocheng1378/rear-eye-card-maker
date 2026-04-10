@@ -586,6 +586,12 @@ function setupEvents() {
         S.setDirty(true);
       }
     }
+    // Batch opacity slider value display
+    if (t.id === 'batchOpacity') {
+      var valEl = document.getElementById('batchOpacityVal');
+      if (valEl) valEl.textContent = t.value + '%';
+      return;
+    }
     // MAML 变量搜索过滤
     if (t.dataset.mamlSearch !== undefined) {
       var searchIdx = Number(t.dataset.mamlSearch);
@@ -758,6 +764,40 @@ function setupEvents() {
         renderConfig(getTemplateMAML);
         _autoPreview();
         toast(cv ? '🎯 约束已设置: ' + cv : '🔓 已取消约束', 'info');
+      }
+      return;
+    }
+
+    // Batch operations
+    var batchBtn = e.target.closest('[data-batch]');
+    if (batchBtn) {
+      e.stopPropagation();
+      var batchOp = batchBtn.dataset.batch;
+      captureState('批量操作: ' + batchOp);
+      var changed = 0;
+      S.elements.forEach(function (el) {
+        if (batchOp === 'color') {
+          var bc = document.getElementById('batchColor');
+          if (bc && el.color !== undefined) { el.color = bc.value; changed++; }
+        } else if (batchOp === 'opacity') {
+          var bo = document.getElementById('batchOpacity');
+          if (bo) { el.opacity = Number(bo.value); changed++; }
+        } else if (batchOp === 'fontSize') {
+          var bf = document.getElementById('batchFontSize');
+          if (bf && el.type === 'text') { el.size = Number(bf.value); changed++; }
+        } else if (batchOp === 'boldOn') {
+          if (el.type === 'text') { el.bold = true; changed++; }
+        } else if (batchOp === 'boldOff') {
+          if (el.type === 'text') { el.bold = false; changed++; }
+        }
+      });
+      if (changed > 0) {
+        S.setDirty(true);
+        renderConfig(getTemplateMAML);
+        _autoPreview();
+        toast('✅ 已修改 ' + changed + ' 个元素', 'success');
+      } else {
+        toast('没有符合条件的元素', 'info');
       }
       return;
     }
