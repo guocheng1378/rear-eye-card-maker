@@ -27,6 +27,7 @@ import { shareTemplate, checkShareURL, showDraftRecovery } from './share.js';
 import { openLibraryModal } from './card-library-ui.js';
 import { saveToLibrary } from '../card-library.js';
 import { openMarketModal } from './template-market.js';
+import { openRearStoreModal } from './rearstore.js';
 import { showQRModal } from './qr-share.js';
 import { t, getLang, setLang, getAvailableLangs, applyI18n } from '../i18n.js';
 import { openDesignTools } from './design-tools.js';
@@ -2121,6 +2122,7 @@ Object.assign(window.JCM, {
     toast('✅ 已保存到卡片库: ' + entry.name, 'success');
   },
   openMarket: function () { openMarketModal(stepCallbacks); },
+    openRearStore: function () { openRearStoreModal(stepCallbacks); },
   showQR: function () {
     if (!S.tpl) return toast('请先选择模板', 'error');
     var data = { t: S.tpl.id, c: S.cfg, e: S.tpl.id === 'custom' ? S.elements : undefined };
