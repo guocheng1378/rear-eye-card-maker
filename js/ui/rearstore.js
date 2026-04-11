@@ -4,8 +4,8 @@ import { TEMPLATES } from '../templates/index.js';
 import { resetHistory } from '../history.js';
 import { toast, toastProgress } from './toast.js';
 import { escHtml } from '../utils.js';
-import { importZip, exportZip } from '../export.js';
-import { generateMAML, validateMAML } from '../maml.js';
+import { importZip } from '../export.js';
+import { generateMAML } from '../maml.js';
 import { getDevice } from '../devices.js';
 
 var INDEX_BASE = 'https://raw.githubusercontent.com/NekoStash/widgets-index/main';
@@ -511,6 +511,8 @@ function publishCard(name, description, version, stepCallbacks, existingEntry) {
     return;
   }
 
+  // Validate current state
+  if (!S.tpl) return toast('请先选择一个模板', 'error');
   var p = toastProgress('正在生成 MAML...');
 
   // Generate MAML
@@ -850,7 +852,7 @@ export function closeRearStoreModal() {
 }
 
 // ─── Gist 导入 UI（供外部调用）────────────────────────────────────
-export function importFromGistUI() {
+export function importFromGistUI(stepCallbacks) {
   var input = prompt('输入 Gist ID 或链接:');
   if (!input) return;
   var match = input.match(/gist\.github\.com\/[^/]+\/([a-f0-9]+)/);
@@ -866,10 +868,12 @@ export function importFromGistUI() {
         var data = JSON.parse(files['card.json'].content);
         S.setTpl(TEMPLATES.find(function (t) { return t.id === (data.templateId || 'custom'); }) || TEMPLATES.find(function (t) { return t.id === 'custom'; }));
         S.setCfg(data.config || { cardName: data.name });
-        S.setElements([]);
+        if (data.elements) S.setElements(data.elements);
+        else S.setElements([]);
         S.setUploadedFiles({});
         S.setSelIdx(-1); S.setDirty(true);
         resetHistory();
+        if (stepCallbacks) { stepCallbacks.renderTplGrid(); stepCallbacks.goStep(1); }
         toast('✅ 已导入: ' + (data.name || gistId), 'success');
       } else if (files['card.xml']) {
         toast('⚠️ 请使用「导入 MAML XML」功能导入此卡片', 'warning');
