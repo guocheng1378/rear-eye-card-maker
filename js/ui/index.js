@@ -27,7 +27,7 @@ import { shareTemplate, checkShareURL, showDraftRecovery } from './share.js';
 import { openLibraryModal } from './card-library-ui.js';
 import { saveToLibrary } from '../card-library.js';
 import { openMarketModal } from './template-market.js';
-import { openRearStoreModal, closeRearStoreModal } from './rearstore.js';
+import { openRearStoreModal, closeRearStoreModal, importFromGistUI } from './rearstore.js';
 import { showQRModal } from './qr-share.js';
 import { t, getLang, setLang, getAvailableLangs, applyI18n } from '../i18n.js';
 import { openDesignTools } from './design-tools.js';
@@ -2123,45 +2123,7 @@ Object.assign(window.JCM, {
   },
   openMarket: function () { openMarketModal(stepCallbacks); },
     openRearStore: function () { openRearStoreModal(stepCallbacks); },
-    importFromGist: function () {
-      var id = prompt('输入 Gist ID 或链接:');
-      if (!id) return;
-      var match = id.match(/gist.github.com/[^/]+/([a-f0-9]+)/);
-      if (match) id = match[1];
-      id = id.trim();
-      if (!id) return;
-      var gistImportFn = function() {};
-      import('./rearstore.js').then(function(m) {
-        // Direct gist import via fetch
-        var p;
-        import('./toast.js').then(function(t) {
-          p = t.toastProgress('正在从 Gist 导入...');
-          fetch('https://api.github.com/gists/' + id)
-            .then(function(r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
-            .then(function(gist) {
-              var files = gist.files || {};
-              var cardFile = files['card.json'] || files['card.xml'];
-              if (!cardFile) throw new Error('Gist 中没有找到卡片数据');
-              if (files['card.json']) {
-                var data = JSON.parse(files['card.json'].content);
-                import('./state.js').then(function(S) {
-                  import('./templates/index.js').then(function(T) {
-                    S.setTpl(T.TEMPLATES.find(function(t) { return t.id === (data.templateId || 'custom'); }) || T.TEMPLATES.find(function(t) { return t.id === 'custom'; }));
-                    S.setCfg(data.config || { cardName: data.name });
-                    S.setElements([]);
-                    S.setUploadedFiles({});
-                    S.setSelIdx(-1); S.setDirty(true);
-                    import('./history.js').then(function(h) { h.resetHistory(); });
-                    goStep(1, stepCallbacks);
-                    p.close('✅ 已导入: ' + data.name, 'success');
-                  });
-                });
-              }
-            })
-            .catch(function(e) { p.close('❌ ' + e.message, 'error'); });
-        });
-      });
-    },
+    importFromGist: function () { importFromGistUI(); },
   showQR: function () {
     if (!S.tpl) return toast('请先选择模板', 'error');
     var data = { t: S.tpl.id, c: S.cfg, e: S.tpl.id === 'custom' ? S.elements : undefined };
