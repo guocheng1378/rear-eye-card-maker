@@ -848,3 +848,34 @@ function downloadAndImport(widgetId, version, url, fileName, stepCallbacks) {
 export function closeRearStoreModal() {
   if (_modal) { _modal.remove(); _modal = null; }
 }
+
+// ─── Gist 导入 UI（供外部调用）────────────────────────────────────
+export function importFromGistUI() {
+  var input = prompt('输入 Gist ID 或链接:');
+  if (!input) return;
+  var match = input.match(/gist\.github\.com\/[^/]+\/([a-f0-9]+)/);
+  var gistId = match ? match[1] : input.trim();
+  if (!gistId) return;
+
+  toast('⏳ 正在从 Gist 导入...');
+  fetch('https://api.github.com/gists/' + gistId)
+    .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+    .then(function (gist) {
+      var files = gist.files || {};
+      if (files['card.json']) {
+        var data = JSON.parse(files['card.json'].content);
+        S.setTpl(TEMPLATES.find(function (t) { return t.id === (data.templateId || 'custom'); }) || TEMPLATES.find(function (t) { return t.id === 'custom'; }));
+        S.setCfg(data.config || { cardName: data.name });
+        S.setElements([]);
+        S.setUploadedFiles({});
+        S.setSelIdx(-1); S.setDirty(true);
+        resetHistory();
+        toast('✅ 已导入: ' + (data.name || gistId), 'success');
+      } else if (files['card.xml']) {
+        toast('⚠️ 请使用「导入 MAML XML」功能导入此卡片', 'warning');
+      } else {
+        throw new Error('Gist 中没有找到卡片数据');
+      }
+    })
+    .catch(function (err) { toast('❌ 导入失败: ' + err.message, 'error'); });
+}
