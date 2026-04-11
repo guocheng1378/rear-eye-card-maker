@@ -2123,7 +2123,7 @@ Object.assign(window.JCM, {
   },
   openMarket: function () { openMarketModal(stepCallbacks); },
     openRearStore: function () { openRearStoreModal(stepCallbacks); },
-    importFromGist: function () { importFromGistUI(); },
+    importFromGist: function () { importFromGistUI(stepCallbacks); },
   showQR: function () {
     if (!S.tpl) return toast('请先选择模板', 'error');
     var data = { t: S.tpl.id, c: S.cfg, e: S.tpl.id === 'custom' ? S.elements : undefined };
