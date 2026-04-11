@@ -789,11 +789,18 @@ function downloadAndImport(widgetId, version, url, fileName, stepCallbacks) {
         S.setUploadedFiles(data.files || {});
         S.setSelIdx(-1); S.setDirty(true);
         resetHistory();
-        // Mark as installed
         markInstalled(widgetId, data.cardName || widgetId, version, fileName);
         if (stepCallbacks) { stepCallbacks.renderTplGrid(); stepCallbacks.goStep(1); }
         closeRearStoreModal();
         p.close('✅ 已导入: ' + fileName, 'success');
+      }).catch(function (zipErr) {
+        // ZIP exists but isn't a valid MAML format - offer direct download
+        p.close('⚠️ ZIP 格式不兼容，已下载文件', 'warning');
+        var a = document.createElement('a');
+        a.href = URL.createObjectURL(file);
+        a.download = fileName;
+        a.click();
+        URL.revokeObjectURL(a.href);
       });
     }
     var a = document.createElement('a');
