@@ -1871,3 +1871,22 @@ input[type=range]::-moz-range-track{
   overflow: hidden;
 }
 .rs-widget-actions { display: flex; gap: 8px; justify-content: flex-end; }
+
+/* ── RearStore Tabs ─────────────────────────────────────────── */
+.rs-tab {
+  transition: color 0.15s, border-color 0.15s;
+  position: relative;
+}
+.rs-tab:hover {
+  color: var(--text) !important;
+}
+.rs-tab.active::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--accent);
+  border-radius: 1px;
+}
